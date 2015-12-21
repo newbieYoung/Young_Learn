@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>WebWorker初步了解</title>
+</head>
+
+<body>
+    <script type="text/javascript">
+    var worker = new Worker('demo0.js');
+    //通知webworker
+    var data = {
+        name:'liy',
+        age:24
+    };
+    worker.postMessage(data);
+    //监听webworker
+    worker.onmessage = function(e) {
+        //更改主线程传给webwork的数据，不会对主线程的数据有任何影响，因为主线程传参数给webworker会有序列化和反序列的过程
+        console.log(data.name);
+        document.write(e.data);
+    };
+
+    var worker1 = new Worker('demo.js');
+    var data1 = {
+        name:'tsm',
+        age:50
+    };
+    worker1.postMessage(data1);
+    </script>
+</body>
+
+</html>
