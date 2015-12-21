@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>FileSystem初步了解</title>
+</head>
+
+<body>
+    <script type="text/javascript">
+    window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
+    window.requestFileSystem(window.TEMPORARY, 200 * 1024 * 1024, onInitFs, errorHandler);
+    //文件操作失败
+    function errorHandler(e) {
+        var msg = '';
+        switch (e.code) {
+            case FileError.QUOTA_EXCEEDED_ERR:
+                msg = 'QUOTA_EXCEEDED_ERR';
+                break;
+            case FileError.NOT_FOUND_ERR:
+                msg = 'NOT_FOUND_ERR';
+                break;
+            case FileError.SECURITY_ERR:
+                msg = 'SECURITY_ERR';
+                break;
+            case FileError.INVALID_MODIFICATION_ERR:
+                msg = 'INVALID_MODIFICATION_ERR';
+                break;
+            case FileError.INVALID_STATE_ERR:
+                msg = 'INVALID_STATE_ERR';
+                break;
+            default:
+                msg = 'Unknown Error';
+                break;
+        }
+        console.log('Error: ' + msg);
+    }
+    //沙盒文件区域初始化成功
+    function onInitFs(fs) {
+        console.log('Opened file system:' + fs.name);
+        //查找或创建文件
+        fs.root.getFile('log.txt', {
+            create: true, //文件不存在时创建文件
+            exclusive: false //文件存在时不报错
+        }, function(fileEntry) {
+            console.log(fileEntry.isFile === true);
+            console.log(fileEntry.name);
+            console.log(fileEntry.fullPath);
+            //写入文件
+            fileEntry.createWriter(function(fileWriter) {
+                fileWriter.onwriteend = function() {
+                    console.log('Write completed.');
+                };
+                fileWriter.onerror = function(e) {
+                    console.log('Write failed: ' + e.toString());
+                };
+                fileWriter.write(new Blob(['hello file system']));
+            }, errorHandler);
+            //文件附加内容
+            fileEntry.createWriter(function(fileWriter) {
+                fileWriter.seek(fileWriter.length); // Start write position at EOF.
+                var canvas = document.createElement('canvas');
+                canvas.width = 1;
+                canvas.height = 1;
+                var context = canvas.getContext('2d');
+                fileWriter.write(context.getImageData(0,0,1,1));
+            }, errorHandler);
+            //读取文件
+            fileEntry.file(function(file) {
+                var reader = new FileReader();
+                reader.onloadend = function() {
+                    var txtArea = document.createElement('textarea');
+                    txtArea.value = this.result;
+                    document.body.appendChild(txtArea);
+                };
+                reader.readAsText(file);
+            }, errorHandler);
+        }, errorHandler);
+    }
+    //要使用 PERSISTENT 存储，您必须向用户取得存储持久数据的许可
+    window.webkitStorageInfo.requestQuota(PERSISTENT, 200 * 1024 * 1024, function(grantedBytes) {
+        window.requestFileSystem(PERSISTENT, grantedBytes, onInitFs, errorHandler);
+    }, function(e) {
+        console.log('Error', e);
+    });
+    //查询当前配额使用和分配情况
+    window.webkitStorageInfo.queryUsageAndQuota(window.webkitStorageInfo.PERSISTENT, console.log.bind(console));
+    </script>
+</body>
+
+</html>
