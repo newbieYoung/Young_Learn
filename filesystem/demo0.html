@@ -63,7 +63,8 @@
                 canvas.width = 1;
                 canvas.height = 1;
                 var context = canvas.getContext('2d');
-                fileWriter.write(context.getImageData(0,0,1,1));
+                var uint8Array = new Uint8Array(context.getImageData(0,0,1,1).data.buffer);
+                fileWriter.write(new Blob(uint8Array));
             }, errorHandler);
             //读取文件
             fileEntry.file(function(file) {
@@ -71,6 +72,7 @@
                 reader.onloadend = function() {
                     var txtArea = document.createElement('textarea');
                     txtArea.value = this.result;
+                    //console.log(this.result);
                     document.body.appendChild(txtArea);
                 };
                 reader.readAsText(file);
