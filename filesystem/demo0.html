@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>FileSystem初步了解</title>
+    <title>FileSystem初步了解（文件操作相关）</title>
 </head>
 
 <body>
@@ -77,11 +77,15 @@
                 };
                 reader.readAsText(file);
             }, errorHandler);
+            //删除文件
+            // fileEntry.remove(function() {
+            //     console.log('File removed.');
+            // }, errorHandler);
         }, errorHandler);
     }
     //要使用 PERSISTENT 存储，您必须向用户取得存储持久数据的许可
     window.webkitStorageInfo.requestQuota(PERSISTENT, 200 * 1024 * 1024, function(grantedBytes) {
-        window.requestFileSystem(PERSISTENT, grantedBytes, onInitFs, errorHandler);
+        //window.requestFileSystem(PERSISTENT, grantedBytes, onInitFs, errorHandler);
     }, function(e) {
         console.log('Error', e);
     });
