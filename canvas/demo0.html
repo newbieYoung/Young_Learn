@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>toBlob</title>
+</head>
+
+<body>
+    <script type="text/javascript">
+    var canvas = document.createElement('canvas');
+    canvas.width = 100;
+    canvas.height = 100;
+    var context = canvas.getContext('2d');
+    //canvas.toBlob目前只有ff兼容
+    canvas.toBlob(function(blob) {
+        console.log(blob);
+        console.log(blob instanceof Blob);
+        //把canvas.toBlob得到的blob转换成arraybuffer
+        var arrayBuffer;
+		var fileReader = new FileReader();
+		fileReader.onload = function() {
+		    arrayBuffer = this.result;
+		    console.log(arrayBuffer);
+		};
+		fileReader.readAsArrayBuffer(blob);
+		//比较canvas.toBlob得到的blob和通过imagedata转化的blob
+	    var imageData = context.getImageData(0,0,100,100);
+	    var arrayBuffer2 = imageData.data.buffer;
+	    console.log(arrayBuffer2);
+	    var uint8Array = new Uint8Array(arrayBuffer2);
+	    var blob2 = new Blob(uint8Array,{ "type" : "image\/png" });
+	    console.log(blob2);
+	    console.log(blob2 instanceof Blob);
+    });
+    //结论先获取canvas的imagedata然后把imagedata转换成blob比直接获取canvas的blob大很多
+    </script>
+</body>
+
+</html>

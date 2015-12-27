@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>二进制精灵图</title>
+</head>
+<body>
+	<script type="text/javascript">
+		var width = 640;
+		var height = 1136;
+		//加载图片
+		var img1 = {};
+		img1.obj = new Image();
+		img1.obj.src = './1.png';
+		img1.obj.onload = function(){
+			img1.img = this;
+		};
+
+		var img2 = {};
+		img2.obj = new Image();
+		img2.obj.src = './2.png';
+		img2.obj.onload = function(){
+			img2.img = this;
+		};
+
+		var img3 = {};
+		img3.obj = new Image();
+		img3.obj.src = './3.png';
+		img3.obj.onload = function(){
+			img3.img = this;
+		};
+		//检测图片是否加载完成
+		var interval = setInterval(function(){
+			if(img1.img&&img2.img&&img3.img){
+				clearInterval(interval);
+
+				var canvas1 = document.createElement('canvas');
+				canvas1.width = width;
+				canvas1.height = height;
+				var context1 = canvas1.getContext('2d');
+				context1.drawImage(img1.img, 0, 0, width, height);
+				canvas1.toBlob(function(blob){
+					console.log('canvas1');
+					console.log(blob);
+					var fileReader = new FileReader();
+					fileReader.onload = function() {
+					    img1.arrayBuffer = this.result;
+					    console.log('canvas1');
+					    console.log(img1.arrayBuffer);
+					};
+					fileReader.readAsArrayBuffer(blob);
+				});
+
+				var canvas2 = document.createElement('canvas');
+				canvas2.width = width;
+				canvas2.height = height;
+				var context2 = canvas2.getContext('2d');
+				context2.drawImage(img2.img,0,0,width,height);
+				canvas2.toBlob(function(blob){
+					console.log('canvas2');
+					console.log(blob);
+					var fileReader = new FileReader();
+					fileReader.onload = function() {
+					    img2.arrayBuffer = this.result;
+					    console.log('canvas2');
+					    console.log(img2.arrayBuffer);
+					};
+					fileReader.readAsArrayBuffer(blob);
+				});
+
+				var canvas3 = document.createElement('canvas');
+				canvas3.width = width;
+				canvas3.height = height;
+				var context3 = canvas3.getContext('2d');
+				context3.drawImage(img3.img,0,0,width,height);
+				canvas3.toBlob(function(blob){
+					console.log('canvas3');
+					console.log(blob);
+					var fileReader = new FileReader();
+					fileReader.onload = function() {
+					    img3.arrayBuffer = this.result;
+					    console.log('canvas3');
+					    console.log(img3.arrayBuffer);
+					};
+					fileReader.readAsArrayBuffer(blob);
+				});
+			}
+		},1000);
+		//检测图片是否解析完成
+		var interval2 = setInterval(function(){
+			if(img1.arrayBuffer&&img2.arrayBuffer&&img3.arrayBuffer){
+				clearInterval(interval2);
+				img1.int8Array = new Int8Array(img1.arrayBuffer);
+				img2.int8Array = new Int8Array(img2.arrayBuffer);
+				img3.int8Array = new Int8Array(img2.arrayBuffer);
+				var totalLength = img1.int8Array.length+img2.int8Array.length+img3.int8Array.length;
+				console.log(totalLength);
+				//计算输出图片的宽高
+				var output = {
+					total:0,
+					width:0,
+					height
+				};
+	            if (totalLength / 4 !== Math.floor(totalLength / 4)) {
+	                output.total = (Math.floor(totalLength / 4) + 1) * 4;
+	            }else{
+	            	output.total = totalLength;
+	            }
+	            output.width = width;//默认输出图片宽度为原图宽度
+	            output.height = Math.floor(output.total / 4 / output.width) + 1;
+	            //输出图片
+	            var canvas = document.createElement('canvas');
+	            canvas.width = output.width;
+	            canvas.height = output.height;
+	            var context = canvas.getContext('2d');
+	            var imageData = context.getImageData(0,0,output.width,output.height);
+	            //填充二进制精灵图数据
+	            var start = 0;
+	            var end = img1.int8Array.length;
+	            for(var i=start;i<end;i++){
+	            	imageData.data[i] = img1.int8Array[i];
+	            }
+	            start = end;
+	            end = start+img2.int8Array.length;
+	            for(var i=start;i<end;i++){
+	            	imageData.data[i] = img2.int8Array[i];
+	            }
+	            start = end;
+	            end = start+img3.int8Array.length;
+	            for(var i=start;i<end;i++){
+	            	imageData.data[i] = img3.int8Array[i];
+	            }
+	            //保存结果
+	            context.putImageData(imageData, 0, 0, 0, 0, output.width,output.height);
+	            document.body.appendChild(canvas);
+			}
+		},1000);
+	</script>
+</body>
+</html>

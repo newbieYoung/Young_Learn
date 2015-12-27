@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" >
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>使用canvas标签实现图片自适应</title>
+    <style type="text/css">
+        body{
+            margin:0;
+            padding:0;
+            font-size:0;
+        }
+        canvas{
+            width:50%;
+        }
+    </style>
+</head>
+<body>
+    <canvas width="270" height="270"></canvas>
+    <canvas width="270" height="270"></canvas>
+    <canvas width="270" height="270"></canvas>
+    <canvas width="270" height="270"></canvas>
+    <canvas width="270" height="270"></canvas>
+    <canvas width="270" height="270"></canvas>
+    <script type="text/javascript">
+        var i = new Image();
+        i.src = './i.png';
+        var canvasArr = document.querySelectorAll('canvas');
+        var context0 = canvasArr[0].getContext('2d');
+        var context1 = canvasArr[1].getContext('2d');
+        var context2 = canvasArr[2].getContext('2d');
+        var context3 = canvasArr[3].getContext('2d');
+        var context4 = canvasArr[4].getContext('2d');
+        var context5 = canvasArr[5].getContext('2d');
+        i.onload = function(){
+            context0.drawImage(this,0,0,270,270,0,0,270,270);
+            context1.drawImage(this,0,270,270,270,0,0,270,270);
+            context2.drawImage(this,0,540,270,270,0,0,270,270);
+            context3.drawImage(this,0,810,270,270,0,0,270,270);
+            context4.drawImage(this,0,1080,270,270,0,0,270,270);
+            context5.drawImage(this,0,1350,270,270,0,0,270,270);
+        };
+    </script>
+</body>
+</html>

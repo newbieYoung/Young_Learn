@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Blob转换成ArrayBuffer</title>
+</head>
+<body>
+	<script type="text/javascript">
+		var blob = new Blob();
+		var fileReader = new FileReader();
+		fileReader.onload = function() {
+		    var arrayBuffer = this.result;
+		    console.log(arrayBuffer);
+		    console.log(arrayBuffer instanceof ArrayBuffer);
+		};
+		fileReader.readAsArrayBuffer(blob);
+	</script>
+</body>
+</html>
