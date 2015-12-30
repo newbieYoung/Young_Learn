@@ -2,30 +2,33 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>二进制精灵图</title>
+	<title>二进制精灵图（blob->arrayBuffer->int8Array->blob数据不一样？）</title>
 </head>
 <body>
+	<img id="1" src="">
+	<img id="2" src="">
+	<img id="3" src="">
 	<script type="text/javascript">
 		var width = 640;
 		var height = 1136;
 		//加载图片
 		var img1 = {};
 		img1.obj = new Image();
-		img1.obj.src = './1.png';
+		img1.obj.src = './a.jpg';
 		img1.obj.onload = function(){
 			img1.img = this;
 		};
 
 		var img2 = {};
 		img2.obj = new Image();
-		img2.obj.src = './2.png';
+		img2.obj.src = './b.jpg';
 		img2.obj.onload = function(){
 			img2.img = this;
 		};
 
 		var img3 = {};
 		img3.obj = new Image();
-		img3.obj.src = './3.png';
+		img3.obj.src = './a.jpg';
 		img3.obj.onload = function(){
 			img3.img = this;
 		};
@@ -42,6 +45,11 @@
 				canvas1.toBlob(function(blob){
 					console.log('canvas1');
 					console.log(blob);
+					//还原测试
+					var newImg = document.createElement("img");
+     				newImg.src = URL.createObjectURL(blob);
+  					document.body.appendChild(newImg);
+
 					var fileReader = new FileReader();
 					fileReader.onload = function() {
 					    img1.arrayBuffer = this.result;
@@ -59,6 +67,12 @@
 				canvas2.toBlob(function(blob){
 					console.log('canvas2');
 					console.log(blob);
+
+					//还原测试
+					var newImg = document.createElement("img");
+     				newImg.src = URL.createObjectURL(blob);
+  					document.body.appendChild(newImg);
+
 					var fileReader = new FileReader();
 					fileReader.onload = function() {
 					    img2.arrayBuffer = this.result;
@@ -76,6 +90,12 @@
 				canvas3.toBlob(function(blob){
 					console.log('canvas3');
 					console.log(blob);
+
+					//还原测试
+					var newImg = document.createElement("img");
+     				newImg.src = URL.createObjectURL(blob);
+  					document.body.appendChild(newImg);
+
 					var fileReader = new FileReader();
 					fileReader.onload = function() {
 					    img3.arrayBuffer = this.result;
@@ -92,7 +112,25 @@
 				clearInterval(interval2);
 				img1.int8Array = new Int8Array(img1.arrayBuffer);
 				img2.int8Array = new Int8Array(img2.arrayBuffer);
-				img3.int8Array = new Int8Array(img2.arrayBuffer);
+				img3.int8Array = new Int8Array(img3.arrayBuffer);
+				//还原
+				document.body.innerHTML = '';
+				img1.blob = new Blob(img1.int8Array,{type:'image/png'});
+				console.log('new img1 blob');
+				console.log(img1.blob);
+				document.querySelector('#1').src = URL.createObjectURL(img1.blob);
+
+				img2.blob = new Blob(img2.int8Array,{type:'image/png'});
+				console.log('new img2 blob');
+				console.log(img2.blob);
+				document.querySelector('#2').src = URL.createObjectURL(img2.blob);
+
+				img3.blob = new Blob(img3.int8Array,{type:'image/png'});
+				console.log('new img3 blob');
+				console.log(img3.blob);
+				document.querySelector('#3').src = URL.createObjectURL(img3.blob);
+				
+				//存储
 				var totalLength = img1.int8Array.length+img2.int8Array.length+img3.int8Array.length;
 				console.log(totalLength);
 				//计算输出图片的宽高
