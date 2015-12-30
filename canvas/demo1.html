@@ -5,9 +5,9 @@
 	<title>二进制精灵图（blob->arrayBuffer->int8Array->blob数据不一样？）</title>
 </head>
 <body>
-	<img id="1" src="">
-	<img id="2" src="">
-	<img id="3" src="">
+	<img id="a" src="">
+	<img id="b" src="">
+	<img id="c" src="">
 	<script type="text/javascript">
 		var width = 640;
 		var height = 1136;
@@ -48,7 +48,7 @@
 					//还原测试
 					var newImg = document.createElement("img");
      				newImg.src = URL.createObjectURL(blob);
-  					document.body.appendChild(newImg);
+  					//document.body.appendChild(newImg);
 
 					var fileReader = new FileReader();
 					fileReader.onload = function() {
@@ -71,7 +71,7 @@
 					//还原测试
 					var newImg = document.createElement("img");
      				newImg.src = URL.createObjectURL(blob);
-  					document.body.appendChild(newImg);
+  					//document.body.appendChild(newImg);
 
 					var fileReader = new FileReader();
 					fileReader.onload = function() {
@@ -94,7 +94,7 @@
 					//还原测试
 					var newImg = document.createElement("img");
      				newImg.src = URL.createObjectURL(blob);
-  					document.body.appendChild(newImg);
+  					//document.body.appendChild(newImg);
 
 					var fileReader = new FileReader();
 					fileReader.onload = function() {
@@ -114,21 +114,20 @@
 				img2.int8Array = new Int8Array(img2.arrayBuffer);
 				img3.int8Array = new Int8Array(img3.arrayBuffer);
 				//还原
-				document.body.innerHTML = '';
 				img1.blob = new Blob([img1.int8Array],{type:'image/png'});
 				console.log('new img1 blob');
 				console.log(img1.blob);
-				//document.querySelector('#1').src = URL.createObjectURL(img1.blob);
+				document.querySelector('#a').src = URL.createObjectURL(img1.blob);
 
 				img2.blob = new Blob([img2.int8Array],{type:'image/png'});
 				console.log('new img2 blob');
 				console.log(img2.blob);
-				//document.querySelector('#2').src = URL.createObjectURL(img2.blob);
+				document.querySelector('#b').src = URL.createObjectURL(img2.blob);
 
 				img3.blob = new Blob([img3.int8Array],{type:'image/png'});
 				console.log('new img3 blob');
 				console.log(img3.blob);
-				//document.querySelector('#3').src = URL.createObjectURL(img3.blob);
+				document.querySelector('#c').src = URL.createObjectURL(img3.blob);
 				
 				//存储
 				var totalLength = img1.int8Array.length+img2.int8Array.length+img3.int8Array.length;
