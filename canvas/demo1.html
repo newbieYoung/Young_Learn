@@ -115,20 +115,20 @@
 				img3.int8Array = new Int8Array(img3.arrayBuffer);
 				//还原
 				document.body.innerHTML = '';
-				img1.blob = new Blob(img1.int8Array,{type:'image/png'});
+				img1.blob = new Blob([img1.int8Array],{type:'image/png'});
 				console.log('new img1 blob');
 				console.log(img1.blob);
-				document.querySelector('#1').src = URL.createObjectURL(img1.blob);
+				//document.querySelector('#1').src = URL.createObjectURL(img1.blob);
 
-				img2.blob = new Blob(img2.int8Array,{type:'image/png'});
+				img2.blob = new Blob([img2.int8Array],{type:'image/png'});
 				console.log('new img2 blob');
 				console.log(img2.blob);
-				document.querySelector('#2').src = URL.createObjectURL(img2.blob);
+				//document.querySelector('#2').src = URL.createObjectURL(img2.blob);
 
-				img3.blob = new Blob(img3.int8Array,{type:'image/png'});
+				img3.blob = new Blob([img3.int8Array],{type:'image/png'});
 				console.log('new img3 blob');
 				console.log(img3.blob);
-				document.querySelector('#3').src = URL.createObjectURL(img3.blob);
+				//document.querySelector('#3').src = URL.createObjectURL(img3.blob);
 				
 				//存储
 				var totalLength = img1.int8Array.length+img2.int8Array.length+img3.int8Array.length;
