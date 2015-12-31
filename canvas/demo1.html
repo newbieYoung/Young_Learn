@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>二进制精灵图（blob->arrayBuffer->int8Array->blob数据不一样？）</title>
+	<title>二进制精灵图（此方案不可取，二进制精灵图的大小为所有图片的大小）</title>
 </head>
 <body>
 	<img id="a" src="">
@@ -155,17 +155,17 @@
 	            var start = 0;
 	            var end = img1.int8Array.length;
 	            for(var i=start;i<end;i++){
-	            	imageData.data[i] = img1.int8Array[i];
+	            	imageData.data[i] = img1.int8Array[i-start];
 	            }
 	            start = end;
 	            end = start+img2.int8Array.length;
 	            for(var i=start;i<end;i++){
-	            	imageData.data[i] = img2.int8Array[i];
+	            	imageData.data[i] = img2.int8Array[i-start];
 	            }
 	            start = end;
 	            end = start+img3.int8Array.length;
 	            for(var i=start;i<end;i++){
-	            	imageData.data[i] = img3.int8Array[i];
+	            	imageData.data[i] = img3.int8Array[i-start];
 	            }
 	            //保存结果
 	            context.putImageData(imageData, 0, 0, 0, 0, output.width,output.height);
