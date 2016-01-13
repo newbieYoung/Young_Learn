@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Three框架</title>
+		<script src="../node_modules/three.js/build/three.js"></script>
+        <style type="text/css">
+			div#canvas-frame {
+				border: none;
+				cursor: pointer;
+				width: 100%;
+				height: 600px;
+				background-color: #EEEEEE;
+			}
+		</style>
+		<script>
+            //添加性能监控
+            (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();stats.domElement.style.cssText='position:fixed;left:0;top:0;z-index:10000';document.body.appendChild(stats.domElement);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='http://rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})()
+
+            //创建渲染器并添加到容器中
+            var renderer;
+            function initThree() {
+                width = document.getElementById('canvas-frame').clientWidth;
+                height = document.getElementById('canvas-frame').clientHeight;
+                renderer = new THREE.WebGLRenderer({
+                    antialias : true
+                });
+                renderer.setSize(width, height);
+                document.getElementById('canvas-frame').appendChild(renderer.domElement);
+                renderer.setClearColor(0xFFFFFF, 1.0);
+            }
+
+            //创建相机
+            var camera;
+            function initCamera() {
+                camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+                camera.position.x = 0;
+                camera.position.y = 1000;
+                camera.position.z = 0;
+                camera.up.x = 0;
+                camera.up.y = 0;
+                camera.up.z = 1;
+                camera.lookAt({
+                    x : 0,
+                    y : 0,
+                    z : 0
+                });
+            }
+
+            //创建场景
+            var scene;
+            function initScene() {
+                scene = new THREE.Scene();
+            }
+
+            //创建光源
+            var light;
+            function initLight() {
+                light = new THREE.DirectionalLight(0xFF0000, 1.0, 0);
+                light.position.set(100, 100, 200);
+                scene.add(light);
+            }
+
+            //创建图形
+            var cube;
+            var lines = [];
+            function initObject() {
+
+                //网格
+                var geometry = new THREE.Geometry();
+                geometry.vertices.push( new THREE.Vector3( - 500, 0, 0 ) );
+                geometry.vertices.push( new THREE.Vector3( 500, 0, 0 ) );
+                for ( var i = 0; i <= 20; i ++ ) {
+                    var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0x000000, opacity: 0.2 } ) );
+                    line.position.z = ( i * 50 ) - 500;
+                    scene.add( line );
+                    lines.push(line);
+                    var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0x000000, opacity: 0.2 } ) );
+                    line.position.x = ( i * 50 ) - 500;
+                    line.rotation.y = 90 * Math.PI / 180;
+                    scene.add( line );
+                    lines.push(line);
+                }
+                
+            }
+
+            //渲染一次
+            function render()
+            {
+                renderer.clear();
+                renderer.render(scene, camera);
+            }
+
+            //动画渲染
+            function animation()
+            {
+                //相机移动
+                //camera.position.z =camera.position.z +1;
+                
+                //物体移动
+                // for(var i=0;i<lines.length;i++){
+                //     lines[i].position.z = lines[i].position.z-1;
+                // }
+
+                renderer.render(scene, camera);
+                requestAnimationFrame(animation);
+            }
+
+            function threeStart() {
+                initThree();
+                initCamera();
+                initScene();
+                initLight();
+                initObject();
+                //render();
+                animation();
+            }
+
+		</script>
+	</head>
+
+	<body onload="threeStart();">
+		<div id="canvas-frame"></div>
+	</body>
+</html>
