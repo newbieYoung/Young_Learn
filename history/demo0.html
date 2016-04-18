@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Html5 history api</title>
+</head>
+<body>
+	<select>
+		<option city="sz">深圳</option>
+		<option city="bj">北京</option>
+		<option city="cs">长沙</option>
+	</select>
+	<ul></ul>
+	<script type="text/javascript">
+		var data = {
+			sz:['liy','ycy','wcl'],
+			bj:['zm','wpx'],
+			cs:['tbb','wh']
+		}
+		var ul = document.querySelector('ul');
+		var select = document.querySelector('select');
+		function render(){
+			var url = window.location.href;
+			var index = url.indexOf('?city=');
+			var city = 'sz';
+			if(index!=-1){
+				city = url.substring(index+7,url.length);
+			}
+			var list = data[city];
+			var html = '';
+			for(var i=0;i<list.length;i++){
+				html += '<li>'+list[i]+'</li>';
+			}
+			ul.innerHTML = html;
+		}
+
+		select.addEventListener('click',function(e){
+			console.log(e.target.nodeName);
+		}); 
+	</script>
+</body>
+</html>
