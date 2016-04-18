@@ -5,37 +5,63 @@
 	<title>Html5 history api</title>
 </head>
 <body>
-	<select>
-		<option city="sz">深圳</option>
-		<option city="bj">北京</option>
-		<option city="cs">长沙</option>
-	</select>
-	<ul></ul>
+	<ul id="select">
+		<li city="sz">深圳</li>
+		<li city="bj">北京</li>
+		<li city="cs">长沙</li>
+	</ul>
+	<ul id="list"></ul>
 	<script type="text/javascript">
+		//数据源
 		var data = {
 			sz:['liy','ycy','wcl'],
 			bj:['zm','wpx'],
 			cs:['tbb','wh']
 		}
-		var ul = document.querySelector('ul');
-		var select = document.querySelector('select');
+		//元素
+		var ul = document.querySelector('#list');
+		var select = document.querySelector('#select');
+		//渲染
 		function render(){
 			var url = window.location.href;
 			var index = url.indexOf('?city=');
 			var city = 'sz';
 			if(index!=-1){
-				city = url.substring(index+7,url.length);
+				city = url.substring(index+6,url.length);
 			}
-			var list = data[city];
+			var list = data[city];//模拟ajax数据请求
 			var html = '';
 			for(var i=0;i<list.length;i++){
 				html += '<li>'+list[i]+'</li>';
 			}
 			ul.innerHTML = html;
 		}
-
+		//事件
+		window.onload = function(){
+			var url = window.location.href;
+			console.log(url.indexOf('?city='));
+			if(url.indexOf('?city=')===-1){
+				url = window.location.href+'?city=sz';
+				window.history.replaceState(data['sz'],'sz',url);
+			}
+			render();
+		};
+		window.onpopstate = function(e){
+			var list = e.state;//从历史纪录中获取当时数据
+			var html = '';
+			for(var i=0;i<list.length;i++){
+				html += '<li>'+list[i]+'</li>';
+			}
+			ul.innerHTML = html;
+		};
 		select.addEventListener('click',function(e){
-			console.log(e.target.nodeName);
+			var target = e.target;
+			if(target&&target.nodeName.toLowerCase()==='li'){
+				var city = target.getAttribute('city');
+				var url = 'http://localhost:9000/history/demo0.html?city='+city;
+				window.history.pushState(data[city],city,url);
+				render();
+			}
 		}); 
 	</script>
 </body>
