@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>canvas动画</title>
+	<script type="text/javascript" src="/node_modules/jquery/dist/jquery.min.js"></script>
+	<style type="text/css">
+		html{
+			font-size:42px;
+		}
+		.roll-container{
+			background-color:#eee;
+			width:5.16rem;
+			height:3.24rem;
+			margin:0 auto;
+			position:relative;
+			overflow:hidden;
+			box-shadow: inset 0 15px 15px -5px #fff,inset 0 -15px 15px -5px #fff;
+		}
+		.roll-container .item{
+			position:absolute;
+			width:1.24rem;
+			height:3.24rem;
+		}
+		.roll-container .item.first{
+			left:0;
+		}
+		.roll-container .item.second{
+			left:1.32rem;
+		}
+		.roll-container .item.third{
+			left:2.64rem;
+		}
+		.roll-container .item.fouth{
+			left:3.96rem;
+		}
+        .tips{
+            font-size:0.3rem;
+            margin-top:2rem;
+        }
+	</style>
+</head>
+<body>
+    <ul class="tips">
+       
+    </ul>
+	<div class="roll-container">
+		<canvas index="0" class="item first" width="124" height="324"></canvas>
+		<canvas index="1" class="item second" width="124" height="324"></canvas>
+		<canvas index="2" class="item third" width="124" height="324"></canvas>
+		<canvas index="3" class="item fouth" width="124" height="324"></canvas>
+	</div>
+	<script type="text/javascript">
+	javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})()
+	</script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+
+			var listImg = new Image();
+			initRoll();
+			var rollCanvas = document.querySelectorAll('div.roll-container canvas.item');
+
+			function initRoll(){
+				listImg.src = './list.png';
+				listImg.onload = function(){
+					for(var i=0;i<rollCanvas.length;i++){
+						var context = rollCanvas[i].getContext('2d');
+						context.clearRect(0,0,124,324);
+						context.drawImage(listImg,0,0,124,324,0,0,124,324);
+					}
+				}
+			}
+
+	    	function startRoll(){//开始滚动动画
+	            for(var i=0;i<rollCanvas.length;i++){
+	                var context = rollCanvas[i].getContext('2d');
+	                roll(context,200*i);
+	            }
+	    	}
+
+	        function roll(context,delay){
+	            var basic = 1000;
+	            var speed = 100;
+	            var up = 1;
+	            var y = 0;
+	            var time = 0;
+	            var item = 50;
+	            (function(context,speed,up,y,time,item,delay){
+	                setInterval(function(){
+	                    context.clearRect(0,0,124,324);
+	                    time = time+item;
+	                    if(time>delay){
+	                        if(time<2000){//加速阶段
+	                            speed = speed+up*item
+	                        }else if(time>=2000){//等待抽奖结果阶段
+	                            speed = speed
+	                        }
+	                        y = y+speed*item;
+	                        var y1 = y%(1071*basic);
+	                        if(y1<=747*basic){
+	                            context.drawImage(listImg,0,y1/basic,124,324,0,0,124,324);
+	                        }else{
+	                            var y2 = 1071*basic-y1;
+	                            context.drawImage(listImg,0,y1/basic,124,y2/basic,0,0,124,y2/basic);
+	                            var y3 = 324*basic-y2;
+	                            context.drawImage(listImg,0,0,124,y3/basic,0,y2/basic,124,y3/basic);
+	                        }
+	                    }
+	                },item)
+	            })(context,speed,up,y,time,item,delay);
+	        }
+
+	    	startRoll();
+		});
+	</script>
+</body>
+</html>
