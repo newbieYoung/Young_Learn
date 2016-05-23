@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>canvas动画</title>
+	<title>影响canvas动画性能的因素</title>
 	<script type="text/javascript" src="/node_modules/jquery/dist/jquery.min.js"></script>
 	<style type="text/css">
 		html{
@@ -10,29 +10,14 @@
 		}
 		.roll-container{
 			background-color:#eee;
-			width:5.16rem;
+			width:100%;
 			height:3.24rem;
 			margin:0 auto;
-			position:relative;
-			overflow:hidden;
 			box-shadow: inset 0 15px 15px -5px #fff,inset 0 -15px 15px -5px #fff;
 		}
 		.roll-container .item{
-			position:absolute;
 			width:1.24rem;
 			height:3.24rem;
-		}
-		.roll-container .item.first{
-			left:0;
-		}
-		.roll-container .item.second{
-			left:1.32rem;
-		}
-		.roll-container .item.third{
-			left:2.64rem;
-		}
-		.roll-container .item.fouth{
-			left:3.96rem;
 		}
         .tips{
             font-size:0.3rem;
@@ -42,16 +27,31 @@
 </head>
 <body>
     <ul class="tips">
-       
+       <li>运动的元素越多性能越低，内存消耗越大（很容理解）</li>
+       <li>资源越大性能越低，内存消耗越大（与浏览器图片解码有关，浏览器解码所需时间和图片的类型以及尺寸有关）</li>
+       <li>画布尺寸越大性能越低，内存消耗越大（与浏览器的绘制有关）</li>
+       <li>setInterval和setTimeout方法容易丢帧</li>
     </ul>
 	<div class="roll-container">
-		<canvas index="0" class="item first" width="124" height="324"></canvas>
-		<canvas index="1" class="item second" width="124" height="324"></canvas>
-		<canvas index="2" class="item third" width="124" height="324"></canvas>
-		<canvas index="3" class="item fouth" width="124" height="324"></canvas>
+		<canvas index="0" class="item" width="124" height="324"></canvas>
+		<canvas index="1" class="item" width="124" height="324"></canvas>
+		<canvas index="2" class="item" width="124" height="324"></canvas>
+		<canvas index="3" class="item" width="124" height="324"></canvas>
+		<canvas index="4" class="item" width="124" height="324"></canvas>
+		<canvas index="5" class="item" width="124" height="324"></canvas>
+		<canvas index="6" class="item" width="124" height="324"></canvas>
+		<canvas index="7" class="item" width="124" height="324"></canvas>
+		<canvas index="8" class="item" width="124" height="324"></canvas>
+		<canvas index="9" class="item" width="124" height="324"></canvas>
+		<canvas index="10" class="item" width="124" height="324"></canvas>
+		<canvas index="11" class="item" width="124" height="324"></canvas>
+		<canvas index="12" class="item" width="124" height="324"></canvas>
+		<canvas index="13" class="item" width="124" height="324"></canvas>
+		<canvas index="14" class="item" width="124" height="324"></canvas>
+		<canvas index="15" class="item" width="124" height="324"></canvas>
 	</div>
 	<script type="text/javascript">
-	javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})()
+		javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})()
 	</script>
 	<script type="text/javascript">
 		$(document).ready(function(){
@@ -74,7 +74,7 @@
 	    	function startRoll(){//开始滚动动画
 	            for(var i=0;i<rollCanvas.length;i++){
 	                var context = rollCanvas[i].getContext('2d');
-	                roll(context,200*i);
+	                roll(context,0);
 	            }
 	    	}
 
