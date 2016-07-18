@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" >
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<title>使用touch事件简单实现轮播组件</title>
+	<style type="text/css">
+		.container{
+			width:300px;
+			height:150px;
+			overflow:hidden;
+		}
+		.component{
+			width:900px;
+			height:150px;
+			font-size:0;
+		}
+		.component .item{
+			display:inline-block;
+			width:300px;
+			height:150px;
+		}
+		.component .item.green{
+			background-color:green;
+		}
+		.component .item.blue{
+			background-color:blue;
+		}
+		.component .item.red{
+			background-color:red;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="component">
+			<div class="item blue"></div>
+			<div class="item green"></div>
+			<div class="item red"></div>
+		</div>
+	</div>
+	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			
+		});
+	</script>
+</body>
+</html>
