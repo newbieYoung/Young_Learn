@@ -8,13 +8,16 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
 	<title>使用touch事件简单实现轮播组件</title>
 	<style type="text/css">
+		body{
+			padding:0;
+			margin:0;
+			overflow-x:hidden;
+		}
 		.container{
-			width:300px;
 			height:150px;
 			overflow:hidden;
 		}
 		.component{
-			width:900px;
 			height:150px;
 			font-size:0;
 		}
@@ -45,7 +48,98 @@
 	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
-			
+			//初始化轮播图
+        	var index = 0;//轮播图序号
+        	var isFixed = true;//自动滑动是否完成
+        	var screenWidth = window.screen.availWidth;
+        	var $slide = $('div.component');
+        	var $slidePage = $slide.find('div.item');
+        	var slideLength = $slidePage.length;
+        	if(slideLength>1){
+        		//每屏宽度等于屏幕宽度
+        		$slide.css({
+	        		'width':slideLength*screenWidth+'px'
+	        	});
+	        	$slidePage.css({
+	        		'width':screenWidth+'px'
+	        	});
+	        	var startX = 0;
+	        	var moveX = 0;
+	        	$slide.on('touchstart',function(e){
+	        		if(isFixed){
+	        			var touch = e.originalEvent.touches[0];
+		        		$slide.css({
+							'transition':'none',
+							'-webkit-transition':'none'
+						});
+		        		startX = touch.clientX;
+	        		}
+	        	});
+	        	$slide.on('touchmove',function(e){
+	        		if(isFixed){
+	        			var touch = e.originalEvent.touches[0];
+	        			moveX = touch.pageX - startX;
+	        			var absX = Math.abs(moveX);
+	        			if(index==0&&moveX>0){
+		        			//第一幕不能再向左移动
+		        		}else if(index==(slideLength-1)&&moveX<0){
+		        			//最后一幕不能再向右移动
+		        		}else{
+		        			if(absX>=parseInt(screenWidth/2)){
+		        				//已经滑动过半，触发了自动移动
+		        				isFixed = false;
+		        				if(moveX<0){
+		        					index = index+1;//向右边
+		        				}else{
+		        					index = index-1;//向左边
+		        				}
+		        				setTimeout(function(){
+		        					$slide.css({
+			        					'transition':'transform 0.5s ease-out',
+			        					'-webkit-transition':'-webkit-transform 0.5s ease-out',
+			        					'transform':'translateX('+(-index*screenWidth)+'px)',
+			        					'-webkit-transform':'translateX('+(-index*screenWidth)+'px)'
+			        				});
+			        				//500毫秒的动效需要手动在600毫秒后设置完成状态，使用transitionend事件设置完成状态在touch事件触发频率很快时会有问题
+			        				setTimeout(function(){
+			        					isFixed = true;
+			        				},600);
+		        				},100);
+		        			}else{
+		        				$slide.css({
+									'transform':'translateX('+(-index*screenWidth+moveX)+'px)',
+									'-webkit-transform':'translateX('+(-index*screenWidth+moveX)+'px)',
+								});
+		        			}
+		        		}
+	        		}
+	        	});
+	        	$slide.on('touchend',function(e){
+	        		//touch结束，如果还没触发自动移动，要么自动移动到初始位置，要么自动移动下一个位置
+	        		if(isFixed){
+	        			if(index==0&&moveX>0){
+		        			//第一幕不能再向左移动
+		        		}else if(index==(slideLength-1)&&moveX<0){
+		        			//最后一幕不能再向右移动
+		        		}else{
+		        			isFixed = false;
+		        			setTimeout(function(){
+	        					$slide.css({
+									'transition':'transform 0.5s ease-out',
+									'-webkit-transition':'-webkit-transform 0.5s ease-out',
+									'transform':'translateX('+(-index*screenWidth)+'px)',
+									'-webkit-transform':'translateX('+(-index*screenWidth)+'px)'
+								});
+								//500毫秒的动效需要手动在600毫秒后设置完成状态，使用transitionend事件设置完成状态在touch事件触发频率很快时会有问题
+								setTimeout(function(){
+		        					isFixed = true;
+		        				},600);
+	        				},100);
+		        		}
+	        		}
+	        	});
+        	}
+        
 		});
 	</script>
 </body>
