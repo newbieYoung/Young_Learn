@@ -53,6 +53,8 @@
 		$(document).ready(function(){
 			//初始化轮播图
         	var index = 0;//轮播图序号
+        	var touchstart = false;
+        	var preventDefault = false;//是否阻止页面滑动
         	var isFixed = true;//自动滑动是否完成
         	var screenWidth = window.screen.availWidth;
         	var $slide = $('div.component');
@@ -67,11 +69,19 @@
 	        		'width':screenWidth+'px'
 	        	});
 	        	var startX = 0;
+	        	var startY = 0;
 	        	var moveX = 0;
+	        	var lastMoveX = 0;
+	        	var moveY = 0;
 
       			$slide.on('webkitTransitionEnd transitionend oTransitionEnd otransitionend transitionend',function(){
       				if(!isFixed){
       					isFixed = true;
+      					startX = 0;
+			        	startY = 0;
+			        	moveX = 0;
+			        	lastMoveX = 0;
+			        	moveY = 0;
       					/* caution */
 						$slide.off('touchmove');
         				$slide.off('touchend');
@@ -84,7 +94,9 @@
 							'transition':'none',
 							'-webkit-transition':'none'
 						});
+						touchstart = true;
 		        		startX = touch.clientX;
+		        		startY = touch.clientY;
 		        		/* caution */
 			        	$slide.on('touchmove',function(e){move(e);});
 	        			$slide.on('touchend',function(e){end(e)});
@@ -93,17 +105,36 @@
 
 	        	function move(e){
 	        		/* caution */
-	        		e.preventDefault();//阻止默认滑动
 	        		if(isFixed){
 	        			var touch = e.originalEvent.touches[0];
 	        			moveX = touch.pageX - startX;
-	        			var absX = Math.abs(moveX);
-	        			if(index==0&&moveX>0){
-		        			//第一幕不能再向左移动
-		        		}else if(index==(slideLength-1)&&moveX<0){
-		        			//最后一幕不能再向右移动
-		        		}else{
-		        			if(absX>=parseInt(screenWidth/2)){
+	        			if(touchstart){
+	        				moveY = touch.pageY - startY;
+	        				if(Math.abs(moveX)>Math.abs(moveY)/2){
+	        					moveItem(e);
+	        					touchstart = false;
+	        					preventDefault  = true;
+	        				}else{
+	        					touchstart = false;
+	        					preventDefault  = false;//否则默认为用户想滑动页面
+	        				}
+	        			}else{
+	        				if(preventDefault){
+	        					moveItem(e)
+	        				}
+	        			}
+	        		}
+	        	}
+	        	function moveItem(e){
+	        		e.preventDefault();//阻止默认滑动
+	        		absX = Math.abs(moveX);
+        			if(index==0&&moveX>0){
+	        			//第一幕不能再向左移动
+	        		}else if(index==(slideLength-1)&&moveX<0){
+	        			//最后一幕不能再向右移动
+	        		}else{
+	        			if((moveX-lastMoveX)*moveX>=0){//方向一致
+	        				if(absX>=parseInt(screenWidth/2)){
 		        				//已经滑动过半，触发了自动移动
 		        				isFixed = false;
 		        				if(moveX<0){
@@ -118,12 +149,21 @@
 		        					'-webkit-transform':'translateX('+(-index*screenWidth)+'px)'
 		        				});
 		        			}else{
+		        				lastMoveX = moveX;
 		        				$slide.css({
 									'transform':'translateX('+(-index*screenWidth+moveX)+'px)',
 									'-webkit-transform':'translateX('+(-index*screenWidth+moveX)+'px)',
 								});
 		        			}
-		        		}
+	        			}else{//移动过程中方向变化，触发自动移动回到原始位置
+	        				isFixed = false;
+	        				$slide.css({
+								'transition':'transform 0.5s ease-out',
+								'-webkit-transition':'-webkit-transform 0.5s ease-out',
+								'transform':'translateX('+(-index*screenWidth)+'px)',
+								'-webkit-transform':'translateX('+(-index*screenWidth)+'px)'
+							});
+	        			}
 	        		}
 	        	}
 	        	function end(e){
@@ -134,13 +174,15 @@
 		        		}else if(index==(slideLength-1)&&moveX<0){
 		        			//最后一幕不能再向右移动
 		        		}else{
-		        			isFixed = false;
-        					$slide.css({
-								'transition':'transform 0.5s ease-out',
-								'-webkit-transition':'-webkit-transform 0.5s ease-out',
-								'transform':'translateX('+(-index*screenWidth)+'px)',
-								'-webkit-transform':'translateX('+(-index*screenWidth)+'px)'
-							});
+		        			if(Math.abs(moveX)>0&&preventDefault){
+		        				isFixed = false;
+		        				$slide.css({
+									'transition':'transform 0.5s ease-out',
+									'-webkit-transition':'-webkit-transform 0.5s ease-out',
+									'transform':'translateX('+(-index*screenWidth)+'px)',
+									'-webkit-transform':'translateX('+(-index*screenWidth)+'px)'
+								});
+		        			}
 		        		}
 	        		}
 	        	}
