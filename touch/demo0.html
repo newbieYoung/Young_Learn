@@ -65,6 +65,10 @@
 	        	});
 	        	var startX = 0;
 	        	var moveX = 0;
+
+      			$slide.on('webkitTransitionEnd transitionend oTransitionEnd otransitionend transitionend',function(){
+      				isFixed = true;
+      			});
 	        	$slide.on('touchstart',function(e){
 	        		if(isFixed){
 	        			var touch = e.originalEvent.touches[0];
@@ -93,18 +97,12 @@
 		        				}else{
 		        					index = index-1;//向左边
 		        				}
-		        				setTimeout(function(){
-		        					$slide.css({
-			        					'transition':'transform 0.5s ease-out',
-			        					'-webkit-transition':'-webkit-transform 0.5s ease-out',
-			        					'transform':'translateX('+(-index*screenWidth)+'px)',
-			        					'-webkit-transform':'translateX('+(-index*screenWidth)+'px)'
-			        				});
-			        				//500毫秒的动效需要手动在600毫秒后设置完成状态，使用transitionend事件设置完成状态在touch事件触发频率很快时会有问题
-			        				setTimeout(function(){
-			        					isFixed = true;
-			        				},600);
-		        				},100);
+	        					$slide.css({
+		        					'transition':'transform 0.5s ease-out',
+		        					'-webkit-transition':'-webkit-transform 0.5s ease-out',
+		        					'transform':'translateX('+(-index*screenWidth)+'px)',
+		        					'-webkit-transform':'translateX('+(-index*screenWidth)+'px)'
+		        				});
 		        			}else{
 		        				$slide.css({
 									'transform':'translateX('+(-index*screenWidth+moveX)+'px)',
@@ -123,18 +121,12 @@
 		        			//最后一幕不能再向右移动
 		        		}else{
 		        			isFixed = false;
-		        			setTimeout(function(){
-	        					$slide.css({
-									'transition':'transform 0.5s ease-out',
-									'-webkit-transition':'-webkit-transform 0.5s ease-out',
-									'transform':'translateX('+(-index*screenWidth)+'px)',
-									'-webkit-transform':'translateX('+(-index*screenWidth)+'px)'
-								});
-								//500毫秒的动效需要手动在600毫秒后设置完成状态，使用transitionend事件设置完成状态在touch事件触发频率很快时会有问题
-								setTimeout(function(){
-		        					isFixed = true;
-		        				},600);
-	        				},100);
+        					$slide.css({
+								'transition':'transform 0.5s ease-out',
+								'-webkit-transition':'-webkit-transform 0.5s ease-out',
+								'transform':'translateX('+(-index*screenWidth)+'px)',
+								'-webkit-transform':'translateX('+(-index*screenWidth)+'px)'
+							});
 		        		}
 	        		}
 	        	});
