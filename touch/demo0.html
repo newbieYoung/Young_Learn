@@ -47,6 +47,9 @@
 	</div>
 	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript">
+		/**
+		 * 自定义toumove事件时需要阻止设备默认的touchmove事件，比如页面滑动，否则会出现一些莫名其妙的bug
+		 */
 		$(document).ready(function(){
 			//初始化轮播图
         	var index = 0;//轮播图序号
@@ -67,7 +70,12 @@
 	        	var moveX = 0;
 
       			$slide.on('webkitTransitionEnd transitionend oTransitionEnd otransitionend transitionend',function(){
-      				isFixed = true;
+      				if(!isFixed){
+      					isFixed = true;
+      					/* caution */
+						$slide.off('touchmove');
+        				$slide.off('touchend');
+      				}
       			});
 	        	$slide.on('touchstart',function(e){
 	        		if(isFixed){
@@ -77,9 +85,15 @@
 							'-webkit-transition':'none'
 						});
 		        		startX = touch.clientX;
+		        		/* caution */
+			        	$slide.on('touchmove',function(e){move(e);});
+	        			$slide.on('touchend',function(e){end(e)});
 	        		}
 	        	});
-	        	$slide.on('touchmove',function(e){
+
+	        	function move(e){
+	        		/* caution */
+	        		e.preventDefault();//阻止默认滑动
 	        		if(isFixed){
 	        			var touch = e.originalEvent.touches[0];
 	        			moveX = touch.pageX - startX;
@@ -111,8 +125,8 @@
 		        			}
 		        		}
 	        		}
-	        	});
-	        	$slide.on('touchend',function(e){
+	        	}
+	        	function end(e){
 	        		//touch结束，如果还没触发自动移动，要么自动移动到初始位置，要么自动移动下一个位置
 	        		if(isFixed){
 	        			if(index==0&&moveX>0){
@@ -129,7 +143,7 @@
 							});
 		        		}
 	        		}
-	        	});
+	        	}
         	}
         
 		});
