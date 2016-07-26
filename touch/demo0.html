@@ -23,7 +23,6 @@
 		}
 		.component .item{
 			display:inline-block;
-			width:300px;
 			height:150px;
 		}
 		.component .item.green{
@@ -71,7 +70,6 @@
 	        	var startX = 0;
 	        	var startY = 0;
 	        	var moveX = 0;
-	        	var lastMoveX = 0;
 	        	var moveY = 0;
 
       			$slide.on('webkitTransitionEnd transitionend oTransitionEnd otransitionend transitionend',function(){
@@ -80,7 +78,6 @@
       					startX = 0;
 			        	startY = 0;
 			        	moveX = 0;
-			        	lastMoveX = 0;
 			        	moveY = 0;
       					/* caution */
 						$slide.off('touchmove');
@@ -90,10 +87,7 @@
 	        	$slide.on('touchstart',function(e){
 	        		if(isFixed){
 	        			var touch = e.originalEvent.touches[0];
-		        		$slide.css({
-							'transition':'none',
-							'-webkit-transition':'none'
-						});
+	        			cssTransform($slide);
 						touchstart = true;
 		        		startX = touch.clientX;
 		        		startY = touch.clientY;
@@ -133,36 +127,18 @@
 	        		}else if(index==(slideLength-1)&&moveX<0){
 	        			//最后一幕不能再向右移动
 	        		}else{
-	        			if((moveX-lastMoveX)*moveX>=0){//方向一致
-	        				if(absX>=parseInt(screenWidth/2)){
-		        				//已经滑动过半，触发了自动移动
-		        				isFixed = false;
-		        				if(moveX<0){
-		        					index = index+1;//向右边
-		        				}else{
-		        					index = index-1;//向左边
-		        				}
-	        					$slide.css({
-		        					'transition':'transform 0.5s ease-out',
-		        					'-webkit-transition':'-webkit-transform 0.5s ease-out',
-		        					'transform':'translateX('+(-index*screenWidth)+'px)',
-		        					'-webkit-transform':'translateX('+(-index*screenWidth)+'px)'
-		        				});
-		        			}else{
-		        				lastMoveX = moveX;
-		        				$slide.css({
-									'transform':'translateX('+(-index*screenWidth+moveX)+'px)',
-									'-webkit-transform':'translateX('+(-index*screenWidth+moveX)+'px)',
-								});
-		        			}
-	        			}else{//移动过程中方向变化，触发自动移动回到原始位置
+        				if(absX>=parseInt(screenWidth/2)){
+	        				//已经滑动过半，触发了自动移动
 	        				isFixed = false;
-	        				$slide.css({
-								'transition':'transform 0.5s ease-out',
-								'-webkit-transition':'-webkit-transform 0.5s ease-out',
-								'transform':'translateX('+(-index*screenWidth)+'px)',
-								'-webkit-transform':'translateX('+(-index*screenWidth)+'px)'
-							});
+	        				if(moveX<0){
+	        					index = index+1;//向右边
+	        				}else{
+	        					index = index-1;//向左边
+	        				}
+	        				cssTransform($slide,-index*screenWidth,0.5);
+	        			}else{
+	        				lastMoveX = moveX;
+	        				cssTransform($slide,-index*screenWidth+moveX);
 	        			}
 	        		}
 	        	}
@@ -176,15 +152,25 @@
 		        		}else{
 		        			if(Math.abs(moveX)>0&&preventDefault){
 		        				isFixed = false;
-		        				$slide.css({
-									'transition':'transform 0.5s ease-out',
-									'-webkit-transition':'-webkit-transform 0.5s ease-out',
-									'transform':'translateX('+(-index*screenWidth)+'px)',
-									'-webkit-transform':'translateX('+(-index*screenWidth)+'px)'
-								});
+		        				cssTransform($slide,-index*screenWidth,0.5);
 		        			}
 		        		}
 	        		}
+	        	}
+	        	function cssTransform(target,x,second){
+	        		var cssObj = {};
+	        		if(x!=null){
+	        			cssObj['transform'] = 'translateX('+x+'px) translateZ(0)';
+	        			cssObj['-webkit-transform'] = 'translateX('+x+'px) translateZ(0)';
+	        		}
+	        		if(second!=null){
+	        			cssObj['transition'] = 'transform '+second+'s ease-out';
+	        			cssObj['-webkit-transition'] = '-webkit-transform '+second+'s ease-out';
+	        		}else{
+	        			cssObj['transition'] = 'none';
+	        			cssObj['-webkit-transition'] = 'none';
+	        		}
+	        		target.css(cssObj);
 	        	}
         	}
         
