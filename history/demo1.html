@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>浏览器历史记录测试</title>
+</head>
+<body>
+	<p>history demo1</p>
+	<a href="http://172.18.6.42:9000/history/demo2.html">demo2</a>
+	<p id="len"></p>
+	<a id="back" href="javascript:;">back</a><br/>
+	<a id="forward" href="javascript:;">forward</a><br/>
+	<script type="text/javascript">
+
+		window.onload = function(){
+			var len = document.querySelector('#len');
+			var back = document.querySelector('#back');		
+			var forward = document.querySelector('#forward');
+
+			len.innerHTML = window.history.length;
+
+			back.addEventListener('click',function(){
+				window.history.back();
+			});
+			forward.addEventListener('click',function(){
+				window.history.forward();
+			});
+		};
+	</script>
+</body>
+</html>
