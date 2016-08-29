@@ -77,6 +77,10 @@
                 };
                 reader.readAsText(file);
             }, errorHandler);
+            //FileSystem API 使用新的网址机制，可用于填充 src 或 href 属性
+            var img = document.createElement('img');
+            img.src = fileEntry.toURL(); // filesystem:http://example.com/temporary/myfile.png
+            document.body.appendChild(img);
             //删除文件
             // fileEntry.remove(function() {
             //     console.log('File removed.');
