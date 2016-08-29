@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>FileSystem初步了解（和WebWorker协作）</title>
+</head>
+<body>
+	<script type="text/javascript">
+    	//文件操作失败
+	    function errorHandler(e) {
+	        var msg = '';
+	        switch (e.code) {
+	            case FileError.QUOTA_EXCEEDED_ERR:
+	                msg = 'QUOTA_EXCEEDED_ERR';
+	                break;
+	            case FileError.NOT_FOUND_ERR:
+	                msg = 'NOT_FOUND_ERR';
+	                break;
+	            case FileError.SECURITY_ERR:
+	                msg = 'SECURITY_ERR';
+	                break;
+	            case FileError.INVALID_MODIFICATION_ERR:
+	                msg = 'INVALID_MODIFICATION_ERR';
+	                break;
+	            case FileError.INVALID_STATE_ERR:
+	                msg = 'INVALID_STATE_ERR';
+	                break;
+	            default:
+	                msg = 'Unknown Error';
+	                break;
+	        }
+	        console.log('Error: ' + msg);
+	    }
+
+		var worker = new Worker('demo2.js');
+		var data = 'text';
+		worker.postMessage(data);
+		//监听webworker
+	    worker.onmessage = function(e) {
+	        console.log(e.data);
+	        window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
+    		window.requestFileSystem(window.TEMPORARY, 200 * 1024 * 1024, onInitFs, errorHandler);
+	    };
+	    function onInitFs(fs){
+	    	//查找或创建文件
+	        fs.root.getFile('log.txt', {
+	            create: true, //文件不存在时创建文件
+	            exclusive: false //文件存在时不报错
+	        }, function(fileEntry) {
+	            console.log(fileEntry.isFile === true);
+	            console.log(fileEntry.name);
+	            console.log(fileEntry.fullPath);
+	            //读取文件
+	            fileEntry.file(function(file) {
+	                var reader = new FileReader();
+	                reader.onloadend = function() {
+	                    var txtArea = document.createElement('textarea');
+	                    txtArea.value = this.result;
+	                    //console.log(this.result);
+	                    document.body.appendChild(txtArea);
+	                };
+	                reader.readAsText(file);
+	            }, errorHandler);
+	        }, errorHandler);
+	    }
+	</script>
+</body>
+</html>
