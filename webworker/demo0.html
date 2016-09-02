@@ -7,6 +7,10 @@
 </head>
 
 <body>
+    <p>注意事项：</p>
+    <ul>
+        <li>1、不要频繁创建webworker进程，因为web worker脚本不能被缓存到客户端，所以频繁创建也就会频繁的发起请求，导致性能和内存消耗不断增多；</li>
+    </ul>
     <script type="text/javascript">
     var worker = new Worker('demo0.js');
     //通知webworker
