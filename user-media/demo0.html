@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>html5 UserMedia</title>
+</head>
+<body>
+	<video width="640" height="480" autoplay></video>
+	<canvas width="640" height="480"></canvas>
+	<script type="text/javascript">
+		var video = document.querySelector('video');
+		var canvas = document.querySelector('canvas');
+		var context = canvas.getContext('2d');
+
+		navigator.webkitGetUserMedia({
+            video: true
+        }, success, error);
+
+	    function success(stream) {
+		    video.src = window.webkitURL.createObjectURL(stream);
+		    video.onloadedmetadata = function(e) {
+		    	renderCanvas();
+		    };
+	    }
+
+	    function error(err) {
+	        alert('video error: ' + err)
+	    }
+
+	    function renderCanvas(){//使用canvas定时抓取vedio
+	    	setInterval(function(){
+	    		context.drawImage(video, 0, 0, 640, 480);
+	    	},1000);
+	    }
+	</script>
+</body>
+</html>
