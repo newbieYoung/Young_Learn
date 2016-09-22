@@ -52,7 +52,7 @@
 			mediaRecorder.onstop = function(){
 				console.log('onstop');
 
-				var blob = new Blob(recordedBlobs, {type: "video/webm"});
+				var blob = new Blob(recordedBlobs,{type:'audio/wav'});
 
 				var audioURL = window.URL.createObjectURL(blob);
 				var audio = new Audio(audioURL);
