@@ -15,9 +15,11 @@
 	</script>
 	<!-- 顶点着色器程序 -->
 	<script id="shader-vs" type="x-shader/x-vertex">
+		attribute vec4 a_position;
+		attribute float a_pointSize;
 	    void main() {
-	    	gl_Position = vec4(0.0,0.0,0.0,1.0);
-	    	gl_PointSize = 10.0;
+	    	gl_Position = a_position;
+	    	gl_PointSize = a_pointSize;
 	    }
 	</script>
 	<script type="text/javascript">
@@ -25,6 +27,12 @@
 			var canvas = document.querySelector('#webgl');
 			var gl = canvas.getContext('webgl');//获取canvas上下文
 			var shaderPorgram = initShaders(gl);//初始化着色器程序
+
+			var a_position = gl.getAttribLocation(shaderPorgram,'a_position');//获取attribute变量的存储位置
+			var a_pointSize = gl.getAttribLocation(shaderPorgram,'a_pointSize');
+			gl.vertexAttrib3f(a_position,0.0,0.5,0.0);//将顶点位置传输给attribute变量
+			gl.vertexAttrib1f(a_pointSize,5.0);
+
 			gl.clearColor(0.0,0.0,1.0,1.0);//设置背景颜色
 			gl.clear(gl.COLOR_BUFFER_BIT);//清空canvas绘图区域
 			gl.drawArrays(gl.POINTS,0,1);//绘制一个点

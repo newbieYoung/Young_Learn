@@ -16,8 +16,7 @@ function initShaders(gl){
 	//链接成功后激活渲染器程序
 	gl.useProgram(shaderProgram);
 
-	//shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-    //启用顶点缓冲区数组
+	//启用顶点缓冲区数组
     //gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
     //shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
     //gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
