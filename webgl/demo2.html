@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>通过缓冲区对象绘制三角形</title>
+	<title>通过缓冲区对象绘制三角形或矩形</title>
 	<script type="text/javascript" src="./sim-tools.js"></script>
 </head>
 <body onload="main()">
@@ -36,13 +36,21 @@
 			gl.clear(gl.COLOR_BUFFER_BIT);//清空canvas绘图区域
 
 			gl.uniform4f(u_fragColor,1.0,0.0,0.0,1.0);
-			gl.drawArrays(gl.TRIANGLES,0,num);//绘制三角形
+			
+			//gl.drawArrays(gl.TRIANGLES,0,num);//绘制三角形
+			gl.drawArrays(gl.TRIANGLE_STRIP,0,num);
 		}
 
 		//初始化顶点位置
 		function initVertexBuffers(gl,shaderPorgram){
-			var vertices = new Float32Array([0.0,0.5,-0.5,-0.5,0.5,-0.5]);
-			var num = 3;
+			//三角形
+			//var vertices = new Float32Array([0.0,0.5,-0.5,-0.5,0.5,-0.5]);
+			//var num = 3;
+			
+			//矩形
+			var vertices = new Float32Array([-0.5,0.5,-0.5,-0.5,0.5,0.5,0.5,-0.5]);
+			var num = 4;
+
 			//创建缓冲区对象
 			var vertexBuffer = gl.createBuffer();
 			if(!vertexBuffer){
