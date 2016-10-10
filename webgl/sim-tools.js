@@ -59,6 +59,7 @@ function getShader(gl,id){
 	gl.compileShader(shader);
 	//检查是否编译成功
 	if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)){
+		console.log(gl.getShaderInfoLog(shader));//打印编译失败信息
 		return null;
 	}
 	//成功编译返回编译好的着色器
