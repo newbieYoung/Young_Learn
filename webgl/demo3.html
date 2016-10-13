@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>通过缓冲区对象绘制三角形或矩形</title>
+	<title>变换</title>
 	<script type="text/javascript" src="./sim-tools.js"></script>
 </head>
 <body onload="main()">
@@ -18,8 +18,20 @@
 	<!-- 顶点着色器程序 -->
 	<script id="shader-vs" type="x-shader/x-vertex">
 		attribute vec4 a_position;
+		uniform vec4 u_translation;
+		uniform float u_CosB,u_SinB;
+		uniform mat4 u_xformMatrix;
 	    void main() {
-	    	gl_Position = a_position;
+	    	//gl_Position = a_position;
+	    	//平移
+	    	//gl_Position = a_position+u_translation;
+	    	//旋转
+	    	// gl_Position.x = a_position.x*u_CosB - a_position.y*u_SinB;
+	    	// gl_Position.y = a_position.x*u_SinB + a_position.y*u_CosB;
+	    	// gl_Position.z = a_position.z;
+	    	// gl_Position.w = 1.0;
+	    	//矩阵变换
+	    	gl_Position = u_xformMatrix*a_position;
 	    }
 	</script>
 	<script type="text/javascript">
@@ -31,25 +43,54 @@
 			var num = initVertexBuffers(gl,shaderPorgram);
 
 			var u_fragColor = gl.getUniformLocation(shaderPorgram,'u_fragColor');//获取uniform变量的存储位置
+			var u_translation = gl.getUniformLocation(shaderPorgram,'u_translation');
+			var u_CosB = gl.getUniformLocation(shaderPorgram,'u_CosB');
+			var u_SinB = gl.getUniformLocation(shaderPorgram,'u_SinB');
+			var u_xformMatrix = gl.getUniformLocation(shaderPorgram,'u_xformMatrix');
+
+			var angle = 90.0;
+			var radian = Math.PI*angle/180.0;
+			var cosB = Math.cos(radian);
+			var sinB = Math.sin(radian);
+			//创建旋转矩阵
+			// var xformMatrix = new Float32Array([
+			// 	cosB,sinB,0.0,0.0,
+			// 	-sinB,cosB,0.0,0.0,
+			// 	0.0,0.0,1.0,0.0,
+			// 	0.0,0.0,0.0,1.0
+			// ]);
+			//创建平移矩阵
+			// var xformMatrix = new Float32Array([
+			// 	1.0,0.0,0.0,0.0,
+			// 	0.0,1.0,0.0,0.0,
+			// 	0.0,0.0,1.0,0.0,
+			// 	0.5,0.5,0.0,1.0
+			// ]);
+			//创建缩放矩阵
+			var xformMatrix = new Float32Array([
+				1.0,0.0,0.0,0.0,
+				0.0,1.5,0.0,0.0,
+				0.0,0.0,1.0,0.0,
+				0.0,0.0,0.0,1.0
+			]);
+			
+			gl.uniform4f(u_fragColor,1.0,0.0,0.0,1.0);
+			gl.uniform4f(u_translation,0.5,0.5,0.0,0.0);
+			gl.uniform1f(u_CosB,cosB);
+			gl.uniform1f(u_SinB,sinB);
+			gl.uniformMatrix4fv(u_xformMatrix,false,xformMatrix);
 
 			gl.clearColor(0.0,0.0,1.0,1.0);//设置背景颜色
 			gl.clear(gl.COLOR_BUFFER_BIT);//清空canvas绘图区域
-
-			gl.uniform4f(u_fragColor,1.0,0.0,0.0,1.0);
 			
-			//gl.drawArrays(gl.TRIANGLES,0,num);//绘制三角形
-			gl.drawArrays(gl.TRIANGLE_STRIP,0,num);
+			gl.drawArrays(gl.TRIANGLES,0,num);//绘制三角形
 		}
 
 		//初始化顶点位置
 		function initVertexBuffers(gl,shaderPorgram){
 			//三角形
-			//var vertices = new Float32Array([0.0,0.5,-0.5,-0.5,0.5,-0.5]);
-			//var num = 3;
-			
-			//矩形
-			var vertices = new Float32Array([-0.5,0.5,-0.5,-0.5,0.5,0.5,0.5,-0.5]);
-			var num = 4;
+			var vertices = new Float32Array([0.0,0.5,-0.5,-0.5,0.5,-0.5]);
+			var num = 3;
 
 			//创建缓冲区对象
 			var vertexBuffer = gl.createBuffer();
