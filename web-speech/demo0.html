@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>web speech简单学习</title>
+</head>
+<body>
+	<button id="start">start web speech</button>
+	<script type="text/javascript">
+		if (!('webkitSpeechRecognition' in window)) {
+		    //Speech API not supported here…
+		} else { //Let’s do some cool stuff :)
+		    var recognition = new webkitSpeechRecognition(); //That is the object that will manage our whole recognition process. 
+		    recognition.continuous = true;   //Suitable for dictation. 
+		    recognition.interimResults = true;  //If we want to start receiving results even if they are not final.
+		    //Define some more additional parameters for the recognition:
+		    //recognition.lang = "en-US"; 
+		    recognition.lang = 'cmn-Hans-CN';
+		    recognition.maxAlternatives = 1; //Since from our experience, the highest result is really the best...
+
+		    recognition.onstart = function() {
+		    	console.log('onstart');
+			    //Listening (capturing voice from audio input) started.
+			    //This is a good place to give the user visual feedback about that (i.e. flash a red light, etc.)
+			};
+
+			recognition.onend = function() {
+				console.log('onend');
+			    //Again – give the user feedback that you are not listening anymore. If you wish to achieve continuous recognition – you can write a script to start the recognizer again here.
+			};
+
+			recognition.onresult = function(event) { //the event holds the results
+			//Yay – we have results! Let’s check if they are defined and if final or not:
+			    console.log('onresult');
+			    if (typeof(event.results) === 'undefined') { //Something is wrong…
+			        recognition.stop();
+			        return;
+			    }
+
+			    for (var i = event.resultIndex; i < event.results.length; ++i) {      
+			        if (event.results[i].isFinal) { //Final results
+			            console.log("final results: " + event.results[i][0].transcript);   //Of course – here is the place to do useful things with the results.
+			        } else {   //i.e. interim...
+			            console.log("interim results: " + event.results[i][0].transcript);  //You can use these results to give the user near real time experience.
+			        } 
+			    } //end for loop
+			}; 
+
+			recognition.onspeechstart = function() {};  
+
+			recognition.onspeechend = function() {};
+
+			recognition.onnomatch = function(event) {};
+
+			recognition.onerror = function(event) {};
+
+			var startBtn = document.querySelector('#start');
+
+			startBtn.addEventListener('click',function(){
+				recognition.start();
+			});
+		}
+	</script>
+</body>
+</html>
