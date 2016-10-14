@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>web speech 表单输入简单应用举例</title>
+    <style type="text/css">
+	    /* Basic Grey */
+	    .basic-grey {
+	        margin-left: auto;
+	        margin-right: auto;
+	        max-width: 500px;
+	        background: #F7F7F7;
+	        padding: 25px 15px 25px 10px;
+	        font: 12px Georgia, "Times New Roman", Times, serif;
+	        color: #888;
+	        text-shadow: 1px 1px 1px #FFF;
+	        border: 1px solid #E4E4E4;
+	    }
+	    .basic-grey h1 {
+	        font-size: 25px;
+	        padding: 0px 0px 10px 40px;
+	        display: block;
+	        border-bottom: 1px solid #E4E4E4;
+	        margin: -10px -15px 30px -10px;
+	        ;
+	        color: #888;
+	    }
+	    .basic-grey h1>span {
+	        display: block;
+	        font-size: 11px;
+	    }
+	    .basic-grey label {
+	        display: block;
+	        margin: 0px;
+	    }
+	    .basic-grey label>span {
+	        float: left;
+	        width: 20%;
+	        text-align: right;
+	        padding-right: 10px;
+	        margin-top: 10px;
+	        color: #888;
+	    }
+	    .basic-grey input[type="text"],
+	    .basic-grey input[type="email"],
+	    .basic-grey textarea,
+	    .basic-grey select {
+	        border: 1px solid #DADADA;
+	        color: #888;
+	        height: 30px;
+	        margin-bottom: 16px;
+	        margin-right: 6px;
+	        margin-top: 2px;
+	        outline: 0 none;
+	        padding: 3px 3px 3px 5px;
+	        width: 70%;
+	        font-size: 12px;
+	        line-height: 15px;
+	        box-shadow: inset 0px 1px 4px #ECECEC;
+	        -moz-box-shadow: inset 0px 1px 4px #ECECEC;
+	        -webkit-box-shadow: inset 0px 1px 4px #ECECEC;
+	    }
+	    .basic-grey textarea {
+	        padding: 5px 3px 3px 5px;
+	    }
+	    .basic-grey select {
+	        background: #FFF;
+	        appearance: none;
+	        -webkit-appearance: none;
+	        -moz-appearance: none;
+	        text-indent: 0.01px;
+	        text-overflow: '';
+	        width: 70%;
+	        height: 35px;
+	        line-height: 25px;
+	    }
+	    .basic-grey textarea {
+	        height: 100px;
+	    }
+	    .basic-grey .button {
+	        background: #E27575;
+	        border: none;
+	        padding: 10px 25px 10px 25px;
+	        color: #FFF;
+	        box-shadow: 1px 1px 5px #B6B6B6;
+	        border-radius: 3px;
+	        text-shadow: 1px 1px 1px #9E3F3F;
+	        cursor: pointer;
+	    }
+	    .basic-grey .button:hover {
+	        background: #CF7A7A
+	    }
+    </style>
+</head>
+
+<body>
+    <form class="basic-grey">
+        <h1>注册<span>请输入帐号相关信息</span></h1>
+        <label>
+            <span>姓名 :</span>
+            <input id="name" type="text" placeholder="请输入姓名" />
+        </label>
+        <label>
+            <span>邮箱 :</span>
+            <input id="email" type="text" placeholder="请输入注册邮箱" />
+        </label>
+        <label>
+            <span>国籍 :</span>
+            <input id="country" type="text" placeholder="请输入国籍" />
+        </label>
+        <label>
+            <span>简介 :</span>
+            <textarea id="message" placeholder="请简单介绍下自己"></textarea>
+        </label>
+        <label>
+            <span>&nbsp;</span>
+            <input id="submit" type="button" class="button" value="提交" />
+        </label>
+    </form>
+    <script type="text/javascript" src="../node_modules/jquery/dist/jquery.js"></script>
+    <script type="text/javascript">
+    	$(document).ready(function(){
+    		//表单dom
+    		var $name = $('#name');
+    		var $email = $('#email');
+    		var $message = $('#message');
+    		var $country = $('#country');
+    		var $submit = $('#submit');
+    		var $doms = [$name,$email,$message,$country,$submit];
+    		var keys = ['姓名','邮箱','简介','国籍','提交','删除','清空'];
+    		var index = -1;
+    		var cache = null;
+
+    		//web speech
+    		if (!('webkitSpeechRecognition' in window)) {
+			} else {
+			    var recognition = new webkitSpeechRecognition();
+			    recognition.continuous = true;
+			    recognition.interimResults = true;
+			    recognition.lang = 'cmn-Hans-CN';
+			    recognition.maxAlternatives = 1;
+
+			    recognition.onstart = function() {
+				};
+
+				recognition.onend = function() {
+				};
+
+				recognition.onresult = function(event) {
+				    if (typeof(event.results) === 'undefined') {
+				        recognition.stop();
+				        return;
+				    }
+				    for (var i = event.resultIndex; i < event.results.length; ++i) {      
+				        if (event.results[i].isFinal) {
+				        	//选项
+				        	var text = event.results[i][0].transcript;
+				        	for(var j=0;j<keys.length;j++){
+				        		if(text == keys[j]){
+				        			if(j<=3){
+				        				if(index!=-1){
+				        					var value = $doms[index].val();
+					        				value = value.substring(0,value.length-2);
+					        				$doms[index].val(value);
+				        				}
+
+				        				$doms[j].focus();
+					        			index = j;
+					        			break;
+				        			}else{
+				        				switch(j){
+				        					case 5://删除
+				        						var value = $doms[index].val();
+				        						value = value.substring(0,value.length-3);
+				        						$doms[index].val(value);
+				        						break;
+				        					case 6://清空
+				        						$doms[index].val('');
+				        						break;
+				        					default:
+				        						alert(text);
+				        						break;
+				        				}
+				        				break;
+				        			}
+				        		}else{
+				        			if(index!=-1){
+				        				$doms[index].val(cache+text);
+				        			}
+				        		}
+				        	}
+				        	cache = null;//每次输入完成清空缓存
+				        	console.log('final results: ' + text); 
+				        } else {
+				        	//内容
+				        	var text = event.results[i][0].transcript;
+				        	if(index>=0&&index<=$doms.length-1){
+				        		if(cache==null){
+				        			cache = $doms[index].val();
+				        		}
+				        		$doms[index].val(cache+text);
+				        	}
+				        	console.log("interim results: " + text);
+				        }
+				    }
+				}; 
+
+				recognition.onspeechstart = function() {};  
+
+				recognition.onspeechend = function() {};
+
+				recognition.onnomatch = function(event) {};
+
+				recognition.onerror = function(event) {};
+
+				recognition.start();
+			}
+    	});
+    </script>
+</body>
+</html>
