@@ -6,10 +6,13 @@
 </head>
 <body>
 	<button id="start">start web speech</button>
+	<button id="speak">test speak</button>
 	<script type="text/javascript">
 		if (!('webkitSpeechRecognition' in window)) {
 		    //Speech API not supported here…
 		} else { //Let’s do some cool stuff :)
+
+			//语音转文字
 		    var recognition = new webkitSpeechRecognition(); //That is the object that will manage our whole recognition process. 
 		    recognition.continuous = true;   //Suitable for dictation. 
 		    recognition.interimResults = true;  //If we want to start receiving results even if they are not final.
@@ -58,6 +61,25 @@
 
 			startBtn.addEventListener('click',function(){
 				recognition.start();
+			});
+
+			//文字转语音
+			var msg = new SpeechSynthesisUtterance();
+			var voices = window.speechSynthesis.getVoices();
+			msg.voice = voices[10]; // Note: some voices don't support altering params
+			msg.voiceURI = 'native';
+			msg.volume = 1; // 0 to 1
+			msg.rate = 0.1; // 0.1 to 10
+			msg.pitch = 2; //0 to 2
+			msg.text = '你好';
+			msg.lang = 'cmn-Hans-CN';
+			msg.onend = function(e) {
+			  console.log('Finished in ' + event.elapsedTime + ' seconds.');
+			};
+
+			var speak = document.querySelector('#speak');
+			speak.addEventListener('click',function(){
+				speechSynthesis.speak(msg);
 			});
 		}
 	</script>
