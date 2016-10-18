@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>ThreeJS基本元素</title>
+        <script src="../lib/three.js"></script>
+        <style type="text/css">
+            div#canvas-frame {
+                border: none;
+                cursor: pointer;
+                width: 600px;
+                height: 600px;
+                background-color: #EEEEEE;
+                border:1px solid #000;
+            }
+        </style>
+    </head>
+    <body onload="threeStart();">
+        <div id="canvas-frame"></div>
+        <script>
+            var renderer;
+            function initThree() {
+                width = document.getElementById('canvas-frame').clientWidth;
+                height = document.getElementById('canvas-frame').clientHeight;
+                //创建渲染器
+                renderer = new THREE.WebGLRenderer({
+                    antialias : true
+                });
+                renderer.setSize(width, height);
+                renderer.setClearColor(0xFFFFFF, 1.0);
+                //并添加容器中
+                document.getElementById('canvas-frame').appendChild(renderer.domElement);
+            }
+
+            var camera;
+            function initCamera() {
+            	//创建相机
+                camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+                camera.position.x = 600;//相机位置
+                camera.position.y = 600;
+                camera.position.z = 600;
+                camera.up.x = 0;//正方向
+                camera.up.y = 1;
+                camera.up.z = 0;
+                camera.lookAt({
+                    x : 0,
+                    y : 0,
+                    z : 0
+                });
+            }
+
+            var scene;
+            function initScene() {
+            	//创建场景
+                scene = new THREE.Scene();
+            }
+
+            var light;
+            function initLight() {
+            	//创建光线
+                light = new THREE.DirectionalLight(0xFF0000, 1.0, 0);
+                light.position.set(100, 100, 200);
+                scene.add(light);
+            }
+
+            var cube;
+            function initObject() {
+                //坐标轴
+                var xmat = new THREE.LineBasicMaterial({color: 0xff0000});
+                var xgeo = new THREE.Geometry();
+                xgeo.vertices.push(
+                    new THREE.Vector3( 0, 0, 0 ),
+                    new THREE.Vector3( 300, 0, 0 )
+                );
+                var xline = new THREE.Line( xgeo, xmat );
+                scene.add( xline );
+
+                var ymat = new THREE.LineBasicMaterial({color: 0x00ff00});
+                var ygeo = new THREE.Geometry();
+                ygeo.vertices.push(
+                    new THREE.Vector3( 0, 0, 0 ),
+                    new THREE.Vector3( 0, 300, 0 )
+                );
+                var yline = new THREE.Line( ygeo, ymat );
+                scene.add( yline );
+
+                var zmat = new THREE.LineBasicMaterial({color: 0x0000ff});
+                var zgeo = new THREE.Geometry();
+                zgeo.vertices.push(
+                    new THREE.Vector3( 0, 0, 0 ),
+                    new THREE.Vector3( 0, 0, 300 )
+                );
+                var zline = new THREE.Line( zgeo, zmat );
+                scene.add( zline );
+
+                // Cube
+                var cubegeo = new THREE.BoxGeometry( 200, 200, 200 );
+                for ( var i = 0; i < cubegeo.faces.length; i += 2 ) {
+                    var hex = Math.random() * 0xffffff;
+                    cubegeo.faces[ i ].color.setHex( hex );
+                    cubegeo.faces[ i + 1 ].color.setHex( hex );
+                }
+                var cubemat = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
+                cube = new THREE.Mesh( cubegeo, cubemat );
+                cube.position.y = 0;
+                scene.add( cube );
+            }
+
+            var lastStamp;
+            function render(timestamp){
+            	//渲染
+                renderer.clear();
+                if(lastStamp){
+                    cube.rotation.y += (timestamp-lastStamp)/1000;//绕y轴旋转
+                }
+                lastStamp = timestamp;
+                renderer.render(scene, camera);
+                requestAnimationFrame(render);
+            }
+
+            function threeStart() {
+                initThree();
+                initCamera();
+                initScene();
+                initLight();
+                initObject();
+                render();
+            }
+        </script>
+    </body>
+</html>
