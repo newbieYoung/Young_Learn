@@ -8,8 +8,8 @@
             div#canvas-frame {
                 border: none;
                 cursor: pointer;
-                width: 600px;
-                height: 600px;
+                height:600px;
+                width:600px;
                 background-color: #EEEEEE;
                 border:1px solid #000;
             }
@@ -35,8 +35,7 @@
             var camera;
             function initCamera() {
             	//创建相机
-                camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
-                camera.position.x = 600;//相机位置
+                camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
                 camera.position.y = 600;
                 camera.position.z = 600;
                 camera.up.x = 0;//正方向
@@ -64,6 +63,7 @@
             }
 
             var cube;
+            var plane;
             function initObject() {
                 //坐标轴
                 var xmat = new THREE.LineBasicMaterial({color: 0xff0000});
@@ -102,14 +102,23 @@
                 }
                 var cubemat = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
                 cube = new THREE.Mesh( cubegeo, cubemat );
-                cube.position.y = 0;
+                cube.position.y = 150;
                 scene.add( cube );
+
+                // Plane
+                var planegeo = new THREE.PlaneBufferGeometry( 200, 200 );
+                planegeo.rotateX( - Math.PI / 2 );
+                //planegeo.translate(50,-100,50);
+                var planemat = new THREE.MeshBasicMaterial( { color: 0xe0e0e0} );
+                plane = new THREE.Mesh( planegeo, planemat );
+                scene.add( plane );
             }
 
             function render(timestamp){
             	//渲染
                 renderer.clear();
                 cube.rotation.y += moveX/1000;//绕y轴旋转
+                plane.rotation.y = cube.rotation.y;
                 renderer.render(scene, camera);
                 requestAnimationFrame(render);
             }
