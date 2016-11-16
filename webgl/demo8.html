@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>通过控制物体以及相机实现有层次的运动视角</title>
+        <script src="../lib/three.js"></script>
+        <style type="text/css">
+            div#canvas-frame {
+                cursor: pointer;
+                width:100%;
+                height:100%;
+                background-color: #EEEEEE;
+            }
+        </style>
+    </head>
+    <body onload="threeStart();">
+        <div id="canvas-frame"></div>
+        <script>
+            var renderer;
+            var width;
+            var height;
+            function initThree() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                //创建渲染器
+                renderer = new THREE.WebGLRenderer({
+                    antialias : true
+                });
+                renderer.setSize(width, height);
+                renderer.setClearColor(0xFFFFFF, 1.0);
+                //并添加容器中
+                document.getElementById('canvas-frame').appendChild(renderer.domElement);
+            }
+
+            var camera;
+            function initCamera() {
+            	//创建相机
+                camera = new THREE.PerspectiveCamera( 60, width / height, 1, 10000 );
+				camera.position.x = 300;
+                camera.position.y = 600;
+                camera.position.z = 600;
+                camera.up.x = 0;//正方向
+                camera.up.y = 1;
+                camera.up.z = 0;
+                camera.lookAt({
+                    x : 0,
+                    y : 0,
+                    z : 0
+                });
+            }
+
+            var scene;
+            function initScene() {
+            	//创建场景
+                scene = new THREE.Scene();
+            }
+
+            var light;
+            function initLight() {
+            	//创建光线
+            }
+
+            var group;
+            function initObject() {
+                //坐标轴
+                var xmat = new THREE.LineBasicMaterial({color: 0xff0000});
+                var xgeo = new THREE.Geometry();
+                xgeo.vertices.push(
+                    new THREE.Vector3( 0, 0, 0 ),
+                    new THREE.Vector3( 300, 0, 0 )
+                );
+                var xline = new THREE.Line( xgeo, xmat );
+                scene.add( xline );
+
+                var ymat = new THREE.LineBasicMaterial({color: 0x00ff00});
+                var ygeo = new THREE.Geometry();
+                ygeo.vertices.push(
+                    new THREE.Vector3( 0, 0, 0 ),
+                    new THREE.Vector3( 0, 300, 0 )
+                );
+                var yline = new THREE.Line( ygeo, ymat );
+                scene.add( yline );
+
+                var zmat = new THREE.LineBasicMaterial({color: 0x0000ff});
+                var zgeo = new THREE.Geometry();
+                zgeo.vertices.push(
+                    new THREE.Vector3( 0, 0, 0 ),
+                    new THREE.Vector3( 0, 0, 300 )
+                );
+                var zline = new THREE.Line( zgeo, zmat );
+                scene.add( zline );
+
+                var geometry = new THREE.BoxGeometry( 100, 100, 100 );
+				var material = new THREE.MeshNormalMaterial( { overdraw: 0.5 } );
+
+				group = new THREE.Group();
+
+				for ( var i = 0; i < 200; i ++ ) {
+
+					var mesh = new THREE.Mesh( geometry, material );
+					mesh.position.x = Math.random() * 2000 - 1000;
+					mesh.position.y = Math.random() * 2000 - 1000;
+					mesh.position.z = Math.random() * 2000 - 1000;
+					mesh.rotation.x = Math.random() * 2 * Math.PI;
+					mesh.rotation.y = Math.random() * 2 * Math.PI;
+					group.add( mesh );
+
+				}
+
+				scene.add( group );
+            }
+
+            var num = 10;
+            function render(){
+            	//渲染
+                renderer.clear();
+
+                camera.position.x += ( mouseX - camera.position.x ) * .05;
+				camera.position.y += ( - mouseY - camera.position.y ) * .05;
+				camera.lookAt( scene.position );
+
+                var currentSeconds = Date.now();
+				group.rotation.x = Math.sin( currentSeconds * 0.0007 ) * 0.5;
+				group.rotation.y = Math.sin( currentSeconds * 0.0003 ) * 0.5;
+				group.rotation.z = Math.sin( currentSeconds * 0.0002 ) * 0.5;
+                renderer.render(scene, camera);
+
+                requestAnimationFrame(render);
+            }
+
+            function threeStart() {
+                initThree();
+                initCamera();
+                initScene();
+                initLight();
+                initObject();
+                render();
+
+                document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+            }
+
+            var mouseX = 0,mouseY = 0;
+            function onDocumentMouseMove(event) {
+				mouseX = ( event.clientX - width/2 ) * 10;
+				mouseY = ( event.clientY - height/2 ) * 10;
+			}
+        </script>
+    </body>
+</html>
