@@ -60,6 +60,7 @@
             	//创建光线
             }
 
+            var group;
             function initObject() {
                 //坐标轴
                 var xmat = new THREE.LineBasicMaterial({color: 0xff0000});
@@ -89,7 +90,7 @@
                 var zline = new THREE.Line( zgeo, zmat );
                 scene.add( zline );
 
-                var group = new THREE.Group();
+                group = new THREE.Group();
 				scene.add( group );
 				//球体
 				var loader = new THREE.TextureLoader();
@@ -109,7 +110,9 @@
             function render(){
             	//渲染
                 renderer.clear();
+                group.rotation.y += moveX/1000;//绕y轴旋转
                 renderer.render(scene, camera);
+                requestAnimationFrame(render);
             }
 
             function threeStart() {
@@ -119,6 +122,32 @@
                 initLight();
                 initObject();
                 render();
+
+                document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+            }
+
+            var startX;
+            var moveX = 0;
+            function onDocumentMouseDown(event){
+                startX = event.clientX;
+                moveX = 0;
+                document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+                document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+                document.addEventListener( 'mouseout', onDocumentMouseOut, false );
+            }
+            function onDocumentMouseMove(event){
+                moveX = event.clientX-startX-moveX;
+            }
+            function onDocumentMouseUp( event ) {
+                document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+                document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+                document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+
+            }
+            function onDocumentMouseOut( event ) {
+                document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+                document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+                document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
             }
         </script>
     </body>
