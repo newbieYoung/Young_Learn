@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>自定义文件上传组件样式一</title>
+	<style>
+		/**
+	     * 主要原理是用input[type=file]覆盖模拟元素然后设置input[type=file]完全透明
+	     * z-index觉得层级时最好保证元素之间的定位方式（主要区分浮动定位float和非浮动定位relative、abosolute、fixed）是一样的，否则会出现层级关系不符合预期的情况
+		 */
+		.auto-upload-file{
+			background: #F8F8F8;
+			border: 5px dashed #DDD;
+			position:relative;
+
+			text-align: center;
+			z-index:1;
+			width: 200px;
+			height: 65px;
+		}
+		.auto-upload-file input[type=file]{
+			position: relative;
+			opacity:0;
+			left:0;
+
+			z-index:3;
+			width:200px;
+			height:65px;
+		}
+		.auto-upload-file img{
+			position: absolute;
+			width: 200px;
+			height: 65px;
+			top: 0;
+			left: 0px;
+		}
+		.auto-upload-file .txt{
+			margin: auto;  
+			position: absolute;  
+			top: 0; 
+			left: 0;
+			bottom: 0;
+			right: 0;
+			text-align:center;
+
+			width:200px;
+			height:36px;
+			z-index:2;
+		}
+		.auto-upload-file .txt p{
+			margin:0;
+			padding:0;
+			/* 防止文本元素模拟按钮点击时内容被选取背景变蓝色 */
+		    -webkit-user-select:none;
+			user-select:none;
+		}
+	</style>
+</head>
+<body>
+	<div class="auto-upload-file" onchange="previewFile()">
+		<input type="file">
+		<div class="txt">
+			<p>添加图片</p>
+			<p>80*80</p>
+		</div>
+		<img src="">
+	</div>
+	<script>
+		document.querySelector('div.auto-upload-file').addEventListener('change',function(){
+			var previewImg = document.querySelector('div.auto-upload-file>img');
+			var file    = document.querySelector('div.auto-upload-file>input[type=file]').files[0];
+			var reader  = new FileReader();
+			reader.onloadend = function () {
+				previewImg.src = reader.result;
+			};
+			if (file) {
+				reader.readAsDataURL(file);
+			}
+		});
+	</script>
+</body>
+</html>

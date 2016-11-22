@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>自定义选择框</title>
+	<style>
+		.choose-box-container{
+			margin:10px;
+		/* basic css start */
+			position:relative;
+			border:1px solid #000;
+			padding:12px;
+		}
+		.choose-box{
+			padding-left: 25px;
+			color: #0C4757;
+			cursor: pointer;
+			font-size: 13px;
+			display:inline-block;
+		}
+		.choose-box input{
+			position: absolute;
+			left: -9999px;
+		}
+		.choose-box i{
+			position: absolute;
+			top: 14px;
+			left: 10px;
+			display: block;
+			width: 15px;
+			height: 15px;
+			outline: 0px none;
+			border: 1px solid #d6d6de;
+		}
+		.choose-box.radio i{
+			border-radius:10px;
+		}
+		.choose-box.checkbox i{
+			border-radius:0;
+		}
+		.choosed i::after{
+			content: "\2714";
+			top: -3px;
+			left: 1px;
+			width: 15px;
+			height: 15px;
+			font: 400 16px/19px FontAwesome;
+			text-align: center;
+			opacity: 1;
+			position: absolute;
+			color:#E6543F;
+		}
+		.choosed i{
+			border: 1px solid #e54d38;
+		}
+		/* basic css end */
+	</style>
+</head>
+<body>
+	<div class="choose-box-container">
+		<label class="choose-box checkbox choosed">
+		    <input type="checkbox">
+		    <i></i>这是被选择的checkbox
+		</label>
+	</div>
+	<div class="choose-box-container">
+		<label class="choose-box checkbox">
+		    <input type="checkbox">
+		    <i></i>这是未被选择的checkbox
+		</label>
+	</div>
+	<div class="choose-box-container">
+		<label class="choose-box radio choosed">
+		    <input type="radio">
+		    <i></i>这是被选择的radio
+		</label>
+	</div>
+	<div class="choose-box-container">
+		<label class="choose-box radio">
+		    <input type="radio">
+		    <i></i>这是未被选择的radio
+		</label>
+	</div>
+</body>
+</html>
