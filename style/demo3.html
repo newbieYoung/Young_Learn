@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<title>幽灵按钮</title>
+	<style type="text/css">
+		.button{
+			display: block;
+			position: relative;
+			width:180px;
+			height: 50px;
+			line-height: 50px;
+			text-decoration: none;
+			color:#2dcb70;
+			font-family: Arial;
+			font-weight:bolder;
+			border: 2px solid rgba(0,0,0,0.5);
+			text-align:center;
+			margin: 50px 50px;
+			transition:0.4s ease;
+			-moz-transition:0.4s ease;
+			-o-transition:0.4s ease;
+			-webkit-transition:0.4s ease;
+			-ms-transition:0.4s ease;
+		}
+		.button:hover{
+			border:2px solid rgba(0,0,0,1);
+		}
+		.button .line{
+			display: block;
+			position: absolute;
+			background: none;
+			transition:0.4s ease;
+			-moz-transition:0.4s ease;
+			-o-transition:0.4s ease;
+			-webkit-transition:0.4s ease;
+			-ms-transition:0.4s ease;
+		}
+		.button:hover .line{
+			background: rgba(0,0,0,1);
+		}
+		.button .line-top{
+			height: 2px;
+			width: 0px;
+			left: -30px;
+			top: -2px;
+		}
+		.button:hover .line-top{
+			height: 2px;
+			width:50px;
+			left:0px;
+			top:-2px;
+		}
+		.button .line-right{
+			height: 0px;
+			width: 2px;
+			left: 180px;
+			top: -30px;
+		}
+		.button:hover .line-right{
+			height: 50px;
+			width:2px;
+			left:180px;
+			top:0px;
+		}
+		.button .line-bottom{
+			height: 2px;
+			width: 0px;
+			left: 210px;
+			top: 50px;
+		}
+		.button:hover .line-bottom{
+			height: 2px;
+			width:50px;
+			left:130px;
+			top:50px;
+		}
+		.button .line-left{
+			height: 0px;
+			width: 2px;
+			left: -2px;
+			top: 100px;
+		}
+		.button:hover .line-left{
+			height: 50px;
+			width:2px;
+			left:-2px;
+			top:0px;
+		}
+	</style>
+</head>
+<body>
+	<a class="button">
+		<span class="line line-top"></span>
+		<span class="line line-right"></span>
+		<span class="line line-bottom"></span>
+		<span class="line line-left"></span>
+		幽灵按钮demo0
+	</a>
+</body>
+</html>

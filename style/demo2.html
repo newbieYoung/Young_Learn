@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>非图片加减图标（背景渐变）</title>
+	<style>
+		.icon-btn{
+			margin-bottom:4px;
+			
+			cursor:pointer;
+			height: 26px;
+			width: 30px;
+			text-align: center;
+			border: #ADB9C1 1px solid;
+			color: #889097;
+			font: 22px/1.231 Tahoma,Arial,sans-serif;
+			font-weight: bold;
+			padding-bottom:4px;
+			FILTER: progid:DXImageTransform.Microsoft.Gradient(gradientType=0,startColorStr=#FDFEFE,endColorStr=#E2E3E5); /*IE 6 7 8*/ 
+		    background:-ms-linear-gradient(top, #FDFEFE,  #E2E3E5);
+		    background:-moz-linear-gradient(top,#FDFEFE,#E2E3E5);
+		    background:-webkit-linear-gradient(top, #FDFEFE, #E2E3E5);
+		    background:-o-linear-gradient(top, #FDFEFE, #E2E3E5);
+		    /* 防止文本元素模拟按钮点击时内容被选取背景变蓝色 */
+		    -webkit-user-select:none;
+			user-select:none;
+		 }
+	</style>
+</head>
+<body>
+	<div class="icon-btn">+</div>
+	<div class="icon-btn">-</div>
+</body>
+</html>
