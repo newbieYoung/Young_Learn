@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>自定义原生下拉框样式</title>
+	<style type="text/css">
+		select {
+		    width: 200px;
+		    /* 注意在下拉框中，width是包括border的宽度的 */
+		    height: 30px;
+		    border-radius: 5px;
+		    border: 1px solid goldenrod;
+		    background-color: white;
+		    background-repeat: no-repeat;
+		    /* 背景图像的尺寸：第一个值为宽度，第二值为高度 */
+		    background-size: 8px 8px, 8px 8px, 30px 30px, 1px 30px;
+		    /* 背景图片：多张图片用","分割 */
+		    /* repeating-linear-gradient() 函数用于重复线性渐变：参数分别为角度，颜色1，颜色2,... */
+		    background-image: repeating-linear-gradient(225deg, rgb(105, 123, 149) 0%, rgb(105, 123, 149) 50%, transparent 50%, transparent 100%),
+		    /* 组合成三角形图标 */
+		    repeating-linear-gradient(135deg, rgb(105, 123, 149) 0%, rgb(105, 123, 149) 50%, transparent 50%, transparent 100%),
+		    /* 组合成三角形图标 */
+		    linear-gradient(#FFFFFF 0%, #F8F9Fd, #EFFAFA 100%),
+		    /* 竖分割线右侧的背景色 */
+		    repeating-linear-gradient( rgb(191, 204, 220) 0%, rgb(191, 204, 220) 100%);
+		    /* 竖分割线 */
+		    /* 背景图片的位置：第一个参数为水平位置，第二参数为垂直位置 */
+		    background-position: 175px 10px, 183px 10px, right top, 167px top;
+		    /* 去除自定义下拉框样式 */
+		    appearance: none;
+		    -moz-appearance: none;
+		    -webkit-appearance: none;
+		}
+	</style>
+</head>
+<body>
+	<select>
+	    <option value="1">选项1</option>
+	    <option value="2">选项2</option>
+	    <option value="3">选项3</option>
+	    <option value="4">选项4</option>
+	</select>
+</body>
+</html>
