@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" >
+	<title>web手写</title>
+	<style type="text/css">
+		#paper{
+			width:512px;
+			height:384px;
+			border:1px solid #000;
+		}
+	</style>
+</head>
+<body>
+	<ul>
+		<li>1. 基本实现web手写（只实现笔划路径）</li>
+		<li>2. 笔划粗细待实现</li>
+	</ul>
+	<canvas id="paper" width="512" height="384"></canvas>
+	<script type="text/javascript" src="../node_modules/jquery/dist/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var $paper = $('#paper');
+			var paperOff = $paper.offset();
+			var context = $paper[0].getContext('2d');
+			var startPoint = null;
+			var endPoint = null;
+			var points = [];//记录手写过程中的关键点
+			var color = 'red';
+
+			//连线
+			function lineTo(){
+				context.fillStyle = color;
+				context.beginPath();
+				context.moveTo(startPoint.x,startPoint.y);
+				context.lineTo(endPoint.x,endPoint.y);
+				context.stroke();
+			}
+
+			/* 触摸事件 */
+			$paper.on('touchstart',function(e){
+				e.preventDefault();
+				var touch = e.originalEvent.touches[0];
+				var temp = {
+					x:touch.clientX-paperOff.left,
+					y:touch.clientY-paperOff.top
+				};
+				points.push(temp);
+				startPoint = temp;
+				endPoint = temp;
+			});
+
+			$paper.on('touchmove',function(e){
+				if(endPoint){
+					e.preventDefault();
+					var touch = e.originalEvent.touches[0];
+					startPoint = endPoint;
+					endPoint = {
+						x:touch.clientX-paperOff.left,
+						y:touch.clientY-paperOff.top
+					};
+					points.push(endPoint);
+					lineTo();
+				}
+			});
+
+			$paper.on('touchend',function(e){
+				e.preventDefault();
+				startPoint = null;
+				endPoint = null;
+			});
+
+			/* 鼠标事件 */
+			$paper.on('mousemove',function(e){
+				if(endPoint){
+					startPoint = endPoint;
+					endPoint = {
+						x:e.pageX-paperOff.left,
+						y:e.pageY-paperOff.top
+					};
+					points.push(endPoint);
+					lineTo();
+				}
+			});
+			$paper.on('mousedown',function(e){
+				var temp = {
+					x:e.pageX-paperOff.left,
+					y:e.pageY-paperOff.top
+				};
+				points.push(temp);
+				startPoint = temp;
+				endPoint = temp;
+			});
+			$paper.on('mouseup',function(e){
+				startPoint = endPoint;
+				endPoint = {
+					x:e.pageX-paperOff.left,
+					y:e.pageY-paperOff.top
+				};
+				points.push(endPoint);
+				lineTo();
+				startPoint = null;
+				endPoint = null;
+			});
+		});
+	</script>
+</body>
+</html>
