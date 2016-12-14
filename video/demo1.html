@@ -9,7 +9,7 @@
 	<video preload="auto" autoplay="autoplay">
 		<source src="./step1.mp4" type="video/mp4">
 	</video>
-	<h1>在移动端play函数只能在监听某些用户操作的事件中执行</h1>
+	<h1>在移动端video的play函数第一次只能在监听某些用户操作的事件中执行，后续执行没有此限制</h1>
 	<video id="testPlayVideo" preload="auto">
 		<source src="./step1.mp4" type="video/mp4">
 	</video>
@@ -17,15 +17,27 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var $testPlayVideo = $('#testPlayVideo');
+			var $testPlayVideoSource = $testPlayVideo.find('source');
+
 			$testPlayVideo.on('canplaythrough',function(){
 				/**
 				 * 报错 play() can only be initiated by a user gesture.
 				 */
 				$testPlayVideo[0].play();
 			});
+
 			$testPlayVideo.on('click',function(){//监听用户点击事件
 				$testPlayVideo[0].play();
 			});
+
+			/**
+			 * 在移动端一个video播放只需要被授权一次，后续变动资源不需要用户手动触发播放
+			 */
+			$testPlayVideo[0].onended = function(){
+				$testPlayVideoSource.attr('src','./step2.mp4');
+				$testPlayVideo[0].load();
+				$testPlayVideo[0].play();
+			};
 		});
 	</script>
 </body>
