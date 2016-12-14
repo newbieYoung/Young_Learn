@@ -15,15 +15,22 @@
 			var $source = $video.find('source');
 
 			$video.on('click',function(){
-				$video[0].play();
+				//可以理解为先申请play权限，但是不需要实际播放
+				var dom = $video[0];
+				dom.play();
+				dom.pause();
 			});
-
-			$video[0].onended = function(){
-				//这种方式不能满足无感知更改视频资源
-				$source.attr('src','./step2.mp4');
-				$video[0].load();
+			setTimeout(function(){
+				//由于通过点击事件已经申请过权限，那么3秒之后会被播放
 				$video[0].play();
-			};
+			},3000);
+
+			// $video[0].onended = function(){
+			// 	//这种方式不能满足无感知更改视频资源
+			// 	$source.attr('src','./step2.mp4');
+			// 	$video[0].load();
+			// 	$video[0].play();
+			// };
 		});
 	</script>
 </body>
