@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>更改视频资源</title>
+</head>
+<body>
+	<video preload="auto">
+		<source src="./step1.mp4" type="video/mp4">
+	</video>
+	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var $video = $('video');
+			var $source = $video.find('source');
+
+			$video.on('click',function(){
+				$video[0].play();
+			});
+
+			$video[0].onended = function(){
+				//这种方式不能满足无感知更改视频资源
+				$source.attr('src','./step2.mp4');
+				$video[0].load();
+				$video[0].play();
+			};
+		});
+	</script>
+</body>
+</html>
