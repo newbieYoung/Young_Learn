@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>视频切换</title>
+	<style type="text/css">
+		#v1,
+		#v2{
+			position: fixed;
+			top:0;
+			left:0;
+			/*z-index:1;*/
+			display:none;
+		}
+		#v1.current,
+		#v2.current{
+			/*z-index:2;*/
+			display:block;
+		}
+	</style>
+</head>
+<body>
+	<video id="v1" class="current">
+		<source src="./step4.mp4" type="video/mp4">
+	</video>
+	<video id="v2">
+		<source src="./step3.mp4" type="video/mp4">
+	</video>
+	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var $v1 = $('#v1');
+			var $v2 = $('#v2');
+
+			$v1.on('click',function(){
+				$v1.removeClass('current');
+				$v2.addClass('current');
+				$v2[0].play();
+				
+				$v1[0].play();
+				$v1[0].pause();
+			});
+
+			$v2.on('click',function(){
+				$v2.removeClass('current');
+				$v1.addClass('current');
+				$v1[0].play();
+			});
+
+			//如果在某个视频的结束事件中切换至另外一个视频会有明显的间隙
+			$v2[0].onended = function(){
+				$v2.removeClass('current');
+				$v1.addClass('current');
+				$v1[0].play();
+			};
+		});
+	</script>
+</body>
+</html>
