@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>视频预加载</title>
+</head>
+<body>
+	<video preload="auto">
+		<source src="./step1.mp4" type="video/mp4">
+	</video>
+	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var $videos = $('video');
+			/**
+			 * 视频是以流的形式加载，canplaythrough表示已经可以播放了，而不是整个视频已经完全加载完成
+			 */
+			$videos.on('canplaythrough',function(){
+				console.log('canplaythrough');
+			});
+			$videos.on('progress',function(){
+				var dom = $(this)[0];
+				/**
+				 * dom.buffered.end(0) 当前已加载时间
+				 * dom.duration 整个视频的持续时间
+				 */
+				console.log(dom.buffered.end(0)/dom.duration);
+			});
+		});
+	</script>
+</body>
+</html>
