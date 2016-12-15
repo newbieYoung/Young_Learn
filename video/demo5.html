@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>移动端视频播放</title>
+	<style type="text/css">
+		video{
+			width:200px;
+			background-color:#000;
+		}
+	</style>
+</head>
+<body>
+	<h1>播放时可以控制时间</h1>
+	<video playsinline webkit-playsinline id="testTimePlay" preload="auto">
+		<source src="./step2.mp4" type="video/mp4">
+	</video>
+	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+
+			var $testTimePlay = $('#testTimePlay');
+
+			$testTimePlay.on('click',function(){//监听用户点击事件
+				$testTimePlay[0].play();
+			});
+			
+			$testTimePlay[0].onended = function(){
+				$testTimePlay[0].currentTime = 2;//pc上有效，移动端无效
+				$testTimePlay[0].play();
+			};
+		});
+	</script>
+</body>
+</html>
