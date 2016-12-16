@@ -18,6 +18,9 @@
 			$videos.on('canplaythrough',function(){
 				console.log('canplaythrough');
 			});
+			/**
+			 * 在IOS系统中canplaythrough事件不会被触发，这时候只能使用progress事件模拟
+			 */
 			$videos.on('progress',function(){
 				var dom = $(this)[0];
 				/**
