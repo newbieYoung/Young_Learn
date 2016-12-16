@@ -5,7 +5,7 @@
 	<title>移动端视频播放</title>
 </head>
 <body>
-	<h1>在移动端video的play函数第一次只能在监听某些用户操作的事件中执行，后续执行没有此限制</h1>
+	<h1>在移动端video的play函数第一次只能在监听某些用户操作的事件（比如点击、触摸等，另外在IOS safari中touchmove事件不可以）中执行，后续执行没有此限制</h1>
 	<video id="testPlayVideo" preload="auto">
 		<source src="./step1.mp4" type="video/mp4">
 	</video>

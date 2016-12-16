@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>腾讯X5内核浏览器 同层播放器测试</title>
+	<style type="text/css">
+		video{
+			width:400px;
+			background-color:red;
+		}
+	</style>
+</head>
+<body>
+	<h1>head</h1>
+	<video playsinline webkit-playsinline id="testX5" preload="auto" x5-video-player-type="h5">
+		<source src="./step2.mp4" type="video/mp4">
+	</video>
+	<h1>end</h1>
+	<button id="play">播放</button>
+	<script type="text/javascript">
+		var textX5 = document.querySelector('#testX5');
+		var play = document.querySelector('#play');
+		play.addEventListener('click',function(){
+			textX5.play();
+		});
+	</script>
+</body>
+</html>
