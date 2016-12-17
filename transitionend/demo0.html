@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>transitionend事件的触发次数和变换属性的数量一致</title>
+	<style type="text/css">
+		#test{
+			width:100px;
+			height:100px;
+			background-color:red;
+			transition: all 5s linear;
+		}
+	</style>
+</head>
+<body>
+	<div id="test" class="test"></div>
+	<button id="start">开始变换</button>
+	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var $test = $('#test');
+			var $start = $('#start');
+
+			$start.on('click',function(){
+				$test.css({
+					'width':'200px',
+					'height':'200px',
+					'background-color':'blue'
+				});
+			});
+
+			$test.on('webkitTransitionEnd transitionend oTransitionEnd otransitionend',function(){
+				console.log('transitionend');
+			});
+		});
+	</script>
+</body>
+</html>
