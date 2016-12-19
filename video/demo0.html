@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>视频预加载</title>
+	<title>视频事件相关</title>
 </head>
 <body>
 	<h1 id="progress">loading</h1>
 	<h1 id="time">loading</h1>
-	<video preload="auto" style="background-color:red;">
+	<video preload="auto" style="background-color:blue;">
 		<source src="./step1.mp4" type="video/mp4">
 	</video>
 	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
@@ -27,10 +27,16 @@
 				console.log('canplaythrough');
 			});
 
+			//同一段视频不断重复播放，触发该事件的次数以及对应时间点不一定相同
 			$videos.on('timeupdate',function(){
 				time += '('+$videos[0].currentTime+')'
+				if($videos[0].currentTime>=3){
+					$videos[0].currentTime = 0;//重现设置播放时间
+					$videos[0].play();
+				}
 				$time.html(time);
 			});
+
 			/**
 			 * 在IOS系统中canplaythrough事件不会被触发，这时候只能使用progress事件模拟
 			 */

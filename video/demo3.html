@@ -10,6 +10,7 @@
 			left:0;
 			width:400px;
 			z-index:1;
+			background-color:red;
 			/*display:none;*/
 		}
 		#v1.current,
@@ -44,16 +45,10 @@
 				$v1.off('click');
 			});
 
-			// $v2.on('click',function(){
-			// 	$v2.removeClass('current');
-			// 	$v1.addClass('current');
-			// 	$v1[0].play();
-			// });
-
 			$v2[0].onended = function(){
 				$v2.removeClass('current');
 				$v1.addClass('current');
-				$v1[0].currentTime = 0;//pc上有效，移动端无效
+				$v1[0].currentTime = 1;//存在兼容性问题移动端可能无效
 				$v1[0].play();
 			};
 		});

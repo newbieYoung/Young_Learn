@@ -26,7 +26,7 @@
 			});
 			
 			$testTimePlay[0].onended = function(){
-				$testTimePlay[0].currentTime = 2;//pc上有效，移动端无效
+				$testTimePlay[0].currentTime = 2;//存在兼容性问题，移动端有可能无效
 				$testTimePlay[0].play();
 			};
 		});
