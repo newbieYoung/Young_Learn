@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Canvas render Video</title>
+</head>
+<body>
+	<canvas></canvas>
+	<video preload="auto" x-webkit-airplay="true" webkit-playsinline="true" playsinline="true">
+		<source src="../video/step1.mp4" type="video/mp4">
+	</video>
+	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var first = true;
+			var width;
+			var height;
+
+			var canvas = $('canvas');
+			var context = canvas[0].getContext('2d');
+
+			var video = $('video');
+			
+			$(document).on('click',function(){
+				video[0].play();
+			});
+
+			video.on('timeupdate',function(){
+				if(first){
+					width = parseInt(video.css('width'));
+					height = parseInt(video.css('height'));
+					canvas.css({
+						width:width+'px',
+						height:height+'px'
+					});
+					canvas[0].width = width;
+					canvas[0].height = height;
+				}
+				context.drawImage(video[0],0,0,width,height);
+			});
+		});
+	</script>
+</body>
+</html>
