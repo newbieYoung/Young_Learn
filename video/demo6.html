@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>腾讯X5内核浏览器 同层播放器测试</title>
+	<title>腾讯X5内核浏览器测试</title>
 	<style type="text/css">
 		video{
 			width:400px;
@@ -12,6 +12,7 @@
 </head>
 <body>
 	<h1>head</h1>
+	<!-- 如果有x5-video-player-type属性则意味着使用同层播放器播放该视频 -->
 	<video playsinline webkit-playsinline id="testX5" preload="auto" x5-video-player-type="h5">
 		<source src="./step2.mp4" type="video/mp4">
 	</video>
@@ -23,6 +24,7 @@
 		play.addEventListener('click',function(){
 			textX5.play();
 		});
+		//另外还需要注意的是在腾讯X5内核的浏览器中只能存在一个处于播放状态的视频且该视频处于最高层，无视z-index属性
 	</script>
 </body>
 </html>
