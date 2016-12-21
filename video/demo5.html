@@ -26,7 +26,7 @@
 			});
 			
 			$testTimePlay[0].onended = function(){
-				$testTimePlay[0].currentTime = 2;//存在兼容性问题，移动端有可能无效
+				$testTimePlay[0].currentTime = 2;//存在兼容性问题移动端可能无效，或者说是移动端只能设置为已经播放过的时间点
 				$testTimePlay[0].play();
 			};
 		});
