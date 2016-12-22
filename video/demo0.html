@@ -2,7 +2,14 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>视频事件相关</title>
+	<title>视频事件相关以及常用方法</title>
+	<style type="text/css">
+		button{
+			display: block;
+			width:300px;
+			height:100px;
+		}
+	</style>
 </head>
 <body>
 	<h1 id="through">loading</h1>
@@ -10,7 +17,10 @@
 	<h1 id="playing">loading</h1>
 	<h1 id="progress">loading</h1>
 	<h1 id="time">loading</h1>
-	<video preload="auto" style="background-color:blue;">
+	<button id="start">播放</button>
+	<button id="pause">暂停</button>
+	<button id="load">加载</button>
+	<video preload="auto" webkit-playsinline="true" playsinline="true" style="background-color:blue;">
 		<source src="./step1.mp4" type="video/mp4">
 	</video>
 	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
@@ -31,10 +41,14 @@
 			var playing = '';
 			var $playing = $('#playing');
 
+			var $start = $('#start');
+			var $pause = $('#pause');
+			var $load = $('#load');
+
 			var $videos = $('video');
 			/**
 			 * 视频是以流的形式加载，canplaythrough表示已经可以播放了，而不是整个视频已经完全加载完成
-			 * canplaythrough事件在IOS系统中不会被触发
+			 * canplaythrough事件在IOS系统中不会被触发（可以通过另外的方式模拟或者强制加载）
 			 */
 			$videos.on('canplaythrough',function(){
 				through += '('+$videos[0].currentTime+'/'+$videos[0].duration+' '+new Date().getTime()+')';
@@ -76,8 +90,21 @@
 				$progress.html(progress);
 			});
 
-			$videos.on('click',function(){
+			$load.on('click',function(){
+				/**
+				 * 执行load方法在pc浏览器、Android chrome、IOS Safari、腾讯X5中会触发canplaythrough事件，也就是说load方法会去加载资源
+				 */
+				$videos[0].load();
+			});
+
+			$start.on('click',function(){
 				$videos[0].play();
+			});
+
+			$pause.on('click',function(){
+				/**
+				 * 执行pause方法后在pc浏览器、Android chrome、IOS Safari、腾讯X5中timeupdate事件不再被触发
+				 */
 				$videos[0].pause();
 			});
 		});
