@@ -34,6 +34,7 @@
 			var $videos = $('video');
 			/**
 			 * 视频是以流的形式加载，canplaythrough表示已经可以播放了，而不是整个视频已经完全加载完成
+			 * canplaythrough事件在IOS系统中不会被触发
 			 */
 			$videos.on('canplaythrough',function(){
 				through += '('+$videos[0].currentTime+'/'+$videos[0].duration+' '+new Date().getTime()+')';
@@ -43,16 +44,13 @@
 			//同一段视频不断重复播放，触发该事件的次数以及对应时间点不一定相同
 			$videos.on('timeupdate',function(){
 				time += '('+$videos[0].currentTime+' '+new Date().getTime()+')';
-				// if($videos[0].currentTime>=3){
-				// 	$videos[0].currentTime = 0;//重现设置播放时间
-				// 	$videos[0].play();
-				// }
 				$time.html(time);
 			});
 
 			/**
-			 * play和playing事件在pc浏览器中都是在视频播放开始时触发，且一般play事件先于playing事件触发
-			 * play和playing事件在android系统中也是在视频播放开始时触发，同样play事件先于playing事件触发
+			 * play和playing事件在pc浏览器中都是在视频播放开始时触发，且一般play事件先于playing事件触发；
+			 * play和playing事件在android系统中也是在视频播放开始时触发，同样play事件先于playing事件触发；
+			 * play和playing事件在IOS系统中也是在视频播放开始时触发，同样play事件先于playing事件触发，另外play事件也先于progress事件，playing事件晚于progress事件；
 			 */
 			$videos.on('play',function(){
 				play += '('+$videos[0].currentTime+'/'+$videos[0].duration+' '+new Date().getTime()+')';
@@ -67,7 +65,7 @@
 			 * progress事件在pc的各大浏览器中不会触发；
 			 * progress事件在android系统中会在视频播放后触发一次；
 			 * progress事件在腾讯X5内核浏览器中会在视频播放后触发一次；
-			 * 在IOS系统中canplaythrough事件不会被触发，这时候只能使用progress事件模拟
+			 * progress事件在IOS系统中会在视频播放后触发一次；
 			 */
 			$videos.on('progress',function(){
 				/**
@@ -80,6 +78,7 @@
 
 			$videos.on('click',function(){
 				$videos[0].play();
+				$videos[0].pause();
 			});
 		});
 	</script>
