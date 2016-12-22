@@ -9,6 +9,7 @@
 			top:0;
 			left:0;
 			width:400px;
+			height:500px;
 			z-index:1;
 			background-color:red;
 			/*display:none;*/
@@ -21,10 +22,10 @@
 	</style>
 </head>
 <body>
-	<video id="v1" class="current" loop="loop">
-		<source src="./step3.mp4" loop="loop" type="video/mp4">
+	<video id="v1" class="current" loop="loop" webkit-playsinline="true" playsinline="true">
+		<source src="./step3.mp4" type="video/mp4">
 	</video>
-	<video id="v2">
+	<video id="v2" webkit-playsinline="true" playsinline="true">
 		<source src="./step2.mp4" type="video/mp4">
 	</video>
 	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
