@@ -7,6 +7,9 @@
 <body>
 	<h1 id="progress">loading</h1>
 	<h1 id="time">loading</h1>
+	<h1 id="through">loading</h1>
+	<h1 id="play">loading</h1>
+	<h1 id="playing">loading</h1>
 	<video preload="auto" style="background-color:blue;">
 		<source src="./step1.mp4" type="video/mp4">
 	</video>
@@ -19,25 +22,50 @@
 			var time = '';
 			var $time = $('#time');
 
+			var through = '';
+			var $through = $('#through');
+
+			var play = '';
+			var $play = $('#play');
+
+			var playing = '';
+			var $playing = $('#playing');
+
 			var $videos = $('video');
 			/**
 			 * 视频是以流的形式加载，canplaythrough表示已经可以播放了，而不是整个视频已经完全加载完成
 			 */
 			$videos.on('canplaythrough',function(){
-				console.log('canplaythrough');
+				var dom = $(this)[0];
+				through += '('+dom.buffered.end(0)+'/'+dom.duration+' '+new Date().getTime()+')';
+				$through.html(through);
 			});
 
 			//同一段视频不断重复播放，触发该事件的次数以及对应时间点不一定相同
 			$videos.on('timeupdate',function(){
-				time += '('+$videos[0].currentTime+')'
-				if($videos[0].currentTime>=3){
-					$videos[0].currentTime = 0;//重现设置播放时间
-					$videos[0].play();
-				}
+				time += '('+$videos[0].currentTime+' '+new Date().getTime()+')';
+				// if($videos[0].currentTime>=3){
+				// 	$videos[0].currentTime = 0;//重现设置播放时间
+				// 	$videos[0].play();
+				// }
 				$time.html(time);
 			});
 
+			//对各pc浏览器而言play事件和playing事件貌似是一码事
+			$videos.on('play',function(){
+				var dom = $(this)[0];
+				play += '('+dom.buffered.end(0)+'/'+dom.duration+' '+new Date().getTime()+')';
+				$play.html(play);
+			});
+
+			$videos.on('playing',function(){
+				var dom = $(this)[0];
+				playing += '('+dom.buffered.end(0)+'/'+dom.duration+' '+new Date().getTime()+')';
+				$playing.html(playing);
+			});
+
 			/**
+			 * progress事件在pc的各大浏览器中不会触发
 			 * 在IOS系统中canplaythrough事件不会被触发，这时候只能使用progress事件模拟
 			 */
 			$videos.on('progress',function(){
@@ -46,8 +74,7 @@
 				 * dom.buffered.end(0) 当前已加载时间
 				 * dom.duration 整个视频的持续时间
 				 */
-				console.log(dom.buffered.end(0)/dom.duration);
-				progress += '('+dom.buffered.end(0)+'/'+dom.duration+')'
+				progress += '('+dom.buffered.end(0)+'/'+dom.duration+' '+new Date().getTime()+')';
 				$progress.html(progress);
 			});
 
