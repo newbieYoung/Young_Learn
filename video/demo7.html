@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>页面渲染视频数量测试</title>
+	<style type="text/css">
+		video{
+			width:500px;
+			height:500px;
+			margin:10px;
+			background-color:red;
+		}
+	</style>
+</head>
+<body>
+	<h1>暂时只发现chrome浏览器会同时渲染多个视频，最后播放的先渲染；其它浏览器基本只会渲染一个视频，其它会暂停或者消失，视频切换的间隔有长有短。</h1>
+	<video loop="loop" webkit-playsinline="true" playsinline="true">
+		<source src="./step1.mp4" loop="loop" type="video/mp4">
+	</video>
+	<video loop="loop" webkit-playsinline="true" playsinline="true">
+		<source src="./step2.mp4" type="video/mp4">
+	</video>
+	<video loop="loop" webkit-playsinline="true" playsinline="true">
+		<source src="./step3.mp4" type="video/mp4">
+	</video>
+	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var $videos = $('video');
+			$('body').on('click',function(){
+				for(var i=0;i<$videos.length;i++){
+					$videos.eq(i)[0].play();
+				}
+			});
+		});
+	</script>
+</body>
+</html>
