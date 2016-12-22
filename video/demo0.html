@@ -5,11 +5,11 @@
 	<title>视频事件相关</title>
 </head>
 <body>
-	<h1 id="progress">loading</h1>
-	<h1 id="time">loading</h1>
 	<h1 id="through">loading</h1>
 	<h1 id="play">loading</h1>
 	<h1 id="playing">loading</h1>
+	<h1 id="progress">loading</h1>
+	<h1 id="time">loading</h1>
 	<video preload="auto" style="background-color:blue;">
 		<source src="./step1.mp4" type="video/mp4">
 	</video>
@@ -36,8 +36,7 @@
 			 * 视频是以流的形式加载，canplaythrough表示已经可以播放了，而不是整个视频已经完全加载完成
 			 */
 			$videos.on('canplaythrough',function(){
-				var dom = $(this)[0];
-				through += '('+dom.buffered.end(0)+'/'+dom.duration+' '+new Date().getTime()+')';
+				through += '('+$videos[0].currentTime+'/'+$videos[0].duration+' '+new Date().getTime()+')';
 				$through.html(through);
 			});
 
@@ -51,30 +50,31 @@
 				$time.html(time);
 			});
 
-			//对各pc浏览器而言play事件和playing事件貌似是一码事
+			/**
+			 * play和playing事件在pc浏览器中都是在视频播放开始时触发，且一般play事件先于playing事件触发
+			 * play和playing事件在android系统中也是在视频播放开始时触发，同样play事件先于playing事件触发
+			 */
 			$videos.on('play',function(){
-				var dom = $(this)[0];
-				play += '('+dom.buffered.end(0)+'/'+dom.duration+' '+new Date().getTime()+')';
+				play += '('+$videos[0].currentTime+'/'+$videos[0].duration+' '+new Date().getTime()+')';
 				$play.html(play);
 			});
-
 			$videos.on('playing',function(){
-				var dom = $(this)[0];
-				playing += '('+dom.buffered.end(0)+'/'+dom.duration+' '+new Date().getTime()+')';
+				playing += '('+$videos[0].currentTime+'/'+$videos[0].duration+' '+new Date().getTime()+')';
 				$playing.html(playing);
 			});
 
 			/**
-			 * progress事件在pc的各大浏览器中不会触发
+			 * progress事件在pc的各大浏览器中不会触发；
+			 * progress事件在android系统中会在视频播放后触发一次；
+			 * progress事件在腾讯X5内核浏览器中会在视频播放后触发一次；
 			 * 在IOS系统中canplaythrough事件不会被触发，这时候只能使用progress事件模拟
 			 */
 			$videos.on('progress',function(){
-				var dom = $(this)[0];
 				/**
 				 * dom.buffered.end(0) 当前已加载时间
 				 * dom.duration 整个视频的持续时间
 				 */
-				progress += '('+dom.buffered.end(0)+'/'+dom.duration+' '+new Date().getTime()+')';
+				progress += '('+$videos[0].buffered.end(0)+'/'+$videos[0].duration+' '+new Date().getTime()+')';
 				$progress.html(progress);
 			});
 
