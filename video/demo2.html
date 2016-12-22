@@ -2,10 +2,17 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>更改视频资源</title>
+	<title>更改视频资源路径</title>
+	<style type="text/css">
+		video{
+			width:500px;
+			height:500px;
+			background-color:blue;
+		}
+	</style>
 </head>
 <body>
-	<video preload="auto">
+	<video preload="auto" webkit-playsinline="true" playsinline="true">
 		<source src="./step1.mp4" type="video/mp4">
 	</video>
 	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
@@ -23,14 +30,17 @@
 			setTimeout(function(){
 				//由于通过点击事件已经申请过权限，那么3秒之后会被播放
 				$video[0].play();
-			},3000);
+			},2000);
 
-			// $video[0].onended = function(){
-			// 	//这种方式不能满足无感知更改视频资源
-			// 	$source.attr('src','./step2.mp4');
-			// 	$video[0].load();
-			// 	$video[0].play();
-			// };
+			$video[0].onended = function(){
+				//在IOS Safari、Android chrome中对同一个video改变资源路径后加载播放这种方式不能满足无感知更改视频资源
+				
+				//更改资源路径后，需要显示调用load方法，否则资源不会改变，在pc、IOS Safari、Android chrome等表现一致
+				$source.attr('src','./step2.mp4');
+				$video[0].load();
+				
+				$video[0].play();
+			};
 		});
 	</script>
 </body>
