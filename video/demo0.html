@@ -92,7 +92,7 @@
 
 			$load.on('click',function(){
 				/**
-				 * 执行load方法在pc浏览器、Android chrome、IOS Safari、腾讯X5中会触发canplaythrough事件，也就是说load方法会去加载资源
+				 * 点击事件中执行load方法在pc浏览器、Android chrome、IOS Safari、腾讯X5中会触发canplaythrough事件，也就是说load方法会去加载资源
 				 */
 				$videos[0].load();
 			});
@@ -107,6 +107,13 @@
 				 */
 				$videos[0].pause();
 			});
+
+			setTimeout(function(){
+				/**
+				 * 在微信中load方法在非用户操作的事件中不会触发canplaythrough事件
+				 */
+				$videos[0].load();
+			},2000);
 		});
 	</script>
 </body>
