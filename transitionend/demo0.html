@@ -4,11 +4,16 @@
 	<meta charset="UTF-8">
 	<title>transitionend事件的触发次数和变换属性的数量一致</title>
 	<style type="text/css">
+		/**
+		 * 样式中存在rem等相对值时，如果其实际值发生变化，那么也会触发transition
+		 */
 		#test{
 			width:100px;
 			height:100px;
+			margin-top:1rem;
 			background-color:red;
 			transition: all 5s linear;
+			-webkit-transition: all 5s linear;
 		}
 	</style>
 </head>
@@ -16,6 +21,23 @@
 	<div id="test" class="test"></div>
 	<button id="start">开始变换</button>
 	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+	<script type="text/javascript">
+    (function (doc, win) {
+	        var docEl = doc.documentElement,
+	                resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+	                recalc = function () {
+	                    var clientWidth = docEl.clientWidth;
+	                    if (!clientWidth) return;
+	                    if(clientWidth>750){
+	                        clientWidth = 750;
+	                    }
+	                    docEl.style.fontSize = 100*(clientWidth/750)+'px';
+	                };
+	        if (!doc.addEventListener) return;
+	        win.addEventListener(resizeEvt, recalc, false);
+	        doc.addEventListener('DOMContentLoaded', recalc, false);
+	    })(document, window);
+	</script>
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var $test = $('#test');
