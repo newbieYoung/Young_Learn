@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>transition衔接</title>
+	<style type="text/css">
+		.list{
+			width:62px;
+			height:300px;
+			border:1px solid black;
+			overflow-y:hidden;
+		}
+		.list img{
+			width:100%;
+			transition: all 3s linear;
+			transform: translate3d(0,0,0);
+		}
+	</style>
+</head>
+<body>
+	<div class="list"><img src="./list.png"></div>
+	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var $img = $('.list img');
+			var direction = true;
+
+			$img.css({
+				'transform':'translate3d(0,-474px,0)',
+				'-webkit-transform':'translate3d(0,-474px,0)'
+			});
+			
+			$img.on('webkitTransitionEnd transitionend oTransitionEnd otransitionend',function(){
+				direction = !direction;
+				if(direction){
+					$img.css({
+						'transform':'translate3d(0,-474px,0)',
+						'-webkit-transform':'translate3d(0,-474px,0)'
+					});
+				}else{
+					$img.css({
+						'transform':'translate3d(0,0,0)',
+						'-webkit-transform':'translate3d(0,0,0)'
+					});
+				}
+			});
+		});
+	</script>
+</body>
+</html>
