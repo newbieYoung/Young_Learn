@@ -49,7 +49,11 @@
 			$v2[0].onended = function(){
 				$v2.removeClass('current');
 				$v1.addClass('current');
-				$v1[0].currentTime = 1;//存在兼容性问题移动端可能无效，或者说是移动端只能设置为已经播放过的时间点
+				/**
+				 * 存在兼容性问题移动端可能无效，或者说是移动端只能设置为已经播放过的时间点；
+				 * 甚至Android X5浏览器中不管设置从哪个时间点开始都会从头开始。
+				 */
+				$v1[0].currentTime = 1;//
 				$v1[0].play();
 			};
 		});

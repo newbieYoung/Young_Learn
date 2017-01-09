@@ -37,7 +37,13 @@
 							repeatNum = 0;
 							return;
 						}
-						$testTimePlay[0].currentTime = triggerNum-1;
+						/**
+						 * Android X5浏览器中不管设置从哪个时间点开始都会从头开始；
+						 * 而且时间点切换过程中也会存在一定的时间消耗，不能无缝衔接；
+						 * 因此通过精确控制时间点来达到交互效果不能完全兼容所有浏览器。
+						 */
+						$testTimePlay[0].currentTime = triggerNum-5;
+						//alert($testTimePlay[0].currentTime);
 						repeatNum++;
 					}
 				});
