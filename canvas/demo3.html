@@ -9,36 +9,35 @@
 	<video preload="auto" x-webkit-airplay="true" webkit-playsinline="true" playsinline="true">
 		<source src="../video/step1.mp4" type="video/mp4">
 	</video>
-	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript">
-		$(document).ready(function(){
+		document.addEventListener('DOMContentLoaded',function(){
 			var first = true;
 			var width;
 			var height;
 
-			var canvas = $('canvas');
-			var context = canvas[0].getContext('2d');
+			var canvas = document.querySelector('canvas');
+			var context = canvas.getContext('2d');
 
-			var video = $('video');
-			
-			$(document).on('click',function(){
-				video[0].play();
-			});
+			var video = document.querySelector('video');
 
-			video.on('timeupdate',function(){
+			document.addEventListener('click',function(){
+				video.play();
+			},false);
+
+			video.addEventListener('timeupdate',function(){
 				if(first){
-					width = parseInt(video.css('width'));
-					height = parseInt(video.css('height'));
-					canvas.css({
-						width:width+'px',
-						height:height+'px'
-					});
-					canvas[0].width = width;
-					canvas[0].height = height;
+					var videoStyle = window.getComputedStyle(video);
+					width = parseInt(videoStyle.width);
+					height = parseInt(videoStyle.height);
+					canvas.style.width = width+'px';
+					canvas.style.height = height+'px';
+					canvas.width = width;
+					canvas.height = height;
 				}
-				context.drawImage(video[0],0,0,width,height);
-			});
-		});
+				context.drawImage(video,0,0,width,height);
+			},false);
+
+		},false);
 	</script>
 </body>
 </html>
