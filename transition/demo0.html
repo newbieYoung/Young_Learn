@@ -20,9 +20,8 @@
 <body>
 	<div id="test" class="test"></div>
 	<button id="start">开始变换</button>
-	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript">
-    (function (doc, win) {
+    	(function (doc, win) {
 	        var docEl = doc.documentElement,
 	                resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
 	                recalc = function () {
@@ -35,26 +34,22 @@
 	                };
 	        if (!doc.addEventListener) return;
 	        win.addEventListener(resizeEvt, recalc, false);
-	        doc.addEventListener('DOMContentLoaded', recalc, false);
+	        doc.addEventListener('DOMContentLoaded', function(){
+	        	var $test = document.querySelector('#test');
+				var $start = document.querySelector('#start');
+
+				$start.addEventListener('click',function(){
+					$test.style.width = '200px';
+					$test.style.height = '200px';
+					$test.style.backgroundColor = 'blue';
+				},false);
+
+				$test.addEventListener('transitionend',function(){
+					console.log('transitionend');
+				},false);
+				
+	        }, false);
 	    })(document, window);
-	</script>
-	<script type="text/javascript">
-		$(document).ready(function(){
-			var $test = $('#test');
-			var $start = $('#start');
-
-			$start.on('click',function(){
-				$test.css({
-					'width':'200px',
-					'height':'200px',
-					'background-color':'blue'
-				});
-			});
-
-			$test.on('webkitTransitionEnd transitionend oTransitionEnd otransitionend',function(){
-				console.log('transitionend');
-			});
-		});
 	</script>
 </body>
 </html>
