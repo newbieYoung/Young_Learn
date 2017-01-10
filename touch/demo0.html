@@ -44,63 +44,61 @@
 			<div class="item red"></div>
 		</div>
 	</div>
-	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript">
 		/**
 		 * 自定义toumove事件时需要阻止设备默认的touchmove事件，比如页面滑动，否则会出现一些莫名其妙的bug
 		 */
-		$(document).ready(function(){
+		window.onload = function(){
 			//初始化轮播图
         	var index = 0;//轮播图序号
         	var touchstart = false;
         	var preventDefault = false;//是否阻止页面滑动
         	var isFixed = true;//自动滑动是否完成
         	var screenWidth = window.screen.availWidth;
-        	var $slide = $('div.component');
-        	var $slidePage = $slide.find('div.item');
+        	var $slide = document.querySelector('div.component');
+        	var $slidePage = document.querySelectorAll('div.component div.item');
         	var slideLength = $slidePage.length;
         	if(slideLength>1){
         		//每屏宽度等于屏幕宽度
-        		$slide.css({
-	        		'width':slideLength*screenWidth+'px'
-	        	});
-	        	$slidePage.css({
-	        		'width':screenWidth+'px'
-	        	});
+        		$slide.style.width = slideLength*screenWidth+'px';
+        		for(var i=0;i<slideLength;i++){
+        			$slidePage[i].style.width = screenWidth+'px';
+        		}
 	        	var startX = 0;
 	        	var startY = 0;
 	        	var moveX = 0;
 	        	var moveY = 0;
 
-      			$slide.on('webkitTransitionEnd transitionend oTransitionEnd otransitionend transitionend',function(){
-      				if(!isFixed){
+	        	$slide.addEventListener('transitionend',function(){
+	        		if(!isFixed){
       					isFixed = true;
       					startX = 0;
 			        	startY = 0;
 			        	moveX = 0;
 			        	moveY = 0;
       					/* caution */
-						$slide.off('touchmove');
-        				$slide.off('touchend');
+						$slide.removeEventListener('touchmove',move,false);
+        				$slide.removeEventListener('touchend',end,false);
       				}
-      			});
-	        	$slide.on('touchstart',function(e){
+	        	},false);
+
+	        	$slide.addEventListener('touchstart',function(e){
 	        		if(isFixed){
-	        			var touch = e.originalEvent.touches[0];
+	        			var touch = e.touches[0];
 	        			cssTransform($slide);
 						touchstart = true;
 		        		startX = touch.clientX;
 		        		startY = touch.clientY;
 		        		/* caution */
-			        	$slide.on('touchmove',function(e){move(e);});
-	        			$slide.on('touchend',function(e){end(e)});
+		        		$slide.addEventListener('touchmove',move,false);
+		        		$slide.addEventListener('touchend',end,false);
 	        		}
-	        	});
+	        	},false);
 
 	        	function move(e){
 	        		/* caution */
 	        		if(isFixed){
-	        			var touch = e.originalEvent.touches[0];
+	        			var touch = e.touches[0];
 	        			moveX = touch.pageX - startX;
 	        			if(touchstart){
 	        				moveY = touch.pageY - startY;
@@ -158,23 +156,17 @@
 	        		}
 	        	}
 	        	function cssTransform(target,x,second){
-	        		var cssObj = {};
 	        		if(x!=null){
-	        			cssObj['transform'] = 'translateX('+x+'px) translateZ(0)';
-	        			cssObj['-webkit-transform'] = 'translateX('+x+'px) translateZ(0)';
+	        			target.style.transform = 'translateX('+x+'px) translateZ(0)';;
 	        		}
 	        		if(second!=null){
-	        			cssObj['transition'] = 'transform '+second+'s ease-out';
-	        			cssObj['-webkit-transition'] = '-webkit-transform '+second+'s ease-out';
+	        			target.style.transition = 'transform '+second+'s ease-out';
 	        		}else{
-	        			cssObj['transition'] = 'none';
-	        			cssObj['-webkit-transition'] = 'none';
+	        			target.style.transition = 'none';
 	        		}
-	        		target.css(cssObj);
 	        	}
         	}
-        
-		});
+		};
 	</script>
 </body>
 </html>
