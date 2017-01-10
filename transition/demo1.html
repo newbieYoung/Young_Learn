@@ -6,7 +6,7 @@
 	<style type="text/css">
 		.list{
 			width:62px;
-			height:300px;
+			height:162px;
 			border:1px solid black;
 			overflow-y:hidden;
 		}
@@ -19,32 +19,28 @@
 </head>
 <body>
 	<div class="list"><img src="./list.png"></div>
-	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript">
-		$(document).ready(function(){
-			var $img = $('.list img');
+		document.addEventListener('DOMContentLoaded',function(){
+
+			var $img = document.querySelector('.list img');
 			var direction = true;
 
-			$img.css({
-				'transform':'translate3d(0,-474px,0)',
-				'-webkit-transform':'translate3d(0,-474px,0)'
+			$img.addEventListener('transitionend',function(){
+				$img.style.transition = 'none';
+				$img.style.transform = 'translate3d(0,0,0)';
+
+				//使用timeout从no transition 转换为 转换为 transition会有卡顿
+				setTimeout(function(){
+					$img.style.transition = 'all 3s linear';
+					$img.style.transform = 'translate3d(0,-537px,0)';
+				});
+			},false);
+
+			setTimeout(function(){
+				$img.style.transform = 'translate3d(0,-537px,0)';
 			});
-			
-			$img.on('webkitTransitionEnd transitionend oTransitionEnd otransitionend',function(){
-				direction = !direction;
-				if(direction){
-					$img.css({
-						'transform':'translate3d(0,-474px,0)',
-						'-webkit-transform':'translate3d(0,-474px,0)'
-					});
-				}else{
-					$img.css({
-						'transform':'translate3d(0,0,0)',
-						'-webkit-transform':'translate3d(0,0,0)'
-					});
-				}
-			});
-		});
+
+		},false);
 	</script>
 </body>
 </html>
