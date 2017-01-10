@@ -18,12 +18,11 @@
 		<li>2. 笔划粗细待实现</li>
 	</ul>
 	<canvas id="paper" width="512" height="384"></canvas>
-	<script type="text/javascript" src="../node_modules/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript">
-		$(document).ready(function(){
-			var $paper = $('#paper');
-			var paperOff = $paper.offset();
-			var context = $paper[0].getContext('2d');
+		window.onload = function(){
+			var $paper = document.querySelector('#paper');
+			var paperOff = $paper.getBoundingClientRect();//它是相对于可视窗口的距离，滚动位置发生改变时，它们的值是会发生变化的。
+			var context = $paper.getContext('2d');
 			var startPoint = null;
 			var endPoint = null;
 			var points = [];//记录手写过程中的关键点
@@ -39,9 +38,9 @@
 			}
 
 			/* 触摸事件 */
-			$paper.on('touchstart',function(e){
+			$paper.addEventListener('touchstart',function(e){
 				e.preventDefault();
-				var touch = e.originalEvent.touches[0];
+				var touch = e.touches[0];
 				var temp = {
 					x:touch.clientX-paperOff.left,
 					y:touch.clientY-paperOff.top
@@ -49,12 +48,12 @@
 				points.push(temp);
 				startPoint = temp;
 				endPoint = temp;
-			});
+			},false);
 
-			$paper.on('touchmove',function(e){
+			$paper.addEventListener('touchmove',function(e){
 				if(endPoint){
 					e.preventDefault();
-					var touch = e.originalEvent.touches[0];
+					var touch = e.touches[0];
 					startPoint = endPoint;
 					endPoint = {
 						x:touch.clientX-paperOff.left,
@@ -63,16 +62,16 @@
 					points.push(endPoint);
 					lineTo();
 				}
-			});
+			},false);
 
-			$paper.on('touchend',function(e){
+			$paper.addEventListener('touchend',function(e){
 				e.preventDefault();
 				startPoint = null;
 				endPoint = null;
-			});
+			},false);
 
 			/* 鼠标事件 */
-			$paper.on('mousemove',function(e){
+			$paper.addEventListener('mousemove',function(e){
 				if(endPoint){
 					startPoint = endPoint;
 					endPoint = {
@@ -82,8 +81,9 @@
 					points.push(endPoint);
 					lineTo();
 				}
-			});
-			$paper.on('mousedown',function(e){
+			},false);
+
+			$paper.addEventListener('mousedown',function(e){
 				var temp = {
 					x:e.pageX-paperOff.left,
 					y:e.pageY-paperOff.top
@@ -91,8 +91,9 @@
 				points.push(temp);
 				startPoint = temp;
 				endPoint = temp;
-			});
-			$paper.on('mouseup',function(e){
+			},false);
+
+			$paper.addEventListener('mouseup',function(e){
 				startPoint = endPoint;
 				endPoint = {
 					x:e.pageX-paperOff.left,
@@ -102,8 +103,9 @@
 				lineTo();
 				startPoint = null;
 				endPoint = null;
-			});
-		});
+			},false);
+
+		};
 	</script>
 </body>
 </html>
