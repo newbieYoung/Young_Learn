@@ -9,32 +9,31 @@
 	<video id="testPlayVideo" preload="auto" webkit-playsinline="true" playsinline="true">
 		<source src="./step1.mp4" type="video/mp4">
 	</video>
-	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript">
-		$(document).ready(function(){
-			var $testPlayVideo = $('#testPlayVideo');
-			var $testPlayVideoSource = $testPlayVideo.find('source');
+		window.onload = function(){
+			var $testPlayVideo = document.querySelector('#testPlayVideo');
+			var $testPlayVideoSource = $testPlayVideo.children[0];
 
-			$testPlayVideo.on('canplaythrough',function(){
+			$testPlayVideo.addEventListener('canplaythrough',function(){
 				/**
 				 * 报错 play() can only be initiated by a user gesture.
 				 */
-				$testPlayVideo[0].play();
+				$testPlayVideo.play();
 			});
 
-			$testPlayVideo.on('click',function(){//监听用户点击事件
-				$testPlayVideo[0].play();
+			$testPlayVideo.addEventListener('click',function(){//监听用户点击事件
+				$testPlayVideo.play();
 			});
 
 			/**
 			 * 在移动端一个video播放只需要被授权一次，后续变动资源不需要用户手动触发播放
 			 */
-			$testPlayVideo[0].onended = function(){
-				$testPlayVideoSource.attr('src','./step2.mp4');
-				$testPlayVideo[0].load();
-				$testPlayVideo[0].play();
+			$testPlayVideo.onended = function(){
+				$testPlayVideoSource.setAttribute('src','./step2.mp4');
+				$testPlayVideo.load();
+				$testPlayVideo.play();
 			};
-		});
+		};
 	</script>
 </body>
 </html>
