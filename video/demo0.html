@@ -23,42 +23,41 @@
 	<video preload="auto" webkit-playsinline="true" playsinline="true" style="background-color:blue;">
 		<source src="./step1.mp4" type="video/mp4">
 	</video>
-	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript">
-		$(document).ready(function(){
+		window.onload = function(){
 			var progress = '';
-			var $progress = $('#progress');
+			var $progress = document.querySelector('#progress');
 
 			var time = '';
-			var $time = $('#time');
+			var $time = document.querySelector('#time');
 
 			var through = '';
-			var $through = $('#through');
+			var $through = document.querySelector('#through');
 
 			var play = '';
-			var $play = $('#play');
+			var $play = document.querySelector('#play');
 
 			var playing = '';
-			var $playing = $('#playing');
+			var $playing = document.querySelector('#playing');
 
-			var $start = $('#start');
-			var $pause = $('#pause');
-			var $load = $('#load');
+			var $start = document.querySelector('#start');
+			var $pause = document.querySelector('#pause');
+			var $load = document.querySelector('#load');
 
-			var $videos = $('video');
+			var $videos = document.querySelector('video');
 			/**
 			 * 视频是以流的形式加载，canplaythrough表示已经可以播放了，而不是整个视频已经完全加载完成
 			 * canplaythrough事件在IOS系统中不会被触发（可以通过另外的方式模拟或者强制加载）
 			 */
-			$videos.on('canplaythrough',function(){
-				through += '('+$videos[0].currentTime+'/'+$videos[0].duration+' '+new Date().getTime()+')';
-				$through.html(through);
+			$videos.addEventListener('canplaythrough',function(){
+				through += '('+$videos.currentTime+'/'+$videos.duration+' '+new Date().getTime()+')';
+				$through.innerHTML = through;
 			});
 
-			//同一段视频不断重复播放，触发该事件的次数以及对应时间点不一定相同
-			$videos.on('timeupdate',function(){
-				time += '('+$videos[0].currentTime+' '+new Date().getTime()+')';
-				$time.html(time);
+			//同一段视频不断重复播放，触发该事件的次数以及对应时间点不一定相同'
+			$videos.addEventListener('timeupdate',function(){
+				time += '('+$videos.currentTime+' '+new Date().getTime()+')';
+				$time.innerHTML = time;
 			});
 
 			/**
@@ -66,13 +65,13 @@
 			 * play和playing事件在android系统中也是在视频播放开始时触发，同样play事件先于playing事件触发；
 			 * play和playing事件在IOS系统中也是在视频播放开始时触发，同样play事件先于playing事件触发，另外play事件也先于progress事件，playing事件晚于progress事件；
 			 */
-			$videos.on('play',function(){
-				play += '('+$videos[0].currentTime+'/'+$videos[0].duration+' '+new Date().getTime()+')';
-				$play.html(play);
+			$videos.addEventListener('play',function(){
+				play += '('+$videos.currentTime+'/'+$videos.duration+' '+new Date().getTime()+')';
+				$play.innerHTML = play;
 			});
-			$videos.on('playing',function(){
-				playing += '('+$videos[0].currentTime+'/'+$videos[0].duration+' '+new Date().getTime()+')';
-				$playing.html(playing);
+			$videos.addEventListener('playing',function(){
+				playing += '('+$videos.currentTime+'/'+$videos.duration+' '+new Date().getTime()+')';
+				$playing.innerHTML = playing;
 			});
 
 			/**
@@ -81,40 +80,40 @@
 			 * progress事件在腾讯X5内核浏览器中会在视频播放后触发一次；
 			 * progress事件在IOS系统中会在视频播放后触发一次；
 			 */
-			$videos.on('progress',function(){
+			$videos.addEventListener('progress',function(){
 				/**
 				 * dom.buffered.end(0) 当前已加载时间
 				 * dom.duration 整个视频的持续时间
 				 */
-				progress += '('+$videos[0].buffered.end(0)+'/'+$videos[0].duration+' '+new Date().getTime()+')';
-				$progress.html(progress);
+				progress += '('+$videos.buffered.end(0)+'/'+$videos.duration+' '+new Date().getTime()+')';
+				$progress.innerHTML = progress;
 			});
 
-			$load.on('click',function(){
+			$load.addEventListener('click',function(){
 				/**
 				 * 点击事件中执行load方法在pc浏览器、Android chrome、IOS Safari、腾讯X5中会触发canplaythrough事件，也就是说load方法会去加载资源
 				 */
-				$videos[0].load();
+				$videos.load();
 			});
 
-			$start.on('click',function(){
-				$videos[0].play();
+			$start.addEventListener('click',function(){
+				$videos.play();
 			});
 
-			$pause.on('click',function(){
+			$pause.addEventListener('click',function(){
 				/**
 				 * 执行pause方法后在pc浏览器、Android chrome、IOS Safari、腾讯X5中timeupdate事件不再被触发
 				 */
-				$videos[0].pause();
+				$videos.pause();
 			});
 
 			setTimeout(function(){
 				/**
 				 * 在微信中load方法在非用户操作的事件中不会触发canplaythrough事件
 				 */
-				$videos[0].load();
+				$videos.load();
 			},2000);
-		});
+		};
 	</script>
 </body>
 </html>
