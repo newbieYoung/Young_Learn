@@ -14,24 +14,22 @@
 	<video id="testTimePlay"  webkit-playsinline="true" playsinline="true" preload="auto">
 		<source src="./all.mp4" type="video/mp4">
 	</video>
-	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript">
-		$(document).ready(function(){
-
-			var $testTimePlay = $('#testTimePlay');
+		window.onload = function(){
+			var $testTimePlay = document.querySelector('#testTimePlay');
 			var timeInterval;
 			var triggerNum = 5;
 			var repeatNum = 0;
 
-			$testTimePlay.on('click',function(){//监听用户点击事件
-				$testTimePlay[0].play();
+			$testTimePlay.addEventListener('click',function(){//监听用户点击事件
+				$testTimePlay.play();
 				//因为timeupdate事件精度不够，所以采用interval
 				timeInterval = setInterval(function(){
 					// console.log('-----------');
-					// console.log($testTimePlay[0].currentTime);
+					// console.log($testTimePlay.currentTime);
 					// console.log(triggerNum);
 					// console.log(repeatNum);
-					if($testTimePlay[0].currentTime>=triggerNum){
+					if($testTimePlay.currentTime>=triggerNum){
 						if(repeatNum>=3){
 							triggerNum = triggerNum+5;
 							repeatNum = 0;
@@ -42,18 +40,17 @@
 						 * 而且时间点切换过程中也会存在一定的时间消耗，不能无缝衔接；
 						 * 因此通过精确控制时间点来达到交互效果不能完全兼容所有浏览器。
 						 */
-						$testTimePlay[0].currentTime = triggerNum-5;
+						$testTimePlay.currentTime = triggerNum-5;
 						//alert($testTimePlay[0].currentTime);
 						repeatNum++;
 					}
 				});
 			});
 
-			$testTimePlay[0].onended = function(){
+			$testTimePlay.onended = function(){
 				clearInterval(timeInterval);
 			};
-
-		});
+		};
 	</script>
 </body>
 </html>
