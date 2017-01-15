@@ -23,16 +23,17 @@
 	<video loop="loop" webkit-playsinline="true" playsinline="true">
 		<source src="./step3.mp4" type="video/mp4">
 	</video>
-	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript">
-		$(document).ready(function(){
-			var $videos = $('video');
-			$videos.on('click',function(){
-				for(var i=0;i<$videos.length;i++){
-					$videos.eq(i)[0].play();
-				}
-			});
-		});
+		window.onload = function(){
+			var $videos = document.querySelectorAll('video');
+			for(var i=0;i<$videos.length;i++){
+				(function(item){
+					$videos[item].addEventListener('click',function(){
+						$videos[item].play();
+					});
+				})(i);
+			}
+		};
 	</script>
 </body>
 </html>
