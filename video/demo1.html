@@ -20,14 +20,13 @@
 	<video preload="auto" webkit-playsinline="true" playsinline="true" loop="loop">
 		<source src="./step1.mp4" type="video/mp4">
 	</video>
-	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript">
-		$(document).ready(function(){
-			var $video = $('video');
-			$video.on('click',function(){
-				$video[0].play();
+		window.onload = function(){
+			var $video = document.querySelector('video');
+			$video.addEventListener('click',function(){
+				$video.play();
 			});
-		});
+		};
 	</script>
 </body>
 </html>
