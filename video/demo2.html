@@ -15,33 +15,31 @@
 	<video preload="auto" webkit-playsinline="true" playsinline="true">
 		<source src="./step1.mp4" type="video/mp4">
 	</video>
-	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript">
-		$(document).ready(function(){
-			var $video = $('video');
-			var $source = $video.find('source');
+		window.onload = function(){
+			var $video = document.querySelector('video');
+			var $source = $video.children[0];
 
-			$video.on('click',function(){
+			$video.addEventListener('click',function(){
 				//可以理解为先申请play权限，但是不需要实际播放
-				var dom = $video[0];
-				dom.play();
-				dom.pause();
+				$video.play();
+				$video.pause();
 			});
 			setTimeout(function(){
 				//由于通过点击事件已经申请过权限，那么3秒之后会被播放
-				$video[0].play();
+				$video.play();
 			},2000);
 
-			$video[0].onended = function(){
+			$video.onended = function(){
 				//在IOS Safari、Android chrome中对同一个video改变资源路径后加载播放这种方式不能满足无感知更改视频资源
 				
 				//更改资源路径后，需要显示调用load方法，否则资源不会改变，在pc、IOS Safari、Android chrome等表现一致
-				$source.attr('src','./step2.mp4');
-				$video[0].load();
+				$source.setAttribute('src','./step2.mp4');
+				$video.load();
 				
-				$video[0].play();
+				$video.play();
 			};
-		});
+		};
 	</script>
 </body>
 </html>
