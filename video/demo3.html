@@ -28,35 +28,48 @@
 	<video id="v2" webkit-playsinline="true" playsinline="true">
 		<source src="./step2.mp4" type="video/mp4">
 	</video>
-	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript">
-		$(document).ready(function(){
-			var $v1 = $('#v1');
-			var $v2 = $('#v2');
+		window.onload = function(){
+			var $v1 = document.querySelector('#v1');
+			var $v2 = document.querySelector('#v2');
 
-			$v1.on('click',function(){
-				$v1.removeClass('current');
-				$v2.addClass('current');
-				$v2[0].play();
-				
-				$v1[0].play();
+			function start(){
+				var v1Classes = $v1.className;
+				var v2Classes = $v2.className;
+
+				v1Classes = v1Classes.replace(/current/g,'');
+				v2Classes = v2Classes.replace(/current/g,'')+' current';
+
+				$v1.className = v1Classes;
+				$v2.className = v2Classes;
+
+				$v2.play();
+				$v1.play();
 				// setTimeout(function(){
-				// 	$v1[0].pause();
+				// 	$v1.pause();
 				// });
-				$v1.off('click');
-			});
+				$v1.removeEventListener('click',start);
+			}
 
-			$v2[0].onended = function(){
-				$v2.removeClass('current');
-				$v1.addClass('current');
+			$v1.addEventListener('click',start);
+
+			$v2.onended = function(){
+				var v1Classes = $v1.className;
+				var v2Classes = $v2.className;
+
+				v2Classes = v2Classes.replace(/current/g,'');
+				v1Classes = v1Classes.replace(/current/g,'')+' current';
+
+				$v1.className = v1Classes;
+				$v2.className = v2Classes;
 				/**
 				 * 存在兼容性问题移动端可能无效，或者说是移动端只能设置为已经播放过的时间点；
 				 * 甚至Android X5浏览器中不管设置从哪个时间点开始都会从头开始。
 				 */
-				$v1[0].currentTime = 1;//
-				$v1[0].play();
+				$v1.currentTime = 1;//
+				$v1.play();
 			};
-		});
+		};
 	</script>
 </body>
 </html>
