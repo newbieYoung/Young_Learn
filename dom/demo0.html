@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>元素尺寸和大小</title>
+	<style type="text/css">
+		.parent{
+			position: relative;
+			top:0;
+			width:800px;
+			height:600px;
+			background-color:pink;
+			border:10px solid #000;
+			margin:14px;
+			padding:22px;
+		}
+		.child{
+			width:400px;
+			height:300px;
+			background-color:green;
+			border:5px solid #000;
+			margin:7px;
+			padding:11px;
+		}
+	</style>
+</head>
+<body>	
+	<ul>
+		<li>1、已定位父元素是指父元素中第一个定位为relative、absolute、fixed的元素</li>
+	</ul>	
+	<div class="parent">
+		<div class="child"></div>
+	</div>
+	<script type="text/javascript">
+		window.onload = function(){
+			var text = '';
+			var child = document.querySelector('.child');
+			var classStyle = window.getComputedStyle(child);
+
+			text += 'clientWidth(width+padding) : '+child.clientWidth+'<br/>';
+			text += 'clientHeight(height+padding) : '+child.clientHeight+'<br/>';
+			text += 'clientLeft(border) : '+child.clientLeft+'<br/>';
+			text += 'clientTop(border) : '+child.clientTop+'<br/>';
+			text += 'offsetWidth(width+padding+border) : '+child.offsetWidth+'<br/>';
+			text += 'offsetHeight(height+padding+border) : '+child.offsetHeight+'<br/>';
+			text += 'offsetTop(已定位父元素padding+margin) : '+child.offsetTop+'<br/>';
+			text += 'offsetLeft(已定位父元素padding+margin) : '+child.offsetLeft+'<br/>';
+
+			child.innerHTML = text;
+		};
+	</script>
+</body>
+</html>
