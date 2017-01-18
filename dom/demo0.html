@@ -21,6 +21,13 @@
 			border:5px solid #000;
 			margin:7px;
 			padding:11px;
+			overflow:scroll;
+		}
+		.high-child{
+			width:10px;
+			height:900px;
+			background-color:blue;
+			border:1px solid #000;
 		}
 	</style>
 </head>
@@ -33,20 +40,33 @@
 	</div>
 	<script type="text/javascript">
 		window.onload = function(){
-			var text = '';
+			
 			var child = document.querySelector('.child');
 			var classStyle = window.getComputedStyle(child);
 
-			text += 'clientWidth(width+padding) : '+child.clientWidth+'<br/>';
-			text += 'clientHeight(height+padding) : '+child.clientHeight+'<br/>';
-			text += 'clientLeft(border) : '+child.clientLeft+'<br/>';
-			text += 'clientTop(border) : '+child.clientTop+'<br/>';
-			text += 'offsetWidth(width+padding+border) : '+child.offsetWidth+'<br/>';
-			text += 'offsetHeight(height+padding+border) : '+child.offsetHeight+'<br/>';
-			text += 'offsetTop(已定位父元素padding+margin) : '+child.offsetTop+'<br/>';
-			text += 'offsetLeft(已定位父元素padding+margin) : '+child.offsetLeft+'<br/>';
+			updateDetails();
+			child.addEventListener('scroll',updateDetails);
 
-			child.innerHTML = text;
+			//更新详细信息
+			function updateDetails(){
+				var text = '';
+				text += 'clientWidth(width+padding) : '+child.clientWidth+'<br/>';
+				text += 'clientHeight(height+padding) : '+child.clientHeight+'<br/>';
+				text += 'clientLeft(border) : '+child.clientLeft+'<br/>';
+				text += 'clientTop(border) : '+child.clientTop+'<br/>';
+				text += 'offsetWidth(width+padding+border) : '+child.offsetWidth+'<br/>';
+				text += 'offsetHeight(height+padding+border) : '+child.offsetHeight+'<br/>';
+				text += 'offsetTop(已定位父元素padding+margin) : '+child.offsetTop+'<br/>';
+				text += 'offsetLeft(已定位父元素padding+margin) : '+child.offsetLeft+'<br/>';
+				text += 'scrollWidth(clientWidth) : '+child.scrollWidth+'<br/>';
+				text += 'scrollHeight(clientHeight) : '+child.scrollHeight+'<br/>';
+				text += 'scrollLeft(横滚动条滚动的左侧距离) : '+child.scrollLeft+'<br/>';
+				text += 'scrollTop(纵滚动条滚动的上侧距离) : '+child.scrollTop+'<br/>';
+
+				text += '<div class="high-child"></div>';
+
+				child.innerHTML = text;
+			}
 		};
 	</script>
 </body>
