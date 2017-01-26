@@ -73,7 +73,10 @@
 
             var group;
             function initObject() {
-                var cubes = SimpleCube(-75,75,75,3,50);
+                var colors = ['rgba(255,193,37,1)','rgba(0,191,255,1)',
+                            'rgba(50,205,50,1)','rgba(178,34,34,1)',
+                            'rgba(255,255,0,1)','rgba(255,255,255,1)'];
+                var cubes = SimpleCube(-75,75,75,3,50,colors);
                 for(var i=0;i<cubes.length;i++){
                     scene.add(cubes[i]);
                 }
@@ -91,20 +94,21 @@
              * x、y、z 魔方正面左上角坐标
              * num 魔方单位方向上数量
              * len 魔方单位正方体宽高
+             * colors 魔方六面体颜色
              */
-            function SimpleCube(x,y,z,num,len){
+            function SimpleCube(x,y,z,num,len,colors){
                 var cubes = [];
                 for(var i=0;i<num;i++){
                     for(var j=0;j<num*num;j++){
                         var cubegeo = new THREE.BoxGeometry(len,len,len);
                         var materials = [];
                         var myFaces = [];
-                        myFaces.push(faces(Goldenrod));
-                        myFaces.push(faces(Black));
-                        myFaces.push(faces(DeepSkyBlue));
-                        myFaces.push(faces(Black));
-                        myFaces.push(faces(White));
-                        myFaces.push(faces(Black));
+                        myFaces.push(faces(colors[0]));
+                        myFaces.push(faces(colors[1]));
+                        myFaces.push(faces(colors[2]));
+                        myFaces.push(faces(colors[3]));
+                        myFaces.push(faces(colors[4]));
+                        myFaces.push(faces(colors[5]));
                         for (var z = 0; z < 6; z++) {
                             var texture = new THREE.Texture(myFaces[z]);
                             texture.needsUpdate = true;
@@ -125,14 +129,7 @@
                 return cubes;
             }
 
-            var Goldenrod = "rgba(255,193,37,1)";
-            var DeepSkyBlue = "rgba(0,191,255,1)";
-            var White = "rgba(255,255,255,1)";
-            var Black = "rgba(0,0,0,1)";
-            var LimeGreen = "rgba(50,205,50,1)";
-            var Firebrick = "rgba(178,34,34,1)";
-            var Yellow = "rgba(255,255,0,1)";
-
+            //生成canvas素材
             function faces(rgbaColor) {
                 var canvas = document.createElement("canvas");
                 canvas.width = 256;
