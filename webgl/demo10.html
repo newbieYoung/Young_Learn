@@ -92,12 +92,22 @@
                 for(var i=0;i<num;i++){
                     for(var j=0;j<num*num;j++){
                         var cubegeo = new THREE.BoxGeometry(len,len,len);
-                        for ( var z = 0; z < cubegeo.faces.length; z += 2 ) {
-                            var hex = Math.random() * 0xffffff;
-                            cubegeo.faces[ z ].color.setHex( hex );
-                            cubegeo.faces[ z + 1 ].color.setHex( hex );
+                        var materials = [];
+                        var myFaces = [];
+                        myFaces.push(faces(Goldenrod));
+                        myFaces.push(faces(Black));
+                        myFaces.push(faces(DeepSkyBlue));
+                        myFaces.push(faces(Black));
+                        myFaces.push(faces(White));
+                        myFaces.push(faces(Black));
+                        for (var z = 0; z < 6; z++) {
+                            var texture = new THREE.Texture(myFaces[z]);
+                            texture.needsUpdate = true;
+                            materials.push(new THREE.MeshLambertMaterial({
+                                map: texture
+                            }));
                         }
-                        var cubemat = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
+                        var cubemat = new THREE.MeshFaceMaterial(materials);
                         var cube = new THREE.Mesh( cubegeo, cubemat );
                         //中心坐标
                         cube.position.x = (x+len/2)+(j%3)*len;
@@ -109,6 +119,38 @@
                 }
                 return cubes;
             }
+
+            var Goldenrod = "rgba(255,193,37,1)";
+            var DeepSkyBlue = "rgba(0,191,255,1)";
+            var White = "rgba(255,255,255,1)";
+            var Black = "rgba(0,0,0,1)";
+            var LimeGreen = "rgba(50,205,50,1)";
+            var Firebrick = "rgba(178,34,34,1)";
+            var Yellow = "rgba(255,255,0,1)";
+
+            function faces(rgbaColor) {
+                var canvas = document.createElement("canvas");
+                canvas.width = 256;
+                canvas.height = 256;
+                var context = canvas.getContext("2d");
+                if (context) {
+                    // 3
+                    context.fillStyle = "rgba(0,0,0,1)";
+                    context.fillRect(0, 0, 256, 256);
+                    context.rect(16, 16, 224, 224);
+                    context.lineJoin = "round";
+                    context.lineWidth = 16;
+                    context.fillStyle = rgbaColor;
+                    context.strokeStyle = rgbaColor;
+                    context.stroke();
+                    context.fill();
+
+                } else {
+                    alert('您的浏览器不支持Canvas无法预览.\n');
+                }
+                return canvas;
+            }
+
 
             function threeStart() {
                 initThree();
