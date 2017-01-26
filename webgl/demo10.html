@@ -68,16 +68,10 @@
 
             var group;
             function initObject() {
-            	//正方体
-                var cubegeo = new THREE.BoxGeometry( 200, 200, 200 );
-                for ( var i = 0; i < cubegeo.faces.length; i += 2 ) {
-                    var hex = Math.random() * 0xffffff;
-                    cubegeo.faces[ i ].color.setHex( hex );
-                    cubegeo.faces[ i + 1 ].color.setHex( hex );
+                var cubes = SimpleCube(-75,75,75,3,50);
+                for(var i=0;i<cubes.length;i++){
+                    scene.add(cubes[i]);
                 }
-                var cubemat = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
-                cube = new THREE.Mesh( cubegeo, cubemat );
-                scene.add( cube );
             }
 
             function render(){
@@ -85,6 +79,35 @@
                 renderer.clear();
                 renderer.render(scene, camera);
                 requestAnimationFrame(render);
+            }
+
+            /**
+             * 魔方
+             * x、y、z 魔方正面左上角坐标
+             * num 魔方单位方向上数量
+             * len 魔方单位正方体宽高
+             */
+            function SimpleCube(x,y,z,num,len){
+                var cubes = [];
+                for(var i=0;i<num;i++){
+                    for(var j=0;j<num*num;j++){
+                        var cubegeo = new THREE.BoxGeometry(len,len,len);
+                        for ( var z = 0; z < cubegeo.faces.length; z += 2 ) {
+                            var hex = Math.random() * 0xffffff;
+                            cubegeo.faces[ z ].color.setHex( hex );
+                            cubegeo.faces[ z + 1 ].color.setHex( hex );
+                        }
+                        var cubemat = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
+                        var cube = new THREE.Mesh( cubegeo, cubemat );
+                        //中心坐标
+                        cube.position.x = (x+len/2)+(j%3)*len;
+                        cube.position.y = (y-len/2)-parseInt(j/3)*len;
+                        cube.position.z = (z-len/2)-i*len;
+
+                        cubes.push(cube)
+                    }
+                }
+                return cubes;
             }
 
             function threeStart() {
