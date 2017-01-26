@@ -131,16 +131,16 @@
 
             //生成canvas素材
             function faces(rgbaColor) {
-                var canvas = document.createElement("canvas");
+                var canvas = document.createElement('canvas');
                 canvas.width = 256;
                 canvas.height = 256;
-                var context = canvas.getContext("2d");
+                var context = canvas.getContext('2d');
                 if (context) {
                     // 3
-                    context.fillStyle = "rgba(0,0,0,1)";
+                    context.fillStyle = 'rgba(0,0,0,1)';
                     context.fillRect(0, 0, 256, 256);
                     context.rect(16, 16, 224, 224);
-                    context.lineJoin = "round";
+                    context.lineJoin = 'round';
                     context.lineWidth = 16;
                     context.fillStyle = rgbaColor;
                     context.strokeStyle = rgbaColor;
@@ -160,6 +160,16 @@
                 initLight();
                 initObject();
                 render();
+
+                window.addEventListener('resize', onWindowResize, false);
+            }
+
+            function onWindowResize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize( width, height );
             }
         </script>
     </body>
