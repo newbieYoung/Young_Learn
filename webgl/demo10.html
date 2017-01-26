@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <title>魔方</title>
         <script type="text/javascript" src="../lib/three.js"></script>
+        <script type="text/javascript" src="../lib/three-orbit-controls.js"></script>
         <style type="text/css">
         	body{
         		margin:0;
@@ -23,6 +24,7 @@
             var renderer;
             var width;
             var height;
+            var controller;
             function initThree() {
                 width = window.innerWidth;
                 height = window.innerHeight;
@@ -51,6 +53,9 @@
                     y : 0,
                     z : 0
                 });
+                //视角控制
+                controller = new THREE.OrbitControls(camera, renderer.domElement);
+                controller.target = new THREE.Vector3(0, 0, 0);// 把控制基点设为原点
             }
 
             var scene;
@@ -150,7 +155,6 @@
                 }
                 return canvas;
             }
-
 
             function threeStart() {
                 initThree();
