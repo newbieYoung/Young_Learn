@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <title>魔方</title>
         <script type="text/javascript" src="../lib/three.js"></script>
+        <script type="text/javascript" src="../lib/three-orbit-controls.js"></script>
         <style type="text/css">
         	body{
         		margin:0;
@@ -21,17 +22,12 @@
         <div id="canvas-frame"></div>
         <script>
             var renderer;
+            var controller;
             var width;
             var height;
-            var controller;
             var raycaster = new THREE.Raycaster();
             var mouse = new THREE.Vector2();
             var intersect;
-
-            function onMouseMove(event){
-                mouse.x = (event.clientX / width)*2 - 1;
-                mouse.y = -(event.clientY / height)*2 + 1;
-            }
 
             function initThree() {
                 width = window.innerWidth;
@@ -61,6 +57,9 @@
                     y : 0,
                     z : 0
                 });
+                //视角控制
+                controller = new THREE.OrbitControls(camera, renderer.domElement);
+                controller.target = new THREE.Vector3(0, 0, 0);// 把控制基点设为原点
             }
 
             var scene;
@@ -93,6 +92,12 @@
                 raycaster.setFromCamera(mouse, camera);
                 //Raycaster方式定位选取元素，可能会选取多个，以第一个为准
                 var intersect = raycaster.intersectObjects(scene.children)[0];
+                //如果操作焦点在魔方上则取消移动，反之恢复移动
+                if(intersect){
+                    controller.enabled = false;
+                }else{
+                    controller.enabled = true;
+                }
                 renderer.render(scene, camera);
                 requestAnimationFrame(render);
             }
@@ -170,15 +175,22 @@
                 render();
 
                 window.addEventListener('resize', onWindowResize, false);
-                window.addEventListener( 'mousemove', onMouseMove, false );
+                window.addEventListener('mousemove', onMouseMove, false );
             }
 
+            //屏幕尺寸变化
             function onWindowResize() {
                 width = window.innerWidth;
                 height = window.innerHeight;
                 camera.aspect = width / height;
                 camera.updateProjectionMatrix();
                 renderer.setSize( width, height );
+            }
+
+            //鼠标移动
+            function onMouseMove(event){
+                mouse.x = (event.clientX / width)*2 - 1;
+                mouse.y = -(event.clientY / height)*2 + 1;
             }
         </script>
     </body>
