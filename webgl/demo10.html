@@ -24,6 +24,15 @@
             var width;
             var height;
             var controller;
+            var raycaster = new THREE.Raycaster();
+            var mouse = new THREE.Vector2();
+            var intersect;
+
+            function onMouseMove(event){
+                mouse.x = (event.clientX / width)*2 - 1;
+                mouse.y = -(event.clientY / height)*2 + 1;
+            }
+
             function initThree() {
                 width = window.innerWidth;
                 height = window.innerHeight;
@@ -81,6 +90,9 @@
             function render(){
             	//渲染
                 renderer.clear();
+                raycaster.setFromCamera(mouse, camera);
+                //Raycaster方式定位选取元素，可能会选取多个，以第一个为准
+                var intersect = raycaster.intersectObjects(scene.children)[0];
                 renderer.render(scene, camera);
                 requestAnimationFrame(render);
             }
@@ -158,6 +170,7 @@
                 render();
 
                 window.addEventListener('resize', onWindowResize, false);
+                window.addEventListener( 'mousemove', onMouseMove, false );
             }
 
             function onWindowResize() {
