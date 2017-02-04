@@ -28,6 +28,9 @@
             var raycaster = new THREE.Raycaster();
             var mouse = new THREE.Vector2();
             var intersect;
+            var startPoint;
+            var movePoint;
+            var isRotating = false;//魔方是否正在转动
 
             function initThree() {
                 width = window.innerWidth;
@@ -176,6 +179,7 @@
 
                 window.addEventListener('resize', onWindowResize, false);
                 window.addEventListener('mousemove', onMouseMove, false );
+                window.addEventListener('mousedown', onMouseDown, false);
             }
 
             //屏幕尺寸变化
@@ -191,6 +195,23 @@
             function onMouseMove(event){
                 mouse.x = (event.clientX / width)*2 - 1;
                 mouse.y = -(event.clientY / height)*2 + 1;
+                if(intersect){
+                    if(!isRotating&&startPoint){//魔方没有进行转动且满足进行转动的条件
+                        movePoint = intersect.point;
+                        if(!movePoint.equals(startPoint)){
+                            isRotating = true;
+                            var sub = movePoint.sub(startPoint);
+                            //判断差向量和x、y、z轴的夹角
+                        }
+                    }
+                }
+            }
+
+            //鼠标点击
+            function onMouseDown(event){
+                if(!isRotating&&intersect){
+                    startPoint = intersect.point;
+                }
             }
         </script>
     </body>
