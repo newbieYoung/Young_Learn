@@ -46,8 +46,8 @@
             function initCamera() {
             	//创建相机
             	camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
-                camera.position.x = 200
-                camera.position.y = 400;
+                camera.position.x = 0
+                camera.position.y = 0;
                 camera.position.z = 600;
                 camera.up.x = 0;//正方向
                 camera.up.y = 1;
@@ -59,7 +59,7 @@
                 });
                 //视角控制
                 controller = new THREE.OrbitControls(camera, renderer.domElement);
-                controller.target = new THREE.Vector3(0, 0, 0);// 把控制基点设为原点
+                controller.target = new THREE.Vector3(0, 0, -75);//设置控制点
             }
 
             var scene;
