@@ -46,6 +46,17 @@
                        window.webkitRequestAnimationFrame;
             })();
 
+            var cubeParams = {//魔方参数
+                x:-75,
+                y:75,
+                z:75,
+                num:3,
+                len:50,
+                colors:['rgba(255,193,37,1)','rgba(0,191,255,1)',
+                        'rgba(50,205,50,1)','rgba(178,34,34,1)',
+                        'rgba(255,255,0,1)','rgba(255,255,255,1)']
+            };
+
             function initThree() {
                 width = window.innerWidth;
                 height = window.innerHeight;
@@ -94,10 +105,7 @@
 
             var cubes
             function initObject() {
-                var colors = ['rgba(255,193,37,1)','rgba(0,191,255,1)',
-                            'rgba(50,205,50,1)','rgba(178,34,34,1)',
-                            'rgba(255,255,0,1)','rgba(255,255,255,1)'];
-                cubes = SimpleCube(-75,75,75,3,50,colors);
+                cubes = SimpleCube(cubeParams.x,cubeParams.y,cubeParams.z,cubeParams.num,cubeParams.len,cubeParams.colors);
                 for(var i=0;i<cubes.length;i++){
                     scene.add(cubes[i]);
                 }
