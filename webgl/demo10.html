@@ -207,54 +207,15 @@
                         if(!movePoint.equals(startPoint)){
                             isRotating = true;
                             var sub = movePoint.sub(startPoint);
-                            //判断差向量和x、y、z轴的夹角
-                            var xAngle = sub.angleTo(xLine);
-                            var xAngleAd = sub.angleTo(xLineAd);
-                            var yAngle = sub.angleTo(yLine);
-                            var yAngleAd = sub.angleTo(yLineAd);
-                            var zAngle = sub.angleTo(zLine);
-                            var zAngleAd = sub.angleTo(zLineAd);
-                            var minAngle = min([xAngle,xAngleAd,yAngle,yAngleAd,zAngle,zAngleAd]);//最小夹角
-                            var elements;
-                            switch(minAngle){
-                                case xAngle:
-                                    elements = getBoxs(intersect,0);
-                                    console.log(elements);
-                                    console.log('绕y轴向x轴正方向旋转90度');
-                                    break;
-                                case xAngleAd:
-                                    elements = getBoxs(intersect,1);
-                                    console.log(elements);
-                                    console.log('绕y轴向x轴反方向旋转90度');
-                                    break;
-                                case yAngle:
-                                    elements = getBoxs(intersect,2);
-                                    console.log(elements);
-                                    console.log('绕x轴向y轴正方向旋转90度');
-                                    break;
-                                case yAngleAd:
-                                    elements = getBoxs(intersect,3);
-                                    console.log(elements);
-                                    console.log('绕x轴向y轴反方向旋转90度');
-                                    break;
-                                case zAngle:
-                                    elements = getBoxs(intersect,4);
-                                    console.log(elements);
-                                    console.log('绕y轴向z轴正方向旋转90度');
-                                    break;
-                                case zAngleAd:
-                                    elements = getBoxs(intersect,5);
-                                    console.log(elements);
-                                    console.log('绕y轴向z轴反方向旋转90度');
-                                    break;
-                            }
+                            var direction = getDirection(sub);
+                            var elements; = getBoxs(intersect,direction);
+                            rotateAnimation(elements,direction);
                         }
                     }
                 }
             }
 
             /**
-             * 根据方向获得运动元素
              * direction
              * 0:xLine
              * 1:xLineAd
@@ -263,8 +224,51 @@
              * 4:zLine
              * 5:zLineAd
              */
+
+            //旋转动画
+            function rotateAnimation(elements,direction){
+
+            }
+
+            //获得旋转方向
+            function getDirection(vector3){
+                var direction;
+                //判断差向量和x、y、z轴的夹角
+                var xAngle = sub.angleTo(xLine);
+                var xAngleAd = sub.angleTo(xLineAd);
+                var yAngle = sub.angleTo(yLine);
+                var yAngleAd = sub.angleTo(yLineAd);
+                var zAngle = sub.angleTo(zLine);
+                var zAngleAd = sub.angleTo(zLineAd);
+                var minAngle = min([xAngle,xAngleAd,yAngle,yAngleAd,zAngle,zAngleAd]);//最小夹角
+
+                switch(minAngle){
+                    case xAngle:
+                        direction = 0;//绕y轴向x轴正方向旋转90度
+                        break;
+                    case xAngleAd:
+                        direction = 1;//绕y轴向x轴反方向旋转90度
+                        break;
+                    case yAngle:
+                        direction = 2;//绕x轴向y轴正方向旋转90度
+                        break;
+                    case yAngleAd:
+                        direction = 3;//绕x轴向y轴反方向旋转90度
+                        break;
+                    case zAngle:
+                        direction = 4;//绕y轴向z轴正方向旋转90度
+                        break;
+                    case zAngleAd:
+                        direction = 4;//绕y轴向z轴反方向旋转90度
+                        break;
+                    default:
+                        break;
+                }
+                return direction;
+            }
+
+            //根据方向获得运动元素
             function getBoxs(target,direction){
-                //i*9+j
                 var targetId = target.object.id;
                 var ids = [];               
                 for(var i=0;i<cubes.length;i++){
@@ -275,6 +279,7 @@
                 var numI = parseInt(targetId/9);
                 var numJ = targetId%9;
                 var boxs = [];
+                //根据绘制时的规律判断 no = i*9+j
                 switch(direction){
                     case 0:
                     case 1:
