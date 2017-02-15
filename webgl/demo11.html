@@ -103,8 +103,9 @@
                 }
                 var cubemat = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
                 cube = new THREE.Mesh( cubegeo, cubemat );
-                cube.position.y = 150;
-                cube.position.x = 150;
+                cube.position.x = 100;
+                cube.position.y = 100;
+                cube.position.z = -100;
                 scene.add( cube );
             }
 
@@ -113,25 +114,38 @@
                 renderer.clear();
                 renderer.render(scene, camera);
 
+                setTimeout(function(){
+                	renderer.clear();
+
+                	// 这种反转矩阵还原变换的方法有问题，不知道啥原因
+                	// cube.matrix.getInverse(cube.matrix);
+                	// console.log(cube.matrix);
+                	// cube.applyMatrix(cube.matrix);
+
+                	var matrix = cube.matrix.clone();
+                	matrix.getInverse(matrix);
+                	cube.applyMatrix(matrix);
+
+                	renderer.render(scene, camera);
+                },1000);
+
                 /**
                  * ThreeJS中Object3D对象的几何变化基本都是相对于物体本身的坐标系而言的
                  */
                 
                 //绕自身X轴旋转45度
-                setTimeout(function(){
-                	renderer.clear();
-                	cube.rotateX(Math.PI*45/180);
-                	renderer.render(scene, camera);
-                },1000);
+                // setTimeout(function(){
+                // 	renderer.clear();
+                // 	cube.rotateX(Math.PI*45/180);
+                // 	renderer.render(scene, camera);
+                // },2000);
 
                 //绕自身Y轴旋转45度
-                setTimeout(function(){
-                	renderer.clear();
-                	cube.rotateY(Math.PI*45/180);
-                	renderer.render(scene, camera);
-                },2000);
-
-
+                // setTimeout(function(){
+                // 	renderer.clear();
+                // 	cube.rotateY(Math.PI*45/180);
+                // 	renderer.render(scene, camera);
+                // },3000);
             }
 
             function threeStart() {
