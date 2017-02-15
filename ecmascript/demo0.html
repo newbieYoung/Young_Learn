@@ -6,28 +6,31 @@
 </head>
 <body>
 	<script type="text/javascript">
-
 		function factorial(n) {
+			'use strict';
+			var arr = new Array(10000);
  			if (n === 1) return 1;
- 			return n * factorial(n - 1);//这里不是尾调用，需要保存n个调用记录，复杂度 O(n) 
+ 			return 1 * factorial(n - 1);//这里不是尾调用，需要保存n个调用记录，复杂度 O(n) 
 		}
 
 		function _factorial(n, total) {
+			'use strict';
+			var arr = new Array(10000);
  			if (n === 1) return total;
- 			return _factorial(n - 1, n * total);
+ 			return _factorial(n - 1, 1 * total);
  		}
 		
 		window.onload = function(){
+			'use strict';
 			/**
-			 * 没办法从chrome timeline中观察出factorial(100)、_factorial(100,1)计算的内存消耗差异，
+			 * 没办法从chrome timeline中观察出factorial(10000)、_factorial(10000,1)计算的内存消耗差异，
 			 * 而且factorial(100000)、_factorial(100000,1)都会报错Maximum call stack size exceeded
-			 * 所以我不清楚是否还存在所谓的尾调用优化，
-			 * 暂时猜测为现代浏览器引擎自动优化了。
+			 * 所以我不清楚是否还存在所谓的尾调用优化。
 			 */
 
-			//console.log(factorial(100));
+			console.log(factorial(10000));
 
-			console.log(_factorial(100,1))
+			//console.log(_factorial(10000,1))
 		};
 	</script>
 </body>
