@@ -21,7 +21,8 @@
 			/**
 			 * 没办法从chrome timeline中观察出factorial(100)、_factorial(100,1)计算的内存消耗差异，
 			 * 而且factorial(100000)、_factorial(100000,1)都会报错Maximum call stack size exceeded
-			 * 所以我不清楚是否还存在所谓的尾调用优化
+			 * 所以我不清楚是否还存在所谓的尾调用优化，
+			 * 暂时猜测为现代浏览器引擎自动优化了。
 			 */
 
 			//console.log(factorial(100));
