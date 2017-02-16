@@ -269,6 +269,29 @@
                 }
             }
 
+            //绕着世界坐标系的某个轴旋转
+            function rotateAroundWorldY(obj,rad){
+                var x0 = obj.position.x;
+                var z0 = obj.position.z;
+                obj.rotateY(rad);
+                obj.position.x = Math.cos(rad)*x0-Math.sin(rad)*z0;
+                obj.position.z = Math.cos(rad)*z0+Math.sin(rad)*x0;
+            }
+            function rotateAroundWorldZ(obj,rad){
+                var x0 = obj.position.x;
+                var y0 = obj.position.y;
+                obj.rotateZ(rad);
+                obj.position.x = Math.cos(rad)*x0-Math.sin(rad)*y0;
+                obj.position.y = Math.cos(rad)*y0+Math.sin(rad)*x0;
+            }
+            function rotateAroundWorldX(obj,rad){
+                var y0 = obj.position.y;
+                var z0 = obj.position.z;
+                obj.rotateX(rad);
+                obj.position.y = Math.cos(rad)*y0-Math.sin(rad)*z0;
+                obj.position.z = Math.cos(rad)*z0+Math.sin(rad)*y0;
+            }
+
             /**
              * direction
              * 0:xLine
@@ -287,20 +310,24 @@
                 if(startstamp===0){
                     startstamp = timestamp;
                 }
-                if(timestamp-startstamp<1000){
-                    for(var i=0;i<elements.length;i++){
-                        elements[i].rotation.y = 90*Math.PI/180*(timestamp-startstamp)/totalTime;
-                    }
-                    window.requestAnimFrame(function(timestamp){
-                        rotateAnimation(elements,direction,timestamp,startstamp);
-                    });
-                }else{
-                    for(var i=0;i<elements.length;i++){
-                        elements[i].rotation.y = 90*Math.PI/180;
-                    }
-                    isRotating = false;
-                    startPoint = null;
+                for(var i=0;i<elements.length;i++){
+                    rotateAroundWorldY(elements[i],Math.PI*45/180);
                 }
+                
+                // if(timestamp-startstamp<1000){
+                //     for(var i=0;i<elements.length;i++){
+                //         elements[i].rotation.y = 90*Math.PI/180*(timestamp-startstamp)/totalTime;
+                //     }
+                //     window.requestAnimFrame(function(timestamp){
+                //         rotateAnimation(elements,direction,timestamp,startstamp);
+                //     });
+                // }else{
+                //     for(var i=0;i<elements.length;i++){
+                //         elements[i].rotation.y = 90*Math.PI/180;
+                //     }
+                //     isRotating = false;
+                //     startPoint = null;
+                // }
             }
 
 
