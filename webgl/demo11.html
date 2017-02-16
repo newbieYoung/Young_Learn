@@ -109,6 +109,29 @@
                 scene.add( cube );
             }
 
+            //绕着世界坐标系的某个轴旋转
+            function rotateAroundWorldY(obj,rad){
+                var x0 = obj.position.x;
+                var z0 = obj.position.z;
+                obj.rotateY(rad);
+                obj.position.x = Math.cos(rad)*x0-Math.sin(rad)*z0;
+                obj.position.z = Math.cos(rad)*z0+Math.sin(rad)*x0;
+            }
+            function rotateAroundWorldZ(obj,rad){
+                var x0 = obj.position.x;
+                var y0 = obj.position.y;
+                obj.rotateZ(rad);
+                obj.position.x = Math.cos(rad)*x0-Math.sin(rad)*y0;
+                obj.position.y = Math.cos(rad)*y0+Math.sin(rad)*x0;
+            }
+            function rotateAroundWorldX(obj,rad){
+                var y0 = obj.position.y;
+                var z0 = obj.position.z;
+                obj.rotateX(rad);
+                obj.position.y = Math.cos(rad)*y0-Math.sin(rad)*z0;
+                obj.position.z = Math.cos(rad)*z0+Math.sin(rad)*y0;
+            }
+
             function render(timestamp){
             	//渲染
                 renderer.clear();
@@ -122,17 +145,28 @@
                 	// console.log(cube.matrix);
                 	// cube.applyMatrix(cube.matrix);
 
-                    //绕坐标系y轴旋转45度
-                    var initX = cube.position.x;
-                    var initY = cube.position.y;
-                    var initZ = cube.position.z;
-                	var matrix = cube.matrix.clone();
-                	matrix.getInverse(matrix);
-                	cube.applyMatrix(matrix);
-                    cube.rotateY(Math.PI*45/180);
-                    cube.position.y = initY;
-                    cube.position.x = 0;
-                    cube.position.z = -initX/Math.cos(Math.PI*45/180);
+                    //逆矩阵回到世界坐标系原点
+                	//var matrix = cube.matrix.clone();
+                	//matrix.getInverse(matrix);
+                	//cube.applyMatrix(matrix);
+                   
+                    //绕世界坐标系y轴逆时针旋转45度
+                    //rotateAroundWorldY(cube,-Math.PI*45/180);
+
+                    //绕世界坐标系y轴顺时针旋转45度
+                    //rotateAroundWorldY(cube,Math.PI*45/180);
+                    
+                    //绕世界坐标系x轴逆时针旋转45度
+                    //rotateAroundWorldX(cube,Math.PI*45/180);
+
+                    //绕世界坐标系x轴顺时针旋转45度
+                    //rotateAroundWorldX(cube,-Math.PI*45/180);
+                    
+                    //绕世界坐标系z轴顺时针旋转45度
+                    //rotateAroundWorldZ(cube,-Math.PI*45/180);
+
+                    //绕世界坐标系z轴逆时针旋转45度
+                    rotateAroundWorldZ(cube,Math.PI*45/180);
 
                 	renderer.render(scene, camera);
                 },1000);
