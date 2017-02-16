@@ -122,9 +122,17 @@
                 	// console.log(cube.matrix);
                 	// cube.applyMatrix(cube.matrix);
 
+                    //绕坐标系y轴旋转45度
+                    var initX = cube.position.x;
+                    var initY = cube.position.y;
+                    var initZ = cube.position.z;
                 	var matrix = cube.matrix.clone();
                 	matrix.getInverse(matrix);
                 	cube.applyMatrix(matrix);
+                    cube.rotateY(Math.PI*45/180);
+                    cube.position.y = initY;
+                    cube.position.x = 0;
+                    cube.position.z = -initX/Math.cos(Math.PI*45/180);
 
                 	renderer.render(scene, camera);
                 },1000);
