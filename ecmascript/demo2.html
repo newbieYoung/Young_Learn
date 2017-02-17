@@ -16,6 +16,11 @@
 					result = obj;
 					break;
 				case 'object':
+					/**
+					 * 如果存在循环引用那么JSON.stringify方法会报错，方法抛出异常执行结束
+					 */
+					JSON.stringify(obj);
+					
 					if(obj instanceof Array){//数组
 						result = [];
 						for(var i=0;i<obj.length;i++){
@@ -58,6 +63,17 @@
 		// var _date = deapClone(date);
 		// console.log(_date);
 		// console.log(_date===date);
+
+		//循环引用
+		var a = {name:'a'};
+		var b = {name:'b'};
+		a.target = b;
+		b.target = a;
+		a.target = b;
+		console.log(a);
+		console.log(b);
+		var c = deapClone(a);
+		console.log(c);
 
 	</script>
 </body>
