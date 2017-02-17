@@ -107,6 +107,14 @@
             function initObject() {
                 cubes = SimpleCube(cubeParams.x,cubeParams.y,cubeParams.z,cubeParams.num,cubeParams.len,cubeParams.colors);
                 for(var i=0;i<cubes.length;i++){
+                    var item = cubes[i];
+                    /**
+                     * 由于筛选运动元素时是根据物体的id规律来的，但是滚动之后位置发生了变化；
+                     * 再根据初始规律筛选会出问题，而且id是只读变量；
+                     * 所以这里给每个物体设置一个额外变量cudeIndex，每次滚动之后更新该cudeIndex；
+                     * 让该变量一直保持初始规律即可。
+                     */
+                    item.cubeIndex = item.id;
                     scene.add(cubes[i]);
                 }
 
