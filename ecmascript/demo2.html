@@ -20,12 +20,14 @@
 					 * 如果存在循环引用那么JSON.stringify方法会报错，方法抛出异常执行结束
 					 */
 					JSON.stringify(obj);
-					
+
 					if(obj instanceof Array){//数组
 						result = [];
 						for(var i=0;i<obj.length;i++){
 							result.push(deapClone(obj[i]));
 						}
+					}else if(obj instanceof RegExp){//正则
+						result = new RegExp(obj.source,obj.flags);
 					}else{
 						var constructor = obj.constructor;
 						result = new constructor();
@@ -44,11 +46,8 @@
 
 		//测试
 		//console.log(deapClone(1));//ok
-
 		//console.log(deapClone('2'));//ok
-
 		//console.log(deapClone(true));//ok
-
 		//console.log(deapClone([1,2,3,4]));//ok
 		
 		// var person = {name:'liy'};//ok
@@ -65,15 +64,23 @@
 		// console.log(_date===date);
 
 		//循环引用
-		var a = {name:'a'};
-		var b = {name:'b'};
-		a.target = b;
-		b.target = a;
-		a.target = b;
-		console.log(a);
-		console.log(b);
-		var c = deapClone(a);
-		console.log(c);
+		// var a = {name:'a'};//ok
+		// var b = {name:'b'};
+		// a.target = b;
+		// b.target = a;
+		// a.target = b;
+		// console.log(a);
+		// console.log(b);
+		// var c = deapClone(a);
+		// console.log(c);
+
+		//正则
+		// var str = '{name}addasd{website}';//ok
+		// var reg = /\{[a-zA-Z&]{1,}\}/;
+		// console.log(reg.exec(str));
+		// var _reg = deapClone(reg);
+		// console.log(_reg===reg);
+		// console.log(_reg.exec(str));
 
 	</script>
 </body>
