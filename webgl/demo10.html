@@ -311,48 +311,49 @@
                     startstamp = currentstamp;
                     laststamp = currentstamp;
                 }
-                
+                if(currentstamp-startstamp>=1000){
+                    currentstamp = startstamp+1000;
+                    isRotating = false;
+                    startPoint = null;
+                }
+                switch(direction){
+                    case 5:
+                        for(var i=0;i<elements.length;i++){
+                            rotateAroundWorldZ(elements[i],-90*Math.PI/180*(currentstamp-laststamp)/totalTime);
+                        }
+                        break;
+                    case 4:
+                        for(var i=0;i<elements.length;i++){
+                            rotateAroundWorldZ(elements[i],90*Math.PI/180*(currentstamp-laststamp)/totalTime);
+                        }
+                        break;
+                    case 3:
+                        for(var i=0;i<elements.length;i++){
+                            rotateAroundWorldX(elements[i],90*Math.PI/180*(currentstamp-laststamp)/totalTime);
+                        }
+                        break;
+                    case 2:
+                        for(var i=0;i<elements.length;i++){
+                            rotateAroundWorldX(elements[i],-90*Math.PI/180*(currentstamp-laststamp)/totalTime);
+                        }
+                        break;
+                    case 1:
+                        for(var i=0;i<elements.length;i++){
+                            rotateAroundWorldY(elements[i],-90*Math.PI/180*(currentstamp-laststamp)/totalTime);
+                        }
+                        break;
+                    case 0:
+                        for(var i=0;i<elements.length;i++){
+                            rotateAroundWorldY(elements[i],90*Math.PI/180*(currentstamp-laststamp)/totalTime);
+                        }
+                        break;
+                    default:
+                        break;
+                }
                 if(currentstamp-startstamp<1000){
-                    switch(direction){
-                        case 5:
-                            for(var i=0;i<elements.length;i++){
-                                rotateAroundWorldZ(elements[i],-90*Math.PI/180*(currentstamp-laststamp)/totalTime);
-                            }
-                            break;
-                        case 4:
-                            for(var i=0;i<elements.length;i++){
-                                rotateAroundWorldZ(elements[i],90*Math.PI/180*(currentstamp-laststamp)/totalTime);
-                            }
-                            break;
-                        case 3:
-                            for(var i=0;i<elements.length;i++){
-                                rotateAroundWorldX(elements[i],90*Math.PI/180*(currentstamp-laststamp)/totalTime);
-                            }
-                            break;
-                        case 2:
-                            for(var i=0;i<elements.length;i++){
-                                rotateAroundWorldX(elements[i],-90*Math.PI/180*(currentstamp-laststamp)/totalTime);
-                            }
-                            break;
-                        case 1:
-                            for(var i=0;i<elements.length;i++){
-                                rotateAroundWorldY(elements[i],-90*Math.PI/180*(currentstamp-laststamp)/totalTime);
-                            }
-                            break;
-                        case 0:
-                            for(var i=0;i<elements.length;i++){
-                                rotateAroundWorldY(elements[i],90*Math.PI/180*(currentstamp-laststamp)/totalTime);
-                            }
-                            break;
-                        default:
-                            break;
-                    }
                     window.requestAnimFrame(function(timestamp){
                         rotateAnimation(elements,direction,timestamp,startstamp,currentstamp);
                     });
-                }else{
-                    isRotating = false;
-                    startPoint = null;
                 }
             }
 
