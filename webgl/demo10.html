@@ -274,8 +274,8 @@
                 var x0 = obj.position.x;
                 var z0 = obj.position.z;
                 obj.rotateY(rad);
-                obj.position.x = Math.cos(rad)*x0-Math.sin(rad)*z0;
-                obj.position.z = Math.cos(rad)*z0+Math.sin(rad)*x0;
+                obj.position.x = Math.cos(rad)*x0+Math.sin(rad)*z0;
+                obj.position.z = Math.cos(rad)*z0-Math.sin(rad)*x0;
             }
             function rotateAroundWorldZ(obj,rad){
                 var x0 = obj.position.x;
