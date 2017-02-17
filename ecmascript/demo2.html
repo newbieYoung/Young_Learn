@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>深克隆探讨</title>
+</head>
+<body>
+	<script type="text/javascript">
+		function deapClone(obj){
+			var result;
+			var typeName = (typeof obj).toLowerCase();
+			switch(typeName){
+				case 'number':
+				case 'string':
+				case 'boolean':
+					result = obj;
+					break;
+				case 'object':
+					if(obj instanceof Array){//数组
+						result = [];
+						for(var i=0;i<obj.length;i++){
+							result.push(deapClone(obj[i]));
+						}
+					}else{
+						var constructor = obj.constructor;
+						result = new constructor();
+						var ownProperty = Object.getOwnPropertyNames(obj);
+						for(var i=0;i<ownProperty.length;i++){
+							result[ownProperty[i]] = deapClone(obj[ownProperty[i]]);
+						}
+					}
+					break;
+				default:
+					result = null;
+					break;
+			}
+			return result;
+		}
+
+		//测试
+		//console.log(deapClone(1));
+
+		//console.log(deapClone('2'));
+
+		//console.log(deapClone(true));
+
+		//console.log(deapClone([1,2,3,4]));
+		
+		var person = {name:'liy'};
+		var arr = [person,1,2,3];
+		var _arr = deapClone(arr);
+		console.log(_arr);
+		_arr[0].name = '_liy';
+		console.log(_arr[0]);
+		console.log(person);
+	</script>
+</body>
+</html>
