@@ -107,6 +107,19 @@
                 cube.position.y = 100;
                 cube.position.z = -100;
                 scene.add( cube );
+
+                var cubegeo2 = new THREE.BoxGeometry( 200, 200, 200 );
+                for ( var i = 0; i < cubegeo2.faces.length; i += 2 ) {
+                    var hex = Math.random() * 0xffffff;
+                    cubegeo2.faces[ i ].color.setHex( hex );
+                    cubegeo2.faces[ i + 1 ].color.setHex( hex );
+                }
+                var cubemat2 = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
+                cube2 = new THREE.Mesh( cubegeo2, cubemat2 );
+                cube2.position.x = 100;
+                cube2.position.y = 300;
+                cube2.position.z = -100;
+                scene.add( cube2 );
             }
 
             //绕着世界坐标系的某个轴旋转
@@ -166,7 +179,8 @@
                     //rotateAroundWorldZ(cube,-Math.PI*45/180);
 
                     //绕世界坐标系z轴逆时针旋转45度
-                    rotateAroundWorldZ(cube,Math.PI*45/180);
+                    rotateAroundWorldZ(cube,Math.PI*30/180);
+                    rotateAroundWorldZ(cube2,Math.PI*30/180);
 
                 	renderer.render(scene, camera);
                 },1000);
