@@ -37,6 +37,7 @@
             var yLineAd = new THREE.Vector3( 0, -1, 0 );
             var zLine = new THREE.Vector3( 0, 0, 1 );
             var zLineAd = new THREE.Vector3( 0, 0, -1 );
+            var initStatus = [];//魔方初始状态
 
             window.requestAnimFrame = (function() {
                 return window.requestAnimationFrame ||
@@ -111,9 +112,15 @@
                     /**
                      * 由于筛选运动元素时是根据物体的id规律来的，但是滚动之后位置发生了变化；
                      * 再根据初始规律筛选会出问题，而且id是只读变量；
-                     * 所以这里给每个物体设置一个额外变量cudeIndex，每次滚动之后更新该cudeIndex；
+                     * 所以这里给每个物体设置一个额外变量cubeIndex，每次滚动之后更新根据初始状态更新该cubeIndex；
                      * 让该变量一直保持初始规律即可。
                      */
+                    initStatus.push({
+                        x:item.position.x,
+                        y:item.position.y,
+                        z:item.position.z,
+                        cubeIndex:item.id
+                    });
                     item.cubeIndex = item.id;
                     scene.add(cubes[i]);
                 }
@@ -323,6 +330,7 @@
                     currentstamp = startstamp+1000;
                     isRotating = false;
                     startPoint = null;
+                    updateCubeIndex(elements);
                 }
                 switch(direction){
                     case 5:
@@ -365,6 +373,21 @@
                 }
             }
 
+            //更新位置索引
+            function updateCubeIndex(elements){
+                for(var i=0;i<elements.length;i++){
+                    var temp1 = elements[i];
+                    for(var j=0;j<initStatus.length;j++){
+                        var temp2 = initStatus[j];
+                        if( Math.abs(temp1.position.x - temp2.x)<=cubeParams.len/2 && 
+                            Math.abs(temp1.position.y - temp2.y)<=cubeParams.len/2 && 
+                            Math.abs(temp1.position.z - temp2.z)<=cubeParams.len/2 ){
+                            temp1.cubeIndex = temp2.cubeIndex;
+                            break;
+                        }
+                    }
+                }
+            }
 
             //获得旋转方向
             function getDirection(vector3){
@@ -405,10 +428,10 @@
 
             //根据方向获得运动元素
             function getBoxs(target,direction){
-                var targetId = target.object.id;
+                var targetId = target.object.cubeIndex;
                 var ids = [];               
                 for(var i=0;i<cubes.length;i++){
-                    ids.push(cubes[i].id);
+                    ids.push(cubes[i].cubeIndex);
                 }
                 var minId = min(ids);
                 targetId = targetId-minId;
@@ -420,7 +443,7 @@
                     case 0:
                     case 1:
                         for(var i=0;i<cubes.length;i++){
-                            var tempId = cubes[i].id-minId;
+                            var tempId = cubes[i].cubeIndex-minId;
                             if(parseInt(numJ/3)===parseInt(tempId%9/3)){
                                 boxs.push(cubes[i]);
                             }
@@ -429,7 +452,7 @@
                     case 2:
                     case 3:
                         for(var i=0;i<cubes.length;i++){
-                            var tempId = cubes[i].id-minId;
+                            var tempId = cubes[i].cubeIndex-minId;
                             if(tempId%9%3===numJ%3){
                                 boxs.push(cubes[i]);
                             }
@@ -438,7 +461,7 @@
                     case 4:
                     case 5:
                         for(var i=0;i<cubes.length;i++){
-                            var tempId = cubes[i].id-minId;
+                            var tempId = cubes[i].cubeIndex-minId;
                             if(parseInt(tempId/3)===parseInt(numJ/3)){
                                 boxs.push(cubes);
                             }
