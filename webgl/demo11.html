@@ -126,21 +126,35 @@
             function rotateAroundWorldY(obj,rad){
                 var x0 = obj.position.x;
                 var z0 = obj.position.z;
-                obj.rotateY(rad);
+                /**
+                 * 因为物体本身的坐标系是随着物体的变化而变化的，
+                 * 所以如果使用rotateZ、rotateY、rotateX等方法，
+                 * 多次调用后就会出问题，先改为Quaternion实现。
+                 */
+                var q = new THREE.Quaternion(); 
+                q.setFromAxisAngle( new THREE.Vector3( 0, 1, 0 ), rad );
+                obj.quaternion.premultiply( q );
+                //obj.rotateY(rad);
                 obj.position.x = Math.cos(rad)*x0+Math.sin(rad)*z0;
                 obj.position.z = Math.cos(rad)*z0-Math.sin(rad)*x0;
             }
             function rotateAroundWorldZ(obj,rad){
                 var x0 = obj.position.x;
                 var y0 = obj.position.y;
-                obj.rotateZ(rad);
+                var q = new THREE.Quaternion(); 
+                q.setFromAxisAngle( new THREE.Vector3( 0, 0, 1 ), rad );
+                obj.quaternion.premultiply( q );
+                //obj.rotateZ(rad);
                 obj.position.x = Math.cos(rad)*x0-Math.sin(rad)*y0;
                 obj.position.y = Math.cos(rad)*y0+Math.sin(rad)*x0;
             }
             function rotateAroundWorldX(obj,rad){
                 var y0 = obj.position.y;
                 var z0 = obj.position.z;
-                obj.rotateX(rad);
+                var q = new THREE.Quaternion(); 
+                q.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), rad );
+                obj.quaternion.premultiply( q );
+                //obj.rotateX(rad);
                 obj.position.y = Math.cos(rad)*y0-Math.sin(rad)*z0;
                 obj.position.z = Math.cos(rad)*z0+Math.sin(rad)*y0;
             }
@@ -166,7 +180,7 @@
                     //绕世界坐标系y轴顺时针旋转45度
                     //rotateAroundWorldY(cube,-Math.PI*22/180);
                     //rotateAroundWorldY(cube2,-Math.PI*22/180);
-
+                    
                     //绕世界坐标系y轴逆时针旋转45度
                     //rotateAroundWorldY(cube,Math.PI*22/180);
                     //rotateAroundWorldY(cube2,Math.PI*22/180);
@@ -176,8 +190,8 @@
                     //rotateAroundWorldX(cube2,Math.PI*30/180);
 
                     //绕世界坐标系x轴顺时针旋转45度
-                    //rotateAroundWorldX(cube,-Math.PI*180/180);
-                    //rotateAroundWorldX(cube2,-Math.PI*180/180);
+                    rotateAroundWorldX(cube,-Math.PI*180/180);
+                    rotateAroundWorldX(cube2,-Math.PI*180/180);
                     
                     //绕世界坐标系z轴顺时针旋转45度
                     //rotateAroundWorldZ(cube,-Math.PI*12/180);
@@ -189,6 +203,14 @@
 
                 	renderer.render(scene, camera);
                 },1000);
+                
+                //测试多次调用绕世界坐标轴旋转方法是否正常
+                setTimeout(function(){
+                    renderer.clear();
+                    rotateAroundWorldY(cube,Math.PI*20/180);
+                    rotateAroundWorldY(cube2,Math.PI*20/180);
+                    renderer.render(scene, camera);
+                },2000);
 
                 /**
                  * ThreeJS中Object3D对象的几何变化基本都是相对于物体本身的坐标系而言的
