@@ -288,21 +288,35 @@
             function rotateAroundWorldY(obj,rad){
                 var x0 = obj.position.x;
                 var z0 = obj.position.z;
-                obj.rotateY(rad);
+                /**
+                 * 因为物体本身的坐标系是随着物体的变化而变化的，
+                 * 所以如果使用rotateZ、rotateY、rotateX等方法，
+                 * 多次调用后就会出问题，先改为Quaternion实现。
+                 */
+                var q = new THREE.Quaternion(); 
+                q.setFromAxisAngle( new THREE.Vector3( 0, 1, 0 ), rad );
+                obj.quaternion.premultiply( q );
+                //obj.rotateY(rad);
                 obj.position.x = Math.cos(rad)*x0+Math.sin(rad)*z0;
                 obj.position.z = Math.cos(rad)*z0-Math.sin(rad)*x0;
             }
             function rotateAroundWorldZ(obj,rad){
                 var x0 = obj.position.x;
                 var y0 = obj.position.y;
-                obj.rotateZ(rad);
+                var q = new THREE.Quaternion(); 
+                q.setFromAxisAngle( new THREE.Vector3( 0, 0, 1 ), rad );
+                obj.quaternion.premultiply( q );
+                //obj.rotateZ(rad);
                 obj.position.x = Math.cos(rad)*x0-Math.sin(rad)*y0;
                 obj.position.y = Math.cos(rad)*y0+Math.sin(rad)*x0;
             }
             function rotateAroundWorldX(obj,rad){
                 var y0 = obj.position.y;
                 var z0 = obj.position.z;
-                obj.rotateX(rad);
+                var q = new THREE.Quaternion(); 
+                q.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), rad );
+                obj.quaternion.premultiply( q );
+                //obj.rotateX(rad);
                 obj.position.y = Math.cos(rad)*y0-Math.sin(rad)*z0;
                 obj.position.z = Math.cos(rad)*z0+Math.sin(rad)*y0;
             }
