@@ -28,6 +28,7 @@
             var raycaster = new THREE.Raycaster();
             var mouse = new THREE.Vector2();
             var intersect;
+            var normalize;
             var startPoint;
             var movePoint;
             var isRotating = false;//魔方是否正在转动
@@ -125,33 +126,16 @@
                     scene.add(cubes[i]);
                 }
 
-                //坐标轴
-                var xmat = new THREE.LineBasicMaterial({color: 0xff0000});
-                var xgeo = new THREE.Geometry();
-                xgeo.vertices.push(
-                    new THREE.Vector3( 0, 0, 0 ),
-                    new THREE.Vector3( 300, 0, 0 )
-                );
-                var xline = new THREE.Line( xgeo, xmat );
-                scene.add( xline );
-
-                var ymat = new THREE.LineBasicMaterial({color: 0x00ff00});
-                var ygeo = new THREE.Geometry();
-                ygeo.vertices.push(
-                    new THREE.Vector3( 0, 0, 0 ),
-                    new THREE.Vector3( 0, 300, 0 )
-                );
-                var yline = new THREE.Line( ygeo, ymat );
-                scene.add( yline );
-
-                var zmat = new THREE.LineBasicMaterial({color: 0x0000ff});
-                var zgeo = new THREE.Geometry();
-                zgeo.vertices.push(
-                    new THREE.Vector3( 0, 0, 0 ),
-                    new THREE.Vector3( 0, 0, 300 )
-                );
-                var zline = new THREE.Line( zgeo, zmat );
-                scene.add( zline );
+                //正方体
+                var cubegeo = new THREE.BoxGeometry(150,150,150);
+                var hex = 0x000000;
+                for ( var i = 0; i < cubegeo.faces.length; i += 2 ) {
+                    cubegeo.faces[ i ].color.setHex( hex );
+                    cubegeo.faces[ i + 1 ].color.setHex( hex );
+                }
+                var cubemat = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors,opacity: 0, transparent: true});
+                cube = new THREE.Mesh( cubegeo, cubemat );
+                scene.add( cube );
             }
 
             function render(){
@@ -159,9 +143,11 @@
                 renderer.clear();
                 raycaster.setFromCamera(mouse, camera);
                 //Raycaster方式定位选取元素，可能会选取多个，以第一个为准
-                intersect = raycaster.intersectObjects(scene.children)[0];
+                var temps = raycaster.intersectObjects(scene.children);
                 //如果操作焦点在魔方上则取消移动，反之恢复移动
-                if(intersect){
+                if(temps.length){
+                    intersect = temps[1];
+                    normalize = temps[0].face.normal;
                     controller.enabled = false;
                 }else{
                     controller.enabled = true;
