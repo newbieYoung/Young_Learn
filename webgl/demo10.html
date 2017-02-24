@@ -135,19 +135,27 @@
                 }
                 var cubemat = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors,opacity: 0, transparent: true});
                 cube = new THREE.Mesh( cubegeo, cubemat );
+                cube.cubeType = 'coverCube';
                 scene.add( cube );
             }
 
+            var intersects;
             function render(){
             	//渲染
                 renderer.clear();
                 raycaster.setFromCamera(mouse, camera);
                 //Raycaster方式定位选取元素，可能会选取多个，以第一个为准
-                var temps = raycaster.intersectObjects(scene.children);
+                intersects = raycaster.intersectObjects(scene.children);
+                //var intersects = raycaster.intersectObjects(scene.children);
                 //如果操作焦点在魔方上则取消移动，反之恢复移动
-                if(temps.length){
-                    intersect = temps[1];
-                    normalize = temps[0].face.normal;
+                if(intersects.length){
+                    if(intersects[0].object.cubeType==='coverCube'){
+                        intersect = intersects[1];
+                        normalize = intersects[0].face.normal;
+                    }else{
+                        intersect = intersects[0];
+                        normalize = intersects[1].face.normal;
+                    }
                     controller.enabled = false;
                 }else{
                     controller.enabled = true;
@@ -332,9 +340,6 @@
                     startPoint = null;
                     updateCubeIndex(elements);
                 }
-                console.log('---');
-                console.log(direction);
-                console.log(elements);
                 switch(direction){
                     //绕z轴顺时针
                     case 0.1:
