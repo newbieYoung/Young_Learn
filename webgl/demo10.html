@@ -241,6 +241,7 @@
                 window.addEventListener('resize', onWindowResize, false);
                 window.addEventListener('mousemove', onMouseMove, false );
                 window.addEventListener('mousedown', onMouseDown, false);
+                window.addEventListener('mouseup', onMouseUp,false);
             }
 
             //屏幕尺寸变化
@@ -271,6 +272,12 @@
                         }
                     }
                 }
+            }
+
+            //鼠标松开
+            function onMouseUp(){
+                intersect = null;
+                startPoint = null
             }
 
             //鼠标点击
