@@ -348,13 +348,13 @@
              * 旋转动画
              */
             function rotateAnimation(elements,direction,currentstamp,startstamp,laststamp){
-                var totalTime = 1000;//转动的总运动时间
+                var totalTime = 500;//转动的总运动时间
                 if(startstamp===0){
                     startstamp = currentstamp;
                     laststamp = currentstamp;
                 }
-                if(currentstamp-startstamp>=1000){
-                    currentstamp = startstamp+1000;
+                if(currentstamp-startstamp>=totalTime){
+                    currentstamp = startstamp+totalTime;
                     isRotating = false;
                     startPoint = null;
                     updateCubeIndex(elements);
@@ -417,7 +417,7 @@
                     default:
                         break;
                 }
-                if(currentstamp-startstamp<1000){
+                if(currentstamp-startstamp<totalTime){
                     window.requestAnimFrame(function(timestamp){
                         rotateAnimation(elements,direction,timestamp,startstamp,currentstamp);
                     });
