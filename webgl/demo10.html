@@ -239,9 +239,13 @@
                 render();
 
                 window.addEventListener('resize', onWindowResize, false);
-                window.addEventListener('mousemove', onMouseMove, false );
-                window.addEventListener('mousedown', onMouseDown, false);
-                window.addEventListener('mouseup', onMouseUp,false);
+                window.addEventListener('mousemove', moveCube, false );
+                window.addEventListener('mousedown', startCube, false);
+                window.addEventListener('mouseup', stopCube,false);
+
+                window.addEventListener('touchstart',startCube,false);
+                window.addEventListener('touchend',stopCube,false);
+                window.addEventListener('touchmove',moveCube,false);
             }
 
             //屏幕尺寸变化
@@ -253,10 +257,16 @@
                 renderer.setSize( width, height );
             }
 
-            //鼠标移动
-            function onMouseMove(event){
-                mouse.x = (event.clientX / width)*2 - 1;
-                mouse.y = -(event.clientY / height)*2 + 1;
+            //操作魔方
+            function moveCube(event){
+                if(event.touches){
+                    var touch = event.touches[0];
+                    mouse.x = (touch.clientX / width)*2 - 1;
+                    mouse.y = -(touch.clientY / height)*2 + 1;
+                }else{
+                    mouse.x = (event.clientX / width)*2 - 1;
+                    mouse.y = -(event.clientY / height)*2 + 1;
+                }
                 if(intersect){
                     if(!isRotating&&startPoint){//魔方没有进行转动且满足进行转动的条件
                         movePoint = intersect.point;
@@ -274,14 +284,14 @@
                 }
             }
 
-            //鼠标松开
-            function onMouseUp(){
+            //魔方操作结束
+            function stopCube(){
                 intersect = null;
                 startPoint = null
             }
 
-            //鼠标点击
-            function onMouseDown(event){
+            //开始操作魔方
+            function startCube(event){
                 if(!isRotating&&intersect){
                     startPoint = intersect.point;
                 }
