@@ -9,6 +9,7 @@
         	body{
         		margin:0;
         		padding:0;
+                overflow:hidden;
         	}
         	div#canvas-frame {
                 cursor: pointer;
@@ -142,26 +143,6 @@
             function render(){
             	//渲染
                 renderer.clear();
-                raycaster.setFromCamera(mouse, camera);
-                //Raycaster方式定位选取元素，可能会选取多个，以第一个为准
-                var intersects = raycaster.intersectObjects(scene.children);
-                //如果操作焦点在魔方上则取消移动，反之恢复移动
-                if(intersects.length){
-                    try{
-                        if(intersects[0].object.cubeType==='coverCube'){
-                            intersect = intersects[1];
-                            normalize = intersects[0].face.normal;
-                        }else{
-                            intersect = intersects[0];
-                            normalize = intersects[1].face.normal;
-                        }
-                    }catch(err){
-                        //nothing
-                    }
-                    controller.enabled = false;
-                }else{
-                    controller.enabled = true;
-                }
                 renderer.render(scene, camera);
                 window.requestAnimFrame(render);
             }
@@ -243,9 +224,9 @@
                 window.addEventListener('mousedown', startCube, false);
                 window.addEventListener('mouseup', stopCube,false);
 
-                window.addEventListener('touchstart',startCube,false);
-                window.addEventListener('touchend',stopCube,false);
-                window.addEventListener('touchmove',moveCube,false);
+                window.addEventListener('touchstart', startCube, false);
+                window.addEventListener('touchend', stopCube, false);
+                window.addEventListener('touchmove', moveCube, false);
             }
 
             //屏幕尺寸变化
@@ -257,8 +238,8 @@
                 renderer.setSize( width, height );
             }
 
-            //操作魔方
-            function moveCube(event){
+            //获取操作焦点
+            function getIntersects(event){
                 if(event.touches){
                     var touch = event.touches[0];
                     mouse.x = (touch.clientX / width)*2 - 1;
@@ -267,6 +248,31 @@
                     mouse.x = (event.clientX / width)*2 - 1;
                     mouse.y = -(event.clientY / height)*2 + 1;
                 }
+                raycaster.setFromCamera(mouse, camera);
+                //Raycaster方式定位选取元素，可能会选取多个，以第一个为准
+                var intersects = raycaster.intersectObjects(scene.children);
+                //如果操作焦点在魔方上则取消移动，反之恢复移动
+                if(intersects.length){
+                    try{
+                        if(intersects[0].object.cubeType==='coverCube'){
+                            intersect = intersects[1];
+                            normalize = intersects[0].face.normal;
+                        }else{
+                            intersect = intersects[0];
+                            normalize = intersects[1].face.normal;
+                        }
+                    }catch(err){
+                        //nothing
+                    }
+                    controller.enabled = false;
+                }else{
+                    controller.enabled = true;
+                }
+            }
+
+            //操作魔方
+            function moveCube(event){
+                getIntersects(event);
                 if(intersect){
                     if(!isRotating&&startPoint){//魔方没有进行转动且满足进行转动的条件
                         movePoint = intersect.point;
@@ -292,6 +298,7 @@
 
             //开始操作魔方
             function startCube(event){
+                getIntersects(event);
                 if(!isRotating&&intersect){
                     startPoint = intersect.point;
                 }
