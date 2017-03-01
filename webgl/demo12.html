@@ -94,7 +94,9 @@
             }
 
             //创建展示场景所需的各种元素
-            var cubes
+            var cubes;
+            var bottomLineGrid;
+            var topLineGrid;
             function initObject() {
             	//网格
 				var size = 1000, step = 50;
@@ -106,10 +108,10 @@
 					geometry.vertices.push( new THREE.Vector3( i, -250,   size ) );
 				}
 				var material = new THREE.LineBasicMaterial( { color: 0x000000, opacity: 0.2 } );
-				var bottomLineGrid = new THREE.LineSegments( geometry, material );
+				bottomLineGrid = new THREE.LineSegments( geometry, material );
 				scene.add( bottomLineGrid );
 
-				var topLineGrid = bottomLineGrid.clone(true);
+				topLineGrid = bottomLineGrid.clone(true);
 				topLineGrid.translateY(500);
 				scene.add( topLineGrid );
             }
@@ -150,8 +152,10 @@
             		var mouse = _mousePosition(e);
             		var tempY = mouse.y - lastPoint.y;
             		var tempX = mouse.x - lastPoint.x;
-            		camera.rotateX(-tempY/center.y*Math.PI*90/180);
-            		camera.rotateY(-tempX/center.x*Math.PI*180/180);
+                    var xRad = -tempY/center.y*Math.PI*90/180;
+                    var yRad = -tempX/center.x*Math.PI*180/180;
+            		camera.rotateX(xRad);
+            		camera.rotateY(yRad);
             		lastPoint = mouse;
             		window.requestAnimFrame(render);
             	}
