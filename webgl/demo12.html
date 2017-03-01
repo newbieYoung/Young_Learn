@@ -4,7 +4,6 @@
         <meta charset="UTF-8">
         <title>腾讯环绕房间找东西h5简单模仿实现</title>
         <script type="text/javascript" src="../lib/three.js"></script>
-        <script type="text/javascript" src="../lib/three-firstperson-controls.js"></script>
         <style type="text/css">
             div#canvas-frame {
                 cursor: pointer;
@@ -20,7 +19,9 @@
             var renderer;//渲染器
             var width;//页面宽度
             var height;//页面高度
-            var clock = new THREE.Clock();
+            var center = {x:0,y:0};//屏幕中心点
+            var lastPoint;
+            var canNext = true;//是否能进行下一次渲染，防止mousemove事件触发频率过快导致性能问题
 
             window.requestAnimFrame = (function() {//如果有变化则可能还需要requestAnimationFrame刷新
                 return window.requestAnimationFrame ||
@@ -30,10 +31,28 @@
                        window.webkitRequestAnimationFrame;
             })();
 
+            //获得鼠标当前坐标
+			function _mousePosition(e){
+				var xPos, yPos;
+				e = e || window.event;
+				if (e.pageX) {
+					xPos = e.pageX;
+					yPos = e.pageY;
+				} else {
+					xPos = e.clientX + document.body.scrollLeft - document.body.clientLeft;
+					yPos = e.clientY + document.body.scrollTop - document.body.clientTop;
+				}
+				return {
+					x: xPos,
+					y: yPos
+				}
+			}
+
             //根据页面宽度和高度创建渲染器，并添加容器中
             function initThree() {
                 width = window.innerWidth;
                 height = window.innerHeight;
+                center = {x:width/2,y:height/2};
                 renderer = new THREE.WebGLRenderer({
                     antialias : true
                 });
@@ -59,11 +78,6 @@
                     y : 0,
                     z : 0
                 });
-                //视角控制
-                controller = new THREE.FirstPersonControls(camera);
-                controller.movementSpeed = 1000;
-				controller.lookSpeed = 0.125;
-				controller.lookVertical = true;
             }
 
             //创建场景，后续元素需要加入到场景中才会显示出来
@@ -83,7 +97,7 @@
             var cubes
             function initObject() {
             	//网格
-				var size = 500, step = 50;
+				var size = 1000, step = 50;
 				var geometry = new THREE.Geometry();
 				for ( var i = - size; i <= size; i += step ) {
 					geometry.vertices.push( new THREE.Vector3( - size, -250, i ) );
@@ -103,9 +117,8 @@
             //渲染
             function render(){
                 renderer.clear();
-                controller.update( clock.getDelta() );
                 renderer.render(scene, camera);
-                window.requestAnimFrame(render);
+                canNext = true;
             }
 
             //开始
@@ -116,6 +129,32 @@
                 initLight();
                 initObject();
                 render();
+                
+                document.addEventListener('mousedown',function(){
+                	document.addEventListener('mousemove',onMouseMove,false);
+                },false);
+
+                document.addEventListener('mouseup',function(){
+                	document.removeEventListener('mousemove',onMouseMove,false);
+                },false);
+
+            }
+
+            //鼠标移动
+            function onMouseMove(e){
+            	if(canNext){
+            		canNext = false;
+            		if(!lastPoint){
+            			lastPoint = center;
+            		}
+            		var mouse = _mousePosition(e);
+            		var tempY = mouse.y - lastPoint.y;
+            		var tempX = mouse.x - lastPoint.x;
+            		camera.rotateX(-tempY/center.y*Math.PI*90/180);
+            		camera.rotateY(-tempX/center.x*Math.PI*180/180);
+            		lastPoint = mouse;
+            		window.requestAnimFrame(render);
+            	}
             }
         </script>
     </body>
