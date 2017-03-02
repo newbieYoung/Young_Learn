@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>基本图形</title>
+	<style type="text/css">
+		body{
+			padding:0;
+			margin:0;
+		}
+		canvas{
+			margin:10px;
+			border:1px solid #000;
+		}
+	</style>
+</head>
+<body>
+	<canvas width="800" height="600"></canvas>
+	<script type="text/javascript">
+		window.onload = function(){
+
+			var canvas = document.querySelector('canvas');
+            var context = canvas.getContext('2d');
+            var rgbaColor = 'rgba(255,193,37,1)';
+
+            context.fillStyle = 'rgba(0,0,0,1)';
+            context.fillRect(0, 0, 256, 256);
+
+            //用16px宽的线画个圆角矩形，并填充
+            context.rect(16, 16, 224, 224);
+            context.lineJoin = 'round';
+            context.lineWidth = 16;
+            context.fillStyle = rgbaColor;
+            context.strokeStyle = rgbaColor;
+            context.stroke();
+            context.fill();
+		};
+	</script>
+</body>
+</html>
