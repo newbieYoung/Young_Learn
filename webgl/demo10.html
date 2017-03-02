@@ -135,7 +135,7 @@
                     cubegeo.faces[ i + 1 ].color.setHex( hex );
                 }
                 var cubemat = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors,opacity: 0, transparent: true});
-                cube = new THREE.Mesh( cubegeo, cubemat );
+                var cube = new THREE.Mesh( cubegeo, cubemat );
                 cube.cubeType = 'coverCube';
                 scene.add( cube );
             }
