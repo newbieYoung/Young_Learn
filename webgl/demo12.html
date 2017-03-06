@@ -20,7 +20,6 @@
             var width;//页面宽度
             var height;//页面高度
             var center = {x:0,y:0};//屏幕中心点
-            var lastPoint;
             var canNext = true;//是否能进行下一次渲染，防止mousemove事件触发频率过快导致性能问题
 
             window.requestAnimFrame = (function() {//如果有变化则可能还需要requestAnimationFrame刷新
@@ -131,14 +130,8 @@
                 initLight();
                 initObject();
                 render();
-                
-                document.addEventListener('mousedown',function(){
-                	document.addEventListener('mousemove',onMouseMove,false);
-                },false);
 
-                document.addEventListener('mouseup',function(){
-                	document.removeEventListener('mousemove',onMouseMove,false);
-                },false);
+                document.addEventListener('mousemove',onMouseMove,false);
 
             }
 
@@ -146,17 +139,14 @@
             function onMouseMove(e){
             	if(canNext){
             		canNext = false;
-            		if(!lastPoint){
-            			lastPoint = center;
-            		}
             		var mouse = _mousePosition(e);
-            		var tempY = mouse.y - lastPoint.y;
-            		var tempX = mouse.x - lastPoint.x;
-                    var xRad = -tempY/center.y*Math.PI*90/180;
-                    var yRad = -tempX/center.x*Math.PI*180/180;
-            		camera.rotateX(xRad);
-            		camera.rotateY(yRad);
-            		lastPoint = mouse;
+                    var alpha = (height/2 - mouse.y)/(height/2)*(Math.PI/2);
+                    var beta = (mouse.x - width/2)/(width/2)*Math.PI;
+                    var ex = 10 * Math.cos(alpha) * Math.sin(beta);
+                    var ey = 10 *  Math.sin(alpha);
+                    var ez = - 10 * Math.cos(alpha) * Math.cos(beta);
+                    var e = new THREE.Vector3(camera.position.x + ex , camera.position.y + ey , camera.position.z + ez);
+                    camera.lookAt(e);
             		window.requestAnimFrame(render);
             	}
             }
