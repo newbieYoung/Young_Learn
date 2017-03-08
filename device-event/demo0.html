@@ -22,13 +22,13 @@
 			 */
 			window.addEventListener("deviceorientation", function(event) {
 				$orientation.innerHTML = 'alpha:'+parseInt(event.alpha)+' beta:'+parseInt(event.beta)+' gamma:'+parseInt(event.gamma);
-			}, true);
+			}, false);
 
 			//监听设备的加速信息
 			window.addEventListener("devicemotion", function(event) {
 				var accel = event.acceleration;
 				$motion.innerHTML = 'x:'+accel.x+' y:'+accel.y+' z:'+accel.z;
-			}, true);
+			}, false);
 		};
 	</script>
 </body>
