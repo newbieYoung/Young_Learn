@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>重力感应事件初步了解</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" >
+</head>
+<body>
+	<p id="orientation"></p>
+	<p id="motion"></p>
+	<script type="text/javascript">
+		window.onload = function(){
+			var $orientation = document.querySelector('#orientation');
+			var $motion = document.querySelector('#motion');
+
+			//监听设备的物理方向
+			window.addEventListener("deviceorientation", function(event) {
+				$orientation.innerHTML = 'alpha:'+event.alpha+' beta:'+event.beta+' gamma:'+event.gamma;
+			}, true);
+
+			//监听设备的加速信息
+			window.addEventListener("deviceorientation", function(event) {
+				var accel = event.acceleration;
+				$motion.innerHTML = 'x:'+accel.x+' y:'+accel.y+' z:'+accel.z;
+			}, true);
+		};
+	</script>
+</body>
+</html>
