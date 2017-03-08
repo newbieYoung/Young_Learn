@@ -13,9 +13,15 @@
 			var $orientation = document.querySelector('#orientation');
 			var $motion = document.querySelector('#motion');
 
-			//监听设备的物理方向
+			/**
+			 * 监听设备的物理方向
+			 * 手机平放于桌面时；
+			 * 绕手机平面的垂直方向旋转，alpha会发生变化；
+			 * 以手机底部为轴抬起手机时，beta会发生变化；
+			 * 以手机中轴线选择手机时，gamma会发生变化。
+			 */
 			window.addEventListener("deviceorientation", function(event) {
-				$orientation.innerHTML = 'alpha:'+event.alpha+' beta:'+event.beta+' gamma:'+event.gamma;
+				$orientation.innerHTML = 'alpha:'+parseInt(event.alpha)+' beta:'+parseInt(event.beta)+' gamma:'+parseInt(event.gamma);
 			}, true);
 
 			//监听设备的加速信息
