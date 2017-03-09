@@ -7,21 +7,27 @@
 </head>
 <body>
 	<p id="orientation"></p>
+	<p id="change"></p>
 	<p id="motion"></p>
 	<script type="text/javascript">
 		window.onload = function(){
 			var $orientation = document.querySelector('#orientation');
 			var $motion = document.querySelector('#motion');
+			var $change = document.querySelector('#change');
 
 			/**
 			 * 监听设备的物理方向
 			 * 手机平放于桌面时；
 			 * 绕手机平面的垂直方向旋转，alpha会发生变化；
 			 * 以手机底部为轴抬起手机时，beta会发生变化；
-			 * 以手机中轴线选择手机时，gamma会发生变化。
+			 * 以手机中轴线选择手机时，gamma会发生变化；
+			 * 不知道啥原因当beta等于90时alpha和gamma会突然跳跃变化，因为手握手机时可以用alpha+gamma来表示水平方向转动的角度。
 			 */
-			window.addEventListener("deviceorientation", function(event) {
-				$orientation.innerHTML = 'alpha:'+parseInt(event.alpha)+' beta:'+parseInt(event.beta)+' gamma:'+parseInt(event.gamma);
+			window.addEventListener('deviceorientation', function(event) {
+				$orientation.innerHTML = 'alpha:'+parseInt(event.alpha)+'<br/>'
+										+'beta:'+parseInt(event.beta)+'<br/>'
+										+'gamma:'+parseInt(event.gamma)+'<br/>'
+										+'longitude:'+parseInt(event.gamma+event.alpha)+'<br/>';
 			}, false);
 
 			//监听设备的加速信息
