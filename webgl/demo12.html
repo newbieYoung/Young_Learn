@@ -19,7 +19,7 @@
             var renderer;//渲染器
             var width;//页面宽度
             var height;//页面高度
-            var center = {x:0,y:0};//屏幕中心点
+            var center = {x:0,y:0,alpha:0,beta:90};//屏幕中心点
             var canNext = true;//是否能进行下一次渲染，防止mousemove事件触发频率过快导致性能问题
 
             window.requestAnimFrame = (function() {//如果有变化则可能还需要requestAnimationFrame刷新
@@ -51,7 +51,8 @@
             function initThree() {
                 width = window.innerWidth;
                 height = window.innerHeight;
-                center = {x:width/2,y:height/2};
+                center.x = width/2;
+                center.y = height/2;
                 renderer = new THREE.WebGLRenderer({
                     antialias : true
                 });
@@ -62,7 +63,6 @@
 
             //创建相机，并设置正方向和中心点
             var camera;
-            var controller;
             function initCamera() {
                 //创建相机
                 camera = new THREE.PerspectiveCamera(45, width / height, 1, 2000);
@@ -131,8 +131,38 @@
                 initObject();
                 render();
 
-                document.addEventListener('mousemove',onMouseMove,false);
+                window.addEventListener('deviceorientation',onOrientation,false);
+            }
 
+            //重力感应
+            function onOrientation(e){
+                if(e.alpha===null&&e.beta===null){
+                    //重力感应失效，说明是在桌面设备上这时候启动鼠标控制
+                    document.addEventListener('mousemove',onMouseMove,false);
+                    window.removeEventListener('deviceorientation',onOrientation,false);
+                }else{
+                    if(canNext){
+                        canNext = false;
+                        var longitude = e.alpha+e.gamma;
+                        if(longitude>360){
+                            longitude = longitude%360;
+                        }
+                        var alpha = e.beta-center.beta;
+                        var beta = center.alpha-longitude;
+                        if(longitude>180){
+                            beta = 360-longitude;
+                        }
+                        alpha = alpha*1.0/180*Math.PI;
+                        beta = beta*1.0/180*Math.PI;
+                        var ex = 0;
+                        var ex = 10 * Math.cos(alpha) * Math.sin(beta);
+                        var ey = 10 *  Math.sin(alpha);
+                        var ez = - 10 * Math.cos(alpha) * Math.cos(beta);
+                        var e = new THREE.Vector3(camera.position.x + ex , camera.position.y + ey , camera.position.z + ez);
+                        camera.lookAt(e);
+                        window.requestAnimFrame(render);
+                    }
+                }
             }
 
             //鼠标移动
