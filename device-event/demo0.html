@@ -21,7 +21,9 @@
 			 * 绕手机平面的垂直方向旋转，alpha会发生变化；
 			 * 以手机底部为轴抬起手机时，beta会发生变化；
 			 * 以手机中轴线选择手机时，gamma会发生变化；
-			 * 不知道啥原因当beta等于90时alpha和gamma会突然跳跃变化，因为手握手机时可以用alpha+gamma来表示水平方向转动的角度。
+			 * 不知道啥原因当beta等于90时alpha和gamma会突然跳跃变化，因为手握手机时可以用alpha+gamma来表示水平方向转动的角度；
+			 * 另外在某些时候beta也会突然发生跳跃变化；
+			 * 以上突然发生跳跃变化应该和欧拉角死锁有关系。
 			 */
 			window.addEventListener('deviceorientation', function(event) {
 				$orientation.innerHTML = 'alpha:'+parseInt(event.alpha)+'<br/>'
