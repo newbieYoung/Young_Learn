@@ -135,7 +135,6 @@
             }
 
             //重力感应
-            var lastStatus;
             function onOrientation(e){
                 if(e.alpha===null&&e.beta===null){
                     //重力感应失效，说明是在桌面设备上这时候启动鼠标控制
@@ -153,24 +152,6 @@
                         if(longitude>180){
                             beta = 360-longitude;
                         }
-                        //利用累积值的方法防止突然跳跃变化
-                        if(lastStatus){
-                            var alGap = alpha-lastStatus.alpha;
-                            if(Math.abs(alGap)>1){
-                                lastStatus.alGap = lastStatus.alGap+alGap;
-                            }
-                            var beGap = beta-lastStatus.beta;
-                            if(Math.abs(beGap)>1){
-                                lastStatus.beGap = lastStatus.beGap+beGap;
-                            }
-                        }else{
-                            lastStatus = {alGap:0,beGap:0};
-                        }
-                        lastStatus.alpha = alpha;
-                        lastStatus.beta = beta;
-                        alpha = alpha-lastStatus.alGap;
-                        beta = beta-lastStatus.beGap;
-                        //处理相机焦点
                         alpha = alpha*1.0/180*Math.PI;
                         beta = beta*1.0/180*Math.PI;
                         var ex = 0;
