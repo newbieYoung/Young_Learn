@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>toDataURL</title>
+	<style type="text/css">
+		body{
+			margin: 0;
+			padding: 0;
+		}
+		#dist,
+		#source{
+			display:inline-block;
+			margin-left:50px;
+			vertical-align:top;
+			width:270px;
+			height:1620px;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="source" width="270" height="1620"></canvas>
+	<img id="dist">
+	<script type="text/javascript">
+		window.onload = function(){
+			var source = document.querySelector('#source');
+			var scontext = source.getContext('2d');
+
+			var dist = document.querySelector('#dist');
+
+			var img = new Image();
+			img.src = './i.jpg';
+			img.onload = function(){
+				scontext.drawImage(img,0,0);
+				//toDataURL可以实现jpeg图片格式的压缩
+				dist.src = source.toDataURL('image/jpeg',0.5);
+			};
+		};
+	</script>
+</body>
+</html>
