@@ -51,7 +51,7 @@
 </head>
 <body>
     <div class="container">
-        <ul>
+        <ul id="list" style="transform: translate3d(0px,-100px,0px);">
             <li>
                 <div></div>
             </li>
@@ -354,5 +354,40 @@
             </li>
         </ul>
     </div>
+    <script>
+        window.onload = function(){
+            var $list = document.querySelector('#list');
+            var reg = /[-\d.]{1,}px/g;
+            var startPoint;
+
+            $list.addEventListener('touchstart',function(e){
+                var touch = e.touches[0];
+                startPoint = {
+                    x:touch.clientX,
+                    y:touch.clientY
+                };
+            });
+
+            $list.addEventListener('touchmove',function(e){
+                var touch = e.touches[0];
+                var initTranslate = $list.style.transform;
+                var array = initTranslate.match(reg);
+                if(array){
+                    var ypx = array[1];
+                    var y = parseFloat(ypx.substring(0,ypx.length-2));
+                    var increase = touch.clientY - startPoint.y;
+                    var currentY = y+increase;
+                    startPoint = {
+                        x:touch.clientX,
+                        y:touch.clientY
+                    };
+                    $list.style.transform = 'translate3d(0px,'+currentY+'px,0px)';
+                }
+            });
+        };
+    </script>
+    <script>
+        (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})()
+    </script>
 </body>
 </html>
