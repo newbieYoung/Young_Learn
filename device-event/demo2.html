@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>使用JS媒体查询判断横竖屏</title>
+</head>
+<body>
+    <script>
+        window.onload = function(){
+            var $body = document.querySelector('body');
+
+            var mql = window.matchMedia('(orientation:portrait)');
+            mql.addListener(onMediaChange);//监听
+            function onMediaChange(mql){
+                console.log(mql);
+                if(mql.matches){
+                    //竖屏
+                    $body.style.backgroundColor = 'red';
+                }else{
+                    //横屏
+                    $body.style.backgroundColor = 'blue';
+                }
+            }
+            onMediaChange(mql);//初始化
+        };
+    </script>
+</body>
+</html>
