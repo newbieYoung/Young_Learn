@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>通过orientation属性值判断竖屏或者横屏</title>
+</head>
+<body>
+    <script>
+        window.onload = function(){
+            var $body = document.querySelector('body');
+
+            function detectOrient(){
+                console.log(window.orientation);//undefined
+                console.log(window.screen.orientation);
+                if(Math.abs(window.screen.orientation.angle)===90){
+                    //横屏
+                    $body.style.backgroundColor = 'blue';
+                }else{
+                    //竖屏
+                    $body.style.backgroundColor = 'red';
+                }
+            }
+
+            detectOrient();//初始化
+            window.addEventListener('orientationchange',detectOrient);//监听
+        }
+    </script>
+</body>
+</html>

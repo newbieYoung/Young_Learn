@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>通过比较宽高来判断横屏或者竖屏</title>
+</head>
+<body>
+    <script>
+        window.onload = function () {
+            var $body = document.querySelector('body');
+
+            function detectOrient(){
+                if(window.innerHeight>=window.innerWidth){
+                    //竖屏
+                    $body.style.backgroundColor = 'red';
+                }else{
+                    //横屏
+                    $body.style.backgroundColor = 'blue';
+                }
+            }
+            window.addEventListener('resize',detectOrient);//监听
+            detectOrient();//初始化
+        }
+    </script>
+</body>
+</html>
