@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>使用可转让对象来传递数据</title>
+</head>
+<body>
+    <script type="text/javascript">
+        var worker = new Worker('demo1.js');
+
+        var uInt8Array = new Uint8Array(1024*1024*191);
+        for(var i=0;i<uInt8Array.length;i++){
+            uInt8Array[i] = i;
+        }
+
+        //worker.postMessage(uInt8Array);//普通传值方式-值拷贝
+        //worker.postMessage(uInt8Array.buffer,[uInt8Array.buffer]);//可转让对象传值方式一
+        worker.postMessage({buffer:uInt8Array.buffer},[uInt8Array.buffer]);//可转让对象传值方式二
+
+    </script>
+</body>
+</html>
