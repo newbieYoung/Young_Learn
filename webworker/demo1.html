@@ -8,14 +8,27 @@
     <script type="text/javascript">
         var worker = new Worker('demo1.js');
 
-        var uInt8Array = new Uint8Array(1024*1024*191);
-        for(var i=0;i<uInt8Array.length;i++){
-            uInt8Array[i] = i;
+        //var uInt8Array = new Uint8Array(1024*1024*191);
+        //for(var i=0;i<uInt8Array.length;i++){
+        //    uInt8Array[i] = i;
+        //}
+        //worker.postMessage(uInt8Array.buffer);
+        //worker.postMessage({data:uInt8Array.buffer},[uInt8Array.buffer]);
+
+        var imageBufferArray = [];
+        var imageDataArray = [];
+        for(var i=0;i<10;i++){
+            var init = document.createElement('canvas');
+            init.width = 1000;
+            init.height = 10000;
+            var initContext = init.getContext('2d');
+            var imageData = initContext.getImageData(0, 0, 1000, 10000).data;
+            imageBufferArray.push(imageData.buffer);
+            imageDataArray.push(imageData);
         }
 
-        //worker.postMessage(uInt8Array);//普通传值方式-值拷贝
-        //worker.postMessage(uInt8Array.buffer,[uInt8Array.buffer]);//可转让对象传值方式一
-        worker.postMessage({buffer:uInt8Array.buffer},[uInt8Array.buffer]);//可转让对象传值方式二
+        //worker.postMessage(imageDataArray);
+        worker.postMessage({data:imageBufferArray,test:true,imageDatas:imageDataArray},imageBufferArray);
 
     </script>
 </body>
