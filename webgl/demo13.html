@@ -42,7 +42,6 @@
 
     //重力感应事件处理
     function deviceorientation(event){
-        console.log(event.alpha+' '+event.beta+' '+event.gamma);
 
         var alpha = event.alpha/180*Math.PI;
         var beta = event.beta/180*Math.PI;
@@ -58,9 +57,32 @@
         cube.applyMatrix(matrix);
 
         //单个旋转正常
-        cube.rotateZ(alpha);
-        cube.rotateX(beta);
-        cube.rotateY(gamma);
+        //cube.rotateZ(alpha);
+        //cube.rotateX(beta);
+        //cube.rotateY(gamma);
+
+        //单个矩阵正常(注意角度要取负值且使用matrix4)
+        var rz = new THREE.Matrix4();
+        rz.set(Math.cos(-alpha),Math.sin(-alpha),0,0,
+                -Math.sin(-alpha),Math.cos(-alpha),0,0,
+                0,0,1,0,
+                0,0,0,1);
+        cube.applyMatrix(rz);
+
+        var rx = new THREE.Matrix4();
+        rx.set(1,0,0,0,
+                0,Math.cos(-beta),Math.sin(-beta),0,
+                0,-Math.sin(-beta),Math.cos(-beta),0,
+                0,0,0,1);
+        cube.applyMatrix(rx);
+
+        var ry = new THREE.Matrix4();
+        ry.set(Math.cos(-gamma),0,-Math.sin(-gamma),0,
+                0,1,0,0,
+                Math.sin(-gamma),0,Math.cos(-gamma),0,
+                0,0,0,1);
+        cube.applyMatrix(ry);
+
 
         //使用所谓的欧拉角反而不正常
         //var euler = new THREE.Euler(alpha,beta,gamma,'ZXY');
