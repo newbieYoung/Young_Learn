@@ -173,9 +173,9 @@
                 	// cube.applyMatrix(cube.matrix);
 
                     //逆矩阵回到世界坐标系原点
-                	//var matrix = cube.matrix.clone();
-                	//matrix.getInverse(matrix);
-                	//cube.applyMatrix(matrix);
+//                	var matrix = cube.matrix.clone();
+//                	matrix.getInverse(matrix);
+//                	cube.applyMatrix(matrix);
                    
                     //绕世界坐标系y轴顺时针旋转45度
                     //rotateAroundWorldY(cube,-Math.PI*22/180);
@@ -190,8 +190,8 @@
                     //rotateAroundWorldX(cube2,Math.PI*30/180);
 
                     //绕世界坐标系x轴顺时针旋转45度
-                    rotateAroundWorldX(cube,-Math.PI*180/180);
-                    rotateAroundWorldX(cube2,-Math.PI*180/180);
+                    //rotateAroundWorldX(cube,-Math.PI*180/180);
+                    //rotateAroundWorldX(cube2,-Math.PI*180/180);
                     
                     //绕世界坐标系z轴顺时针旋转45度
                     //rotateAroundWorldZ(cube,-Math.PI*12/180);
@@ -205,23 +205,37 @@
                 },1000);
                 
                 //测试多次调用绕世界坐标轴旋转方法是否正常
-                setTimeout(function(){
-                    renderer.clear();
-                    rotateAroundWorldY(cube,Math.PI*20/180);
-                    rotateAroundWorldY(cube2,Math.PI*20/180);
-                    renderer.render(scene, camera);
-                },2000);
+                //setTimeout(function(){
+                //    renderer.clear();
+                //    rotateAroundWorldY(cube,Math.PI*20/180);
+                //    rotateAroundWorldY(cube2,Math.PI*20/180);
+                //    renderer.render(scene, camera);
+                //},2000);
 
                 /**
                  * ThreeJS中Object3D对象的几何变化基本都是相对于物体本身的坐标系而言的
                  */
                 
                 //绕自身X轴旋转45度
-                // setTimeout(function(){
-                // 	renderer.clear();
-                // 	cube.rotateX(Math.PI*45/180);
-                // 	renderer.render(scene, camera);
-                // },2000);
+                setTimeout(function(){
+                 	renderer.clear();
+
+                 	//cube.rotateX(Math.PI*45/180);
+
+                    /**
+                     * 需要注意的是如果直接使用矩阵则是基于世界坐标系而言的；
+                     * 而且不是变化物体的方式，是变换坐标系的方式；
+                     * 因此如果使用矩阵形式想让某个物体看起来绕X轴旋转45度，应该使用绕X轴旋转-45度的矩阵
+                     */
+                    var rx = new THREE.Matrix4();
+                    rx.set(1,0,0,0,
+                            0,Math.cos(45),Math.sin(45),0,
+                            0,-Math.sin(45),Math.cos(45),0,
+                            0,0,0,1);
+                    cube.applyMatrix(rx);
+
+                 	renderer.render(scene, camera);
+                },3000);
 
                 //绕自身Y轴旋转45度
                 // setTimeout(function(){

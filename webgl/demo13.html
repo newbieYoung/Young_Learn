@@ -61,7 +61,10 @@
         //cube.rotateX(beta);
         //cube.rotateY(gamma);
 
-        //单个矩阵正常(注意角度要取负值且使用matrix4)
+        /**
+         * 需要注意的是如果使用的是矩阵，那么肯定是基于世界坐标系而言的；
+         * 所以这里变换的不是物体而是坐标系，因此角度应该是负数。
+         */
         var rz = new THREE.Matrix4();
         rz.set(Math.cos(-alpha),Math.sin(-alpha),0,0,
                 -Math.sin(-alpha),Math.cos(-alpha),0,0,
