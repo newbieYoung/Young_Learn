@@ -173,9 +173,9 @@
                 	// cube.applyMatrix(cube.matrix);
 
                     //逆矩阵回到世界坐标系原点
-//                	var matrix = cube.matrix.clone();
-//                	matrix.getInverse(matrix);
-//                	cube.applyMatrix(matrix);
+                	var matrix = cube.matrix.clone();
+                	matrix.getInverse(matrix);
+                	cube.applyMatrix(matrix);
                    
                     //绕世界坐标系y轴顺时针旋转45度
                     //rotateAroundWorldY(cube,-Math.PI*22/180);
@@ -220,19 +220,16 @@
                 setTimeout(function(){
                  	renderer.clear();
 
-                 	//cube.rotateX(Math.PI*45/180);
+                    var beta = Math.PI*45/180;
 
-                    /**
-                     * 需要注意的是如果直接使用矩阵则是基于世界坐标系而言的；
-                     * 而且不是变化物体的方式，是变换坐标系的方式；
-                     * 因此如果使用矩阵形式想让某个物体看起来绕X轴旋转45度，应该使用绕X轴旋转-45度的矩阵
-                     */
+                 	cube.rotateX(beta);
+
                     var rx = new THREE.Matrix4();
                     rx.set(1,0,0,0,
-                            0,Math.cos(45),Math.sin(45),0,
-                            0,-Math.sin(45),Math.cos(45),0,
+                            0,Math.cos(beta),Math.sin(beta),0,
+                            0,-Math.sin(beta),Math.cos(beta),0,
                             0,0,0,1);
-                    cube.applyMatrix(rx);
+                    //cube.applyMatrix(rx);
 
                  	renderer.render(scene, camera);
                 },3000);
