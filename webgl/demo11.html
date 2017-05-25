@@ -224,10 +224,13 @@
 
                  	cube.rotateX(beta);
 
+                    /**
+                     * 首先使用矩阵时是以世界坐标系为基准的
+                     */
                     var rx = new THREE.Matrix4();
                     rx.set(1,0,0,0,
-                            0,Math.cos(beta),Math.sin(beta),0,
-                            0,-Math.sin(beta),Math.cos(beta),0,
+                            0,Math.cos(-beta),Math.sin(-beta),0,
+                            0,-Math.sin(-beta),Math.cos(-beta),0,
                             0,0,0,1);
                     //cube.applyMatrix(rx);
 
