@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>环绕房间h5简单模仿实现</title>
+    <title>基于鼠标移动实现环绕场景</title>
     <script type="text/javascript" src="../lib/three.js"></script>
     <style type="text/css">
         div#canvas-frame {
@@ -131,50 +131,7 @@
         initObject();
         render();
 
-        window.addEventListener('deviceorientation',onOrientation,false);
-    }
-
-    //重力感应
-    function onOrientation(e){
-        if(e.alpha===null&&e.beta===null){
-            //重力感应失效，说明是在桌面设备上这时候启动鼠标控制
-            document.addEventListener('mousemove',onMouseMove,false);
-            window.removeEventListener('deviceorientation',onOrientation,false);
-        }else{
-            if(canNext){
-                canNext = false;
-
-                var alpha = e.alpha/180*Math.PI;
-                var beta = e.beta/180*Math.PI;
-                var gamma = e.gamma/180*Math.PI;
-
-                var vect3 = new THREE.Vector3(0,0,-500);
-
-                var rz = new THREE.Matrix4();
-                rz.set(Math.cos(-alpha),Math.sin(-alpha),0,0,
-                        -Math.sin(-alpha),Math.cos(-alpha),0,0,
-                        0,0,1,0,
-                        0,0,0,1);
-                vect3.applyMatrix4(rz);
-
-                var rx = new THREE.Matrix4();
-                rx.set(1,0,0,0,
-                        0,Math.cos(-beta),Math.sin(-beta),0,
-                        0,-Math.sin(-beta),Math.cos(-beta),0,
-                        0,0,0,1);
-                vect3.applyMatrix4(rx);
-
-                var ry = new THREE.Matrix4();
-                ry.set(Math.cos(-gamma),0,-Math.sin(-gamma),0,
-                        0,1,0,0,
-                        Math.sin(-gamma),0,Math.cos(-gamma),0,
-                        0,0,0,1);
-                vect3.applyMatrix4(ry);
-
-                camera.lookAt(vect3);
-                window.requestAnimFrame(render);
-            }
-        }
+        document.addEventListener('mousemove',onMouseMove,false);
     }
 
     //鼠标移动

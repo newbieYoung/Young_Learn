@@ -84,7 +84,7 @@
         //cube.applyMatrix(ry);
 
 
-        //欧拉角顺序应该为YXZ且Y对应bate、X对应gamma、Z对应alpha
+        //欧拉角顺序应该为YXZ，另外需要注意的是前边参数的顺序和后边设置的顺序不是一一对应的，也就是说就算顺序被设置为YXZ，前边三个参数的顺序依然XYZ
         var euler = new THREE.Euler();
         euler.set( beta,gamma,alpha,  'YXZ' );
         cube.setRotationFromEuler(euler);
