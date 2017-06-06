@@ -52,7 +52,7 @@
                 antialias : true
             });
             renderer.setSize(width, height);
-            renderer.setClearColor(0xFFFFFF, 1.0);
+            renderer.setClearColor(0xffffff, 0);
             document.getElementById('canvas-frame').appendChild(renderer.domElement);
         }
 
@@ -60,7 +60,7 @@
         var camera;
         var control;
         function initCamera() {
-            camera = new THREE.PerspectiveCamera(75, width / height, 1, 1000);
+            camera = new THREE.PerspectiveCamera(45, width / height, 1, 3000);
             camera.position.x = 0;
             camera.position.y = 0;
             camera.position.z = 100;
@@ -85,10 +85,16 @@
         }
 
         //创建光线
-        var light;
+        var ambient;
+        var point;
         function initLight() {
-            //light = new THREE.AmbientLight(0xfefefe);
-            //scene.add(light);
+            //环境光
+            ambient = new THREE.AmbientLight(0x999999);
+            scene.add(ambient);
+
+            /*太阳光*/
+            point = new THREE.PointLight(0xddddaa,1.5,500);
+            scene.add(point);
         }
 
         //创建展示场景所需的各种元素
@@ -102,11 +108,15 @@
         var uranus; //天王
         var neptune; //海王
         function initObject() {
+            var sunSkinPic = THREE.ImageUtils.loadTexture('/Html_learn/webgl/textures/sunCore.jpg', {}, function(){
+                renderer.render(scene, camera);
+            });
             sun = new THREE.Mesh(new THREE.SphereGeometry(12,16,16),new THREE.MeshLambertMaterial({
-                color:0xff00ff,
-                emissive:0xdd4422
+                emissive:0xdd4422,
+                map:sunSkinPic
             }))
             sun.name = 'Sun';
+            sun.selfRotateSpeed = 0.0008;
             scene.add( sun );
 
             earth = initPlanet('Earth','rgb(46,69,119)',40,5,0.010);
@@ -117,6 +127,73 @@
             saturn = initPlanet('Saturn','rgb(210,140,39)',100,7,0.005);
             uranus = initPlanet('Uranus','rgb(49,168,218)',120,4,0.003);
             neptune = initPlanet('Neptune','rgb(84,125,204)',150,3,0.002);
+
+            initStarBackground();
+        }
+
+        //星空背景
+        function initStarBackground(){
+            var particles = 20000;  //星星数量
+            var bufferGeometry = new THREE.BufferGeometry();
+            var positions = new Float32Array( particles * 3 );
+            var colors = new Float32Array( particles * 3 );
+            var color = new THREE.Color();
+            var gap = 1000;//定义星星的最近出现位置
+
+            for(var i=0;i<positions.length;i=i+3){
+                //所有星星都出现在正负2000以内
+                /*-2gap < x < 2gap */
+                var x = ( Math.random() * gap *2 )* (Math.random()<.5? -1 : 1);
+                var y = ( Math.random() * gap *2 )* (Math.random()<.5? -1 : 1);
+                var z = ( Math.random() * gap *2 )* (Math.random()<.5? -1 : 1);
+
+                /*找出x,y,z中绝对值最大的一个数*/
+                var biggest = Math.abs(x) > Math.abs(y) ? Math.abs(x) > Math.abs(z) ?　'x' : 'z' :
+                        Math.abs(y) > Math.abs(z) ? 'y' : 'z';
+
+                var pos = {'x':x,'y':y,'z':z};
+
+                //所有星星都出现在正负1000以外
+                /*如果最大值比n要小（因为要在一个距离之外才出现星星）则赋值为n（-n）*/
+                if(Math.abs(pos[biggest]) < gap) pos[biggest] = pos[biggest] < 0 ? -gap : gap;
+
+                x = pos['x'];
+                y = pos['y'];
+                z = pos['z'];
+
+                positions[ i ]     = x;
+                positions[ i + 1 ] = y;
+                positions[ i + 2 ] = z;
+
+                /*70%星星有颜色*/
+                var hasColor = Math.random() > 0.3;
+                var vx, vy, vz;
+
+                if(hasColor){
+                    vx = (Math.random()+1) / 2 ;
+                    vy = (Math.random()+1) / 2 ;
+                    vz = (Math.random()+1) / 2 ;
+                }else{
+                    vx = 1 ;
+                    vy = 1 ;
+                    vz = 1 ;
+                }
+
+                color.setRGB( vx, vy, vz );
+
+                colors[ i ]     = color.r;
+                colors[ i + 1 ] = color.g;
+                colors[ i + 2 ] = color.b;
+            }
+
+            bufferGeometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+            bufferGeometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3 ) );
+            bufferGeometry.computeBoundingSphere();
+
+            /*星星的material*/
+            var material = new THREE.PointsMaterial( { size: 6, vertexColors: THREE.VertexColors } );
+            particleSystem = new THREE.Points( bufferGeometry, material );
+            scene.add( particleSystem );
         }
 
         /**
@@ -128,16 +205,22 @@
          * @param speed 公转角速度
          */
         function initPlanet(name,color,distance,volume,speed){
-            var mesh = new THREE.Mesh(new THREE.SphereGeometry(volume,16,16),new THREE.MeshLambertMaterial({
-                emissive:color
-            }));
+            var mesh = new THREE.Mesh(new THREE.SphereGeometry(volume,16,16),new THREE.MeshLambertMaterial( { color:color } ));
             mesh.position.z = -distance;
-            //mesh.castShadow = true;
-            //mesh.receiveShadow = true;
+            mesh.castShadow = true;//辅助线
+            mesh.receiveShadow = true;//柔和阴影
             mesh.name = name;
-            mesh.speed = speed;
+            mesh.aroundSunSpeed = speed;
             mesh.radian = 0;
             scene.add(mesh);
+
+            //轨道
+            var track = new THREE.Mesh( new THREE.RingGeometry (distance-0.2, distance+0.2, 64,1),
+                    new THREE.MeshBasicMaterial( { color: 0x888888, side: THREE.DoubleSide } )
+            );
+            track.rotation.x = - Math.PI / 2;
+            scene.add(track);
+
             return mesh;
         }
 
@@ -171,20 +254,26 @@
 
         //行星绕太阳公转
         function rotateAroundSun(){
-            rotateAroundWorldY(earth,earth.speed);
-            rotateAroundWorldY(mars,mars.speed);
-            rotateAroundWorldY(mercury,mercury.speed);
-            rotateAroundWorldY(venus,venus.speed);
-            rotateAroundWorldY(jupiter,jupiter.speed);
-            rotateAroundWorldY(saturn,saturn.speed);
-            rotateAroundWorldY(uranus,uranus.speed);
-            rotateAroundWorldY(neptune,neptune.speed);
+            rotateAroundWorldY(earth,earth.aroundSunSpeed);
+            rotateAroundWorldY(mars,mars.aroundSunSpeed);
+            rotateAroundWorldY(mercury,mercury.aroundSunSpeed);
+            rotateAroundWorldY(venus,venus.aroundSunSpeed);
+            rotateAroundWorldY(jupiter,jupiter.aroundSunSpeed);
+            rotateAroundWorldY(saturn,saturn.aroundSunSpeed);
+            rotateAroundWorldY(uranus,uranus.aroundSunSpeed);
+            rotateAroundWorldY(neptune,neptune.aroundSunSpeed);
+        }
+
+        //行星自转
+        function rotateSelf(){
+            sun.rotateY(sun.selfRotateSpeed);
         }
 
         //渲染
         function render(){
             renderer.clear();
             rotateAroundSun();
+            rotateSelf();
             renderer.render(scene, camera);
             window.requestAnimFrame(render);
         }
