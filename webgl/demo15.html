@@ -276,11 +276,33 @@
             sun.rotateY(sun.selfRotateSpeed);
         }
 
+        //保证星空背景不出现异常显示情况
+        function checkCamera(){
+            if(!controller.enabled){
+                controller.enabled = true;
+            }
+            var x = camera.position.x;
+            var y = camera.position.y;
+            var z = camera.position.z;
+            if(Math.sqrt(x*x+y*y+z*z)>1000){
+                controller.enabled = false;
+                while(Math.sqrt(x*x+y*y+z*z)>1000){
+                    camera.position.x = x*0.999;
+                    camera.position.y = y*0.999;
+                    camera.position.z = z*0.999;
+                    x = camera.position.x;
+                    y = camera.position.y;
+                    z = camera.position.z;
+                }
+            }
+        }
+
         //渲染
         function render(){
             renderer.clear();
             rotateAroundSun();
             rotateSelf();
+            checkCamera();
             renderer.render(scene, camera);
             window.requestAnimFrame(render);
         }
