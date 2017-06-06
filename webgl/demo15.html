@@ -119,7 +119,7 @@
             sun.selfRotateSpeed = 0.0008;
             scene.add( sun );
 
-            earth = initPlanet('Earth','rgb(46,69,119)',40,5,0.010);
+            earth = initPlanet('Earth','rgb(46,69,119)',40,5,0.010,'/Html_learn/webgl/textures/land_ocean_ice_cloud_2048.jpg');
             mars = initPlanet('Mars','rgb(210,81,16)',50,4,0.008);
             mercury = initPlanet('Mercury','rgb(124,131,203)',20,2,0.02);
             venus = initPlanet('Venus','rgb(190,138,44)',30,4,0.012);
@@ -203,9 +203,16 @@
          * @param distance 距离原点（太阳中心）的距离
          * @param volume 体积
          * @param speed 公转角速度
+         * @param textureUrl 纹理路径
          */
-        function initPlanet(name,color,distance,volume,speed){
+        function initPlanet(name,color,distance,volume,speed,textureUrl){
             var mesh = new THREE.Mesh(new THREE.SphereGeometry(volume,16,16),new THREE.MeshLambertMaterial( { color:color } ));
+            if(textureUrl){
+                var texture = THREE.ImageUtils.loadTexture(textureUrl, {}, function(){
+                    renderer.render(scene, camera);
+                });
+                mesh = new THREE.Mesh(new THREE.SphereGeometry(volume,16,16),new THREE.MeshLambertMaterial( { map:texture } ));
+            }
             mesh.position.z = -distance;
             mesh.castShadow = true;//辅助线
             mesh.receiveShadow = true;//柔和阴影
