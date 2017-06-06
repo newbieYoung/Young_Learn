@@ -110,23 +110,23 @@
         function initObject() {
             var sunSkinPic = THREE.ImageUtils.loadTexture('/Html_learn/webgl/textures/sunCore.jpg', {}, function(){
                 renderer.render(scene, camera);
-            });
+            });//太阳自转为25天
             sun = new THREE.Mesh(new THREE.SphereGeometry(12,16,16),new THREE.MeshLambertMaterial({
                 emissive:0xdd4422,
                 map:sunSkinPic
             }))
             sun.name = 'Sun';
-            sun.selfRotateSpeed = 0.0008;
+            sun.selfRotateSpeed = Math.PI/10/25;
             scene.add( sun );
 
-            earth = initPlanet('Earth','rgb(46,69,119)',40,5,0.010,'/Html_learn/webgl/textures/land_ocean_ice_cloud_2048.jpg');
-            mars = initPlanet('Mars','rgb(210,81,16)',50,4,0.008);
-            mercury = initPlanet('Mercury','rgb(124,131,203)',20,2,0.02);
-            venus = initPlanet('Venus','rgb(190,138,44)',30,4,0.012);
-            jupiter = initPlanet('Jupiter','rgb(254,208,101)',70,9,0.006);
-            saturn = initPlanet('Saturn','rgb(210,140,39)',100,7,0.005);
-            uranus = initPlanet('Uranus','rgb(49,168,218)',120,4,0.003);
-            neptune = initPlanet('Neptune','rgb(84,125,204)',150,3,0.002);
+            earth = initPlanet('Earth','rgb(46,69,119)',40,5,Math.PI/10/365,Math.PI/10/1,'/Html_learn/webgl/textures/land_ocean_ice_cloud_2048.jpg');//Math.PI*2/365
+            mars = initPlanet('Mars','rgb(210,81,16)',50,4,Math.PI/10/365/1.88,Math.PI/10/1);//火星公转为1.88地球年，自转与地球相似
+            mercury = initPlanet('Mercury','rgb(124,131,203)',20,2,Math.PI/10/88,Math.PI/10/59);//水星公转为88天，自转为59天
+            venus = initPlanet('Venus','rgb(190,138,44)',30,4,Math.PI/10/225,-Math.PI/10/243);//金星公转为225天，自转为243天，且自转方向和地球相反
+            jupiter = initPlanet('Jupiter','rgb(254,208,101)',70,9,Math.PI/10/4333,Math.PI/10/0.41);//木星公转为4333天，自转为0.41天
+            saturn = initPlanet('Saturn','rgb(210,140,39)',100,7,Math.PI/10/10760,Math.PI/10/0.426);//土星公转为10760天，自转为0.426天
+            uranus = initPlanet('Uranus','rgb(49,168,218)',120,4,Math.PI/10/30685,Math.PI/10/0.426);//天王星公转为30685天，自转为0.426天
+            neptune = initPlanet('Neptune','rgb(84,125,204)',150,3,Math.PI/10/165,Math.PI/10/18/24);//海王星公转为165天，自转为18小时
 
             initStarBackground();
         }
@@ -205,7 +205,7 @@
          * @param speed 公转角速度
          * @param textureUrl 纹理路径
          */
-        function initPlanet(name,color,distance,volume,speed,textureUrl){
+        function initPlanet(name,color,distance,volume,speed,selfSpeed,textureUrl){
             var mesh = new THREE.Mesh(new THREE.SphereGeometry(volume,16,16),new THREE.MeshLambertMaterial( { color:color } ));
             if(textureUrl){
                 var texture = THREE.ImageUtils.loadTexture(textureUrl, {}, function(){
@@ -218,6 +218,7 @@
             mesh.receiveShadow = true;//柔和阴影
             mesh.name = name;
             mesh.aroundSunSpeed = speed;
+            mesh.selfRotateSpeed = selfSpeed;
             mesh.radian = 0;
             scene.add(mesh);
 
@@ -274,6 +275,14 @@
         //行星自转
         function rotateSelf(){
             sun.rotateY(sun.selfRotateSpeed);
+            earth.rotateY(earth.selfRotateSpeed);
+            mars.rotateY(mars.selfRotateSpeed);
+            mercury.rotateY(mercury.selfRotateSpeed);
+            venus.rotateY(venus.selfRotateSpeed);
+            jupiter.rotateY(jupiter.selfRotateSpeed);
+            saturn.rotateY(saturn.selfRotateSpeed);
+            uranus.rotateY(uranus.selfRotateSpeed);
+            neptune.rotateY(neptune.selfRotateSpeed);
         }
 
         //保证星空背景不出现异常显示情况
