@@ -25,6 +25,9 @@
         var renderer;//渲染器
         var width;//页面宽度
         var height;//页面高度
+        var mouse = new THREE.Vector2();
+        var raycaster = new THREE.Raycaster();
+        var displayName;//当前显示名字
 
         window.requestAnimFrame = (function() {//如果有变化则可能还需要requestAnimationFrame刷新
             return window.requestAnimationFrame ||
@@ -42,6 +45,22 @@
             initLight();
             initObject();
             render();
+
+            window.addEventListener('mousemove', onMousemove, false );
+            //window.addEventListener('mousedown', onMousedown, false );
+            //window.addEventListener('mouseup', onMouseup, false );
+        }
+
+        //获取鼠标坐标
+        function onMousemove(event) {
+            if(event.touches){
+                var touch = event.touches[0];
+                mouse.x = (touch.clientX / width)*2 - 1;
+                mouse.y = -(touch.clientY / height)*2 + 1;
+            }else{
+                mouse.x = (event.clientX / width)*2 - 1;
+                mouse.y = -(event.clientY / height)*2 + 1;
+            }
         }
 
         //根据页面宽度和高度创建渲染器，并添加容器中
@@ -107,6 +126,7 @@
         var saturn; //土星
         var uranus; //天王
         var neptune; //海王
+        var starNames = {};//各星球名字
         function initObject() {
             var sunSkinPic = THREE.ImageUtils.loadTexture('/Html_learn/webgl/textures/sunCore.jpg', {}, function(){
                 renderer.render(scene, camera);
@@ -115,10 +135,12 @@
                 emissive:0xdd4422,
                 map:sunSkinPic
             }))
+            sun.volume = 12;
             sun.name = 'Sun';
             sun.selfRotateSpeed = Math.PI/10/25;
             scene.add( sun );
 
+            //太阳系其它行星
             earth = initPlanet('Earth','rgb(46,69,119)',40,5,Math.PI/10/365,Math.PI/10/1,'/Html_learn/webgl/textures/land_ocean_ice_cloud_2048.jpg');//Math.PI*2/365
             mars = initPlanet('Mars','rgb(210,81,16)',50,4,Math.PI/10/365/1.88,Math.PI/10/1);//火星公转为1.88地球年，自转与地球相似
             mercury = initPlanet('Mercury','rgb(124,131,203)',20,2,Math.PI/10/88,Math.PI/10/59);//水星公转为88天，自转为59天
@@ -128,7 +150,40 @@
             uranus = initPlanet('Uranus','rgb(49,168,218)',120,4,Math.PI/10/30685,Math.PI/10/0.426);//天王星公转为30685天，自转为0.426天
             neptune = initPlanet('Neptune','rgb(84,125,204)',150,3,Math.PI/10/165,Math.PI/10/18/24);//海王星公转为165天，自转为18小时
 
+            initStarsName();
             initStarBackground();
+        }
+
+        //初始化星球名字
+        function initStarsName(){
+            var loader = new THREE.FontLoader();
+            loader.load( '../lib/helvetiker_regular.typeface.json', function ( font ) {
+                nameConstructor(sun.name,sun.volume,font);
+                nameConstructor(earth.name,earth.volume,font);
+                nameConstructor(mars.name,mars.volume,font);
+                nameConstructor(mercury.name,mercury.volume,font);
+                nameConstructor(venus.name,venus.volume,font);
+                nameConstructor(jupiter.name,jupiter.volume,font);
+                nameConstructor(saturn.name,saturn.volume,font);
+                nameConstructor(uranus.name,uranus.volume,font);
+                nameConstructor(neptune.name,neptune.volume,font);
+            });
+        }
+
+        //根据行星名字和体积构造显示名字
+        function nameConstructor(name,volume,font){
+            var planetName = new THREE.Mesh(
+                    new THREE.TextGeometry( name, {
+                        font:font,
+                        size: 4,
+                        height: 4
+                    }),
+                    new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.DoubleSide} )
+            );
+            planetName.volume = volume;
+            planetName.visible = false;
+            starNames[name] = planetName;
+            scene.add(planetName);
         }
 
         //星空背景
@@ -213,6 +268,7 @@
                 });
                 mesh = new THREE.Mesh(new THREE.SphereGeometry(volume,16,16),new THREE.MeshLambertMaterial( { map:texture } ));
             }
+            mesh.volume = volume;
             mesh.position.z = -distance;
             mesh.castShadow = true;//辅助线
             mesh.receiveShadow = true;//柔和阴影
@@ -306,12 +362,42 @@
             }
         }
 
+        //如果鼠标焦点在某个星球上则显示该星球的名称
+        function showStarName(){
+            raycaster.setFromCamera( mouse, camera );
+            var intersects = raycaster.intersectObjects( scene.children );
+            if( intersects.length > 0 ){
+                //取第一个交汇对像（最接近相机）
+                var obj = intersects[ 0 ].object;
+                var name = obj.name;
+                //把上一个显示隐藏
+                displayName && (displayName.visible = false);
+
+                /*如果是有设定名字的东西*/
+                if( starNames[name] ){
+                    starNames[name].visible = true;
+                    displayName = starNames[name];
+                    //复制行星位置
+                    displayName.position.copy(obj.position);
+                    //文字居中
+                    displayName.geometry.center();
+                    //显示在行星的上方（y轴）
+                    displayName.position.y = starNames[name].volume + 4;
+                    //面向相机
+                    displayName.lookAt(camera.position);
+                }
+            }else{
+                displayName && displayName.visible && ( displayName.visible = false )
+            }
+        }
+
         //渲染
         function render(){
             renderer.clear();
             rotateAroundSun();
             rotateSelf();
             checkCamera();
+            showStarName();
             renderer.render(scene, camera);
             window.requestAnimFrame(render);
         }
