@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>伪元素</title>
+    <style>
+        /* 伪元素用于创建一些不在文档树中的元素，并为其添加样式。 */
+
+        .a-div{
+            display: inline-block;
+            width:100px;
+            height:100px;
+            text-align: center;
+            line-height: 100px;
+            background-color:gray;
+        }
+        .a-div:after{
+            content: "hello world!";
+            display: block;
+            width: 100px;
+            height: 100px;
+            background-color: pink;
+        }
+    </style>
+</head>
+<body>
+    <div class="a-div">一个div</div>
+    <script>
+        window.onload = function(){
+            //获取伪元素信息
+            var aDiv = document.querySelector('.a-div');
+            var afterStyle = window.getComputedStyle(aDiv,':after');
+            console.log(afterStyle.width);
+            console.log(afterStyle.content);
+
+            //更改伪元素属性
+            /**
+             * 1、使用CSSStyleSheet的insertRule；
+             * 2、更换类名
+             */
+        }
+    </script>
+</body>
+</html>
