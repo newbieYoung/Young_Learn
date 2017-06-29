@@ -25,10 +25,11 @@
                 var circle = Matter.Bodies.circle(50*(i+1), 0, 25);
                 circle.restitution = 1;//刚体的弹性系数
                 circles.push(circle);
+
+                Matter.Body.applyForce(circle, { x: 0, y: 0 }, { x: 0.1, y: 0 });//主动给刚体一个力
             }
             // 将刚体添加到世界中
             Matter.World.add(engine.world, circles);
-
 
             //添加边界
             Matter.World.add(engine.world, [
