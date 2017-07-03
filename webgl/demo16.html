@@ -25,6 +25,7 @@
 <body onload="threeStart();">
 <div id="canvas-frame"></div>
 <script>
+    'use strict';
     var renderer;//渲染器
     var width;//页面宽度
     var height;//页面高度
@@ -93,7 +94,7 @@
         scene.add( group );
         //创建一个球型用作最后的形状
         var geometry = new THREE.SphereGeometry( 500, 32, 32 );
-        var vl = geometry.vertices.length;
+        var vl = geometry.vertices.length;//球型的所有顶点
         for ( var i = 0; i < vl; i++ ) {
             //为每个点附上材质
             var material = new THREE.SpriteCanvasMaterial( {
