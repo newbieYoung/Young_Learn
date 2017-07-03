@@ -105,11 +105,12 @@
             particle.position.x = 0;
             particle.position.y = 0;
             particle.position.z = 0;
-            particle.scale.x = particle.scale.y = Math.random() * 6 + 3;
+            particle.scale.x = particle.scale.y = Math.random() * 6;//圆形的x和y同时缩放相应倍数
             TweenMax.to(
                 particle.position,
                 1,
-                {x:geometry.vertices[i].x+(0.5-Math.random())*100,y:geometry.vertices[i].y+(0.5-Math.random())*100,z:geometry.vertices[i].z+Math.random()*100,delay:0.5,}
+                //最终坐标增加适当随机变化，来保证最终效果不是一个很规则的球型
+                {x:geometry.vertices[i].x+Math.random()*100,y:geometry.vertices[i].y+Math.random()*100,z:geometry.vertices[i].z+Math.random()*100,delay:0.5,}
             );
             group.add( particle );
         }

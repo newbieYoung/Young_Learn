@@ -28,7 +28,7 @@
     var width;//页面宽度
     var height;//页面高度
     var stats;//性能检测
-    var pos = {val: 1};
+    var pos = {val: 1};//动画运行进度
     window.requestAnimFrame = (function() {//如果有变化则可能还需要requestAnimationFrame刷新
         return window.requestAnimationFrame ||
                 window.mozRequestAnimationFrame ||
@@ -49,7 +49,7 @@
     function initThree() {
         width = window.innerWidth;
         height = window.innerHeight;
-        renderer = new THREE.WebGLRenderer();
+        renderer = new THREE.WebGLRenderer();//ShaderMaterial只能在WebGLRenderer中渲染
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(width, height );
         var container = document.getElementById('canvas-frame');
@@ -106,11 +106,7 @@
         for(var i=0;i<initLength;i++){
             initSizes[i] = Math.random().toFixed(1)*40;
             initColors[i] = Math.random().toFixed(1);
-            if(i%3===2){
-                endPositions[i] += Math.random()*200;
-            }else{
-                endPositions[i] += (Math.random()-0.5)*100;
-            }
+            endPositions[i] += Math.random()*100;//最终坐标增加适当随机变化，来保证最终效果不是一个很规则的球型
         }
 
         initBuffer.addAttribute('initColors',new THREE.BufferAttribute(initColors, 3));
@@ -128,7 +124,6 @@
             transparent:    true
         });
         particleSystem = new THREE.Points(initBuffer, shaderMaterial);
-        particleSystem.position.z = -50;
 
         var tween = new TWEEN.Tween(pos).to({val: 0}, 1000).delay(500).onUpdate(callback);
         tween.start();
@@ -160,18 +155,19 @@
     attribute float initSizes; // 粒子尺寸
     attribute vec3 endPositions; // 目标顶点位置
     attribute vec3 initColors; // 目标顶点颜色
-    uniform float val; // 动画运行时间
+    uniform float val; // 动画运行进度
     vec3 vPos; // 将顶点位置传输给片元着色器
     varying vec3 vexcolor;
     void main() {
         // 计算粒子位置
-        vPos.x = position.x * val + endPositions.x * (1.-val);
-        vPos.y = position.y* val + endPositions.y * (1.-val);
-        vPos.z = position.z* val + endPositions.z * (1.-val);
+        vPos.x = endPositions.x * (1.-val);
+        vPos.y = endPositions.y * (1.-val);
+        vPos.z = endPositions.z * (1.-val);
         vexcolor.r = initColors.r;
         vexcolor.g = initColors.g;
         vexcolor.b = initColors.b;
         // 坐标转换
+        // modelViewMatrix和projectionMatrix两个矩阵会交替处理后会把顶点坐标转换成最终的相机坐标系的顶点坐标
         vec4 mvPosition = modelViewMatrix * vec4( vPos, 1.0 );
         gl_PointSize = initSizes * (1.-val) * ( 300.0 / -mvPosition.z );
         gl_Position = projectionMatrix * mvPosition;
