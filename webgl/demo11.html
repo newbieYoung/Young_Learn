@@ -7,15 +7,30 @@
     <script type="text/javascript" src="../lib/three-orbit-controls.js"></script>
     <style type="text/css">
         div#canvas-frame {
+            position: absolute;
+            top:0;
+            left:0;
             cursor: pointer;
             width:100%;
             height:100%;
-            background-color: #EEEEEE;
+        }
+        .star-bg{
+            position: absolute;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background:#0c0604 url(./textures/star-bg.jpg) no-repeat center;
+            background-size:cover;
+            background-position: 50% 50%;
+            overflow:hidden;
         }
     </style>
 </head>
 <body onload="threeStart();">
-<div id="canvas-frame"></div>
+    <div class="star-bg">
+        <div id="canvas-frame"></div>
+    </div>
 <script>
     var renderer;//渲染器
     var width;//页面宽度
@@ -45,7 +60,8 @@
             antialias : true
         });
         renderer.setSize(width, height);
-        renderer.setClearColor(0xFFFFFF, 1.0);
+        //如果设置了clearColor则会存在背景色遮挡页面的其他元素
+        //renderer.setClearColor(0xFFFFFF, 1.0);
         document.getElementById('canvas-frame').appendChild(renderer.domElement);
     }
     //创建相机，并设置正方向和中心点
