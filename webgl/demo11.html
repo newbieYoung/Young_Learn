@@ -57,7 +57,8 @@
         width = window.innerWidth;
         height = window.innerHeight;
         renderer = new THREE.WebGLRenderer({
-            antialias : true
+            antialias : true,
+            alpha : true//背景区域渲染是否透明
         });
         renderer.setSize(width, height);
         //如果设置了clearColor则会存在背景色遮挡页面的其他元素
@@ -89,7 +90,11 @@
     }
     //创建光线
     var directLight;
+    var ambientLight;
     function initLight() {
+        ambientLight = new THREE.AmbientLight('#7f8281');
+        scene.add(ambientLight);
+
         directLight = new THREE.DirectionalLight(0xffffff);
         /**
          * 方向光的位置和物体的位置共同决定该方向光照射该物体的方向，
