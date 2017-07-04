@@ -105,6 +105,7 @@
         scene.add(directLight);
     }
     //创建展示场景所需的各种元素
+    var earth;
     function initObject() {
         //纹理
         var cloudTexture = THREE.ImageUtils.loadTexture('textures/earth_cloud.png');
@@ -122,8 +123,8 @@
             specular : new THREE.Color(0x909090),
             shininess : 1
         });
-        //var earth = new THREE.Mesh( earth_sphereGeometry,mainMaterial );
-        var earth = THREE.SceneUtils.createMultiMaterialObject(earth_sphereGeometry, [mainMaterial]);
+        //earth = new THREE.Mesh( earth_sphereGeometry,mainMaterial );
+        earth = THREE.SceneUtils.createMultiMaterialObject(earth_sphereGeometry, [mainMaterial]);
         scene.add(earth);
 
         //云
@@ -149,49 +150,11 @@
 
     //更新光源位置，保证视角变化光源相对位置不变
     function updateLightloaction(){
-        var theta =  controller.getPolarAngle()-Math.PI/2;
-        var phi = controller.getAzimuthalAngle();
-        directLight.position.set(-1, 0, 0);
+        var theta = controller.getAzimuthalAngle()-Math.PI/2;
+        var phi = controller.getPolarAngle();
 
-        rotateAroundWorldY(directLight,phi);
-        rotateAroundWorldX(directLight,theta);
-    }
-
-    //绕着世界坐标系的某个轴旋转
-    function rotateAroundWorldY(obj,rad){
-        var x0 = obj.position.x;
-        var z0 = obj.position.z;
-        /**
-         * 因为物体本身的坐标系是随着物体的变化而变化的，
-         * 所以如果使用rotateZ、rotateY、rotateX等方法，
-         * 多次调用后就会出问题，先改为Quaternion实现。
-         */
-        var q = new THREE.Quaternion();
-        q.setFromAxisAngle( new THREE.Vector3( 0, 1, 0 ), rad );
-        obj.quaternion.premultiply( q );
-        //obj.rotateY(rad);
-        obj.position.x = Math.cos(rad)*x0+Math.sin(rad)*z0;
-        obj.position.z = Math.cos(rad)*z0-Math.sin(rad)*x0;
-    }
-    function rotateAroundWorldZ(obj,rad){
-        var x0 = obj.position.x;
-        var y0 = obj.position.y;
-        var q = new THREE.Quaternion();
-        q.setFromAxisAngle( new THREE.Vector3( 0, 0, 1 ), rad );
-        obj.quaternion.premultiply( q );
-        //obj.rotateZ(rad);
-        obj.position.x = Math.cos(rad)*x0-Math.sin(rad)*y0;
-        obj.position.y = Math.cos(rad)*y0+Math.sin(rad)*x0;
-    }
-    function rotateAroundWorldX(obj,rad){
-        var y0 = obj.position.y;
-        var z0 = obj.position.z;
-        var q = new THREE.Quaternion();
-        q.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), rad );
-        obj.quaternion.premultiply( q );
-        //obj.rotateX(rad);
-        obj.position.y = Math.cos(rad)*y0-Math.sin(rad)*z0;
-        obj.position.z = Math.cos(rad)*z0+Math.sin(rad)*y0;
+        directLight.position.x = Math.sin(phi)*Math.sin(theta);
+        directLight.position.z = Math.sin(phi)*Math.cos(theta);
     }
 </script>
 </body>
