@@ -150,11 +150,20 @@
 
     //更新光源位置，保证视角变化光源相对位置不变
     function updateLightloaction(){
-        var theta = controller.getAzimuthalAngle()-Math.PI/2;
-        var phi = controller.getPolarAngle();
+        //丫蛋的算法，没看懂
+        //var theta = controller.getAzimuthalAngle()-Math.PI/2;
+        //var phi = controller.getPolarAngle();
 
-        directLight.position.x = Math.sin(phi)*Math.sin(theta);
-        directLight.position.z = Math.sin(phi)*Math.cos(theta);
+        //directLight.position.x = Math.sin(phi)*Math.sin(theta);
+        //directLight.position.z = Math.sin(phi)*Math.cos(theta);
+
+        //光照点始终都在相机和世界坐标系Y轴所组成平面的法向量上
+        var cameraPosition = camera.position;
+        var vector1 = new THREE.Vector3( cameraPosition.x, cameraPosition.y, cameraPosition.z );//原点和相机的向量
+        var vector2 = new THREE.Vector3(0,1,0);//世界坐标系Y轴正方向
+        var vector3 = new THREE.Vector3();
+        vector3.crossVectors(vector1,vector2);
+        directLight.position.set(vector3.x,vector3.y,vector3.z);
     }
 </script>
 </body>
