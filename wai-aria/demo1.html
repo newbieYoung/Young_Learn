@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>tabindex</title>
+</head>
+<body>
+    <p>键盘用户通常会使用tab键将光标从一个可获得焦点的元素有序地移动到下一个元素，而tabindex属性则决定了光标移动的顺序</p>
+    <ul>
+        <li>tabindex=0表示元素的tab键序与其在源代码中的顺序一致，默认情况下，如果元素本身是可以获得焦点则没必要设置tabindex属性，但是如果你想让一个不能获得焦点的元素，比如span、div也被包含在tab键序列表中，那么在该元素上设置tabindex属性即可；</li>
+        <li>tabindex=-1表示该元素不在tab键序列表中，也就是说按下tab键时，该元素不能获得焦点，虽说可以通过代码来获得焦点；</li>
+        <li>tabindex=1+当tabindex设置为一个正数时，元素获得焦点的顺序由其tabindex属性的值来决定</li>
+    </ul>
+</body>
+</html>
