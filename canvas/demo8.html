@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>drawImage方法参数的影响</title>
+</head>
+<body>
+    <canvas id="target" width="270" height="1620"></canvas>
+    <script>
+        window.onload = function(){
+            var canvas = document.querySelector('#target');
+            var context = canvas.getContext('2d');
+
+
+            var img = new Image();
+            img.src = './i.png';
+            img.onload = function(){
+                var start = new Date().getTime();
+
+                for(var i=0;i<100000;i++){
+                    context.drawImage(img,0,0,270,1620);
+                }
+
+//                var temp = document.createElement('canvas');
+//                var tempContext = temp.getContext('2d');
+//                temp.width = 270;
+//                temp.height = 1620;
+//                tempContext.drawImage(img,0,0,270,1620);
+//                for(var i=0;i<100000;i++){
+//                    context.drawImage(temp,0,0,270,1620);
+//                }
+
+                /**
+                 * 直接绘制img和先把img绘制到离屏canvas中貌似效率相差不大
+                 */
+                var end = new Date().getTime();
+                console.log(end-start);
+            }
+        }
+    </script>
+</body>
+</html>
