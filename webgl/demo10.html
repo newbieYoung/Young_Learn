@@ -69,6 +69,8 @@
                 });
                 renderer.setSize(width, height);
                 renderer.setClearColor(0xFFFFFF, 1.0);
+                renderer.shadowMap.enabled = true;//打开渲染器的阴影地图
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
                 //并添加容器中
                 document.getElementById('canvas-frame').appendChild(renderer.domElement);
             }
@@ -76,9 +78,9 @@
             var camera;
             function initCamera() {
             	//创建相机
-            	camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
-                camera.position.x = 0
-                camera.position.y = 0;
+            	camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+                camera.position.x = 300
+                camera.position.y = 600;
                 camera.position.z = 600;
                 camera.up.x = 0;//正方向
                 camera.up.y = 1;
@@ -90,7 +92,7 @@
                 });
                 //视角控制
                 controller = new THREE.OrbitControls(camera, renderer.domElement);
-                controller.target = new THREE.Vector3(0, 0, -75);//设置控制点
+                controller.target = new THREE.Vector3(0, 0, 0);//设置控制点
             }
 
             var scene;
@@ -99,14 +101,36 @@
             	scene = new THREE.Scene();
             }
 
+            var shadowLight;
             var light;
             function initLight() {
             	//创建光线
-            	light = new THREE.AmbientLight(0xfefefe);
-				scene.add(light);
+                // 第一个参数是天空的颜色，第二个参数是地上的颜色，第三个参数是光源的强度
+                hemisphereLight = new THREE.HemisphereLight(0xaaaaaa,0x000000, .9);
+
+                scene.add(hemisphereLight);
+
+                shadowLight = new THREE.DirectionalLight(0xffffff, .9);
+                shadowLight.position.set(150,350,350);
+                shadowLight.castShadow = true;//开启光源投影
+
+                //定义可见域的投射阴影
+                shadowLight.shadow.camera.left = -400;
+                shadowLight.shadow.camera.right = 400;
+                shadowLight.shadow.camera.top = 400;
+                shadowLight.shadow.camera.bottom = -400;
+                shadowLight.shadow.camera.near = 1;
+                shadowLight.shadow.camera.far = 1000;
+
+                //定义阴影的分辨率；虽然分辨率越高越好，但是需要付出更加昂贵的代价维持高性能的表现
+                shadowLight.shadow.mapSize.width = 2048;
+                shadowLight.shadow.mapSize.height = 2048;
+
+                scene.add(shadowLight);
             }
 
-            var cubes
+            var cubes//魔方
+            var floor;//地板
             function initObject() {
                 cubes = SimpleCube(cubeParams.x,cubeParams.y,cubeParams.z,cubeParams.num,cubeParams.len,cubeParams.colors);
                 for(var i=0;i<cubes.length;i++){
@@ -138,6 +162,15 @@
                 var cube = new THREE.Mesh( cubegeo, cubemat );
                 cube.cubeType = 'coverCube';
                 scene.add( cube );
+
+                //添加地板
+                var floorGeo = new THREE.PlaneBufferGeometry( 600, 600 );
+                floorGeo.rotateX( - Math.PI / 2 );
+                var floorMaterial = new THREE.MeshStandardMaterial({ color: 0xe0e0e0 });
+                var floor = new THREE.Mesh(floorGeo, floorMaterial);
+                floor.receiveShadow = true; //接受阴影
+                floor.position.set(0, -100, 0);
+                scene.add(floor)
             }
 
             function render(){
@@ -180,6 +213,7 @@
                         cube.position.x = (x+len/2)+(j%3)*len;
                         cube.position.y = (y-len/2)-parseInt(j/3)*len;
                         cube.position.z = (z-len/2)-i*len;
+                        cube.castShadow = true;//开启阴影产生
 
                         cubes.push(cube)
                     }
