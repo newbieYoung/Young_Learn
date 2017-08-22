@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>canvas css3 box-shadow linear-gradient</title>
+    <style>
+        .demo0{
+            width:440px;
+            height:80px;
+            background-image: linear-gradient(-90deg, #FA3883 9%, #FFB647 85%);
+            border-radius: 100px;
+            position: absolute;
+            top:0;
+            left:0;
+            z-index:2;
+        }
+        #demo0{
+            width:440px;/* 440 */
+            height:200px;/* 80 */
+            position: absolute;
+            top:0;
+            left:0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="demo0"></div>
+    <canvas id="demo0" width="440" height="200"></canvas>
+    <script>
+        //demo0
+        var canvas0 = document.getElementById("demo0");
+        var ctx0 = canvas0.getContext("2d");
+
+        var g = ctx0.createLinearGradient(0,0,440,80);
+        g.addColorStop(0,"#FFB647");
+        g.addColorStop(1,"#FA3883");
+        ctx0.filter = "blur(10px) grayscale(.5)"; // set the filter
+        ctx0.setTransform(0.8795,0,0,.9375,0,0);  // set scale so can work in same coords
+        radiusRect(ctx0,{x:26.5,y:9,width:440,height:80,radius:100,backgroundColor:g});
+
+        /**
+         * 圆角矩形
+         * @param context 绘图上下文
+         * @param options 圆角矩形参数
+         * radius:原角大小
+         * width:宽度
+         * height:高度
+         * backgroundColor:填充颜色
+         * x:左上角x轴坐标
+         * y:左上角y轴坐标
+         * -------- 待实现
+         * borderWidth:边框大小
+         * borderColor:边框颜色
+         * border-top-bottom-radius等
+         */
+        function radiusRect(context,options){
+            var min = options.width>options.height?options.height:options.width;
+            if(options.radius*2>min){
+                options.radius = min/2;
+            }
+            context.moveTo(options.x+options.radius, options.y);
+            context.lineTo(options.x+options.width-options.radius, options.y);
+            context.quadraticCurveTo(options.x+options.width, options.y, options.x+options.width, options.y+options.radius);//quadraticCurveTo二次贝塞尔曲线
+            context.lineTo(options.x+options.width, options.y+options.height-options.radius);
+            context.quadraticCurveTo(options.x+options.width, options.y+options.height, options.x+options.width-options.radius, options.y+options.height);
+            context.lineTo(options.x+options.radius, options.y+options.height);
+            context.quadraticCurveTo(options.x, options.y+options.height, options.x, options.y+options.height-options.radius);
+            context.lineTo(options.x, options.y+options.radius);
+            context.quadraticCurveTo(options.x, options.y, options.x+options.radius, options.y);
+            context.strokeStyle = options.backgroundColor;
+            context.stroke();
+            context.fillStyle = options.backgroundColor;
+            context.fill();
+        }
+
+    </script>
+</body>
+</html>

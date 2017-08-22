@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>canvas img box-shadow linear-gradient</title>
+    <style>
+        .demo0{
+            width:172px;
+            height:237px;
+            background-image:url(./girl.png);
+            background-size:100% 100%;
+            position: absolute;
+            top:0;
+            left:0;
+            z-index:2;
+        }
+        /*.demo0:after{*/
+            /*content:'';*/
+            /*width:172px;*/
+            /*height:237px;*/
+            /*position: absolute;*/
+            /*top:0;*/
+            /*left:0;*/
+            /*right:0;*/
+            /*bottom:0;*/
+            /*border:1px solid #000;*/
+        /*}*/
+        #demo0{
+            width:172px;/* 172 */
+            height:300px;/* 237 */
+            position: absolute;
+            top:0;
+            left:0;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo0"></div>
+    <canvas id="demo0" width="172" height="300"></canvas>
+    <script>
+        //demo0
+        var canvas0 = document.getElementById("demo0");
+        var ctx0 = canvas0.getContext("2d");
+
+        var img = new Image();
+        img.src = './girl.png';
+        img.onload = function(){
+            // 创建图片纹理
+            var pattern = ctx0.createPattern(this, "no-repeat");
+            ctx0.filter = "blur(10px)"; // set the filter
+            ctx0.setTransform(0.8795,0,0,.9375,0,0);  // set scale so can work in same coords
+            ctx0.drawImage(this , 10.36 , 20);
+        }
+
+    </script>
+</body>
+</html>

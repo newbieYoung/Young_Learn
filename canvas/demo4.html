@@ -23,18 +23,47 @@
             var context = canvas.getContext('2d');
             var rgbaColor = 'rgba(255,193,37,1)';
 
-            context.fillStyle = 'rgba(0,0,0,1)';
-            context.fillRect(0, 0, 256, 256);
+			context.beginPath();
 
-            //用16px宽的线画个圆角矩形，并填充
-            context.rect(16, 16, 224, 224);
-            context.lineJoin = 'round';
-            context.lineWidth = 16;
-            context.fillStyle = rgbaColor;
-            context.strokeStyle = rgbaColor;
-            context.stroke();
-            context.fill();
+			radiusRect(context,{radius:10,width:80,height:40,x:10,y:10,backgroundColor:rgbaColor});
+
+			context.closePath();
 		};
+
+		/**
+		 * 圆角矩形
+		 * @param context 绘图上下文
+		 * @param options 圆角矩形参数
+		 * radius:原角大小
+		 * width:宽度
+		 * height:高度
+		 * backgroundColor:填充颜色
+		 * x:左上角x轴坐标
+		 * y:左上角y轴坐标
+		 * -------- 待实现
+		 * borderWidth:边框大小
+		 * borderColor:边框颜色
+		 * border-top-bottom-radius等
+		 */
+		function radiusRect(context,options){
+			var min = options.width>options.height?options.height:options.width;
+			if(options.radius*2>min){
+				options.radius = min/2;
+			}
+			context.moveTo(options.x+options.radius, options.y);
+			context.lineTo(options.x+options.width-options.radius, options.y);
+			context.quadraticCurveTo(options.x+options.width, options.y, options.x+options.width, options.y+options.radius);//quadraticCurveTo二次贝塞尔曲线
+			context.lineTo(options.x+options.width, options.y+options.height-options.radius);
+			context.quadraticCurveTo(options.x+options.width, options.y+options.height, options.x+options.width-options.radius, options.y+options.height);
+			context.lineTo(options.x+options.radius, options.y+options.height);
+			context.quadraticCurveTo(options.x, options.y+options.height, options.x, options.y+options.height-options.radius);
+			context.lineTo(options.x, options.y+options.radius);
+			context.quadraticCurveTo(options.x, options.y, options.x+options.radius, options.y);
+			context.strokeStyle = options.backgroundColor;
+			context.stroke();
+			context.fillStyle = options.backgroundColor;
+			context.fill();
+		}
 	</script>
 </body>
 </html>

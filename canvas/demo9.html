@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas gradient shadow</title>
+    <style>
+        #canV {
+            width:200px;
+            height:200px;
+            border:1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canV" width = 200 height =200></canvas>
+    <script>
+        var canvas = document.getElementById("canV");
+        var ctx = canvas.getContext("2d");
+
+        var g = ctx.createLinearGradient(10,10,100,100);
+        for(var i = 0; i <= 1; i+= 0.05){
+            g.addColorStop(i,"hsl("+Math.floor(i*360)+",100%,50%)");
+        }
+        var gDark = ctx.createLinearGradient(20,20,100,100);
+        for(var i = 0; i <= 1; i+= 0.05){
+            gDark.addColorStop(i,"hsl("+Math.floor(i*360)+",100%,30%)");
+        }
+        ctx.font = "16px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "hanging";
+        //if(false){
+        if(ctx.filter !== undefined){
+            ctx.fillText("Using filter.",65,125);
+            ctx.fillStyle = gDark;
+            ctx.filter = "blur(5px)"; // set the blur
+            ctx.fillRect(20,20,100,100);  // draw the shadow
+            ctx.fillStyle = g;   // set the lighter gradoent
+            ctx.filter = "blur(0px)";  // remove the blur
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "black"
+            ctx.fillRect(10,10,100,100); // draw the box
+            ctx.strokeRect(10,10,100,100); // with line to look nice.
+        }else{
+            // fallback method
+            ctx.fillText("Using Fallback.",60,125);
+            var can = document.createElement("canvas"); // create a second canvas
+            can.width = Math.floor(canvas.width/10);  // size to make one pixel the
+            can.height =Math.floor(canvas.height/10);  // size of the blur
+            var ctxS = can.getContext("2d");
+            ctxS.setTransform(1/10,0,0,1/10,0,0);  // set scale so can work in same coords
+            ctxS.fillStyle = gDark;
+            ctxS.fillRect(20,20,100,100);  // draw the shadow
+            ctx.imageSmoothingEnabled=true;
+            ctx.drawImage(can,0,0,canvas.width,canvas.height);
+        }
+        ctx.fillStyle = g;   // set the lighter gradoent
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "black"
+        ctx.fillRect(10,10,100,100); // draw the box
+        ctx.strokeRect(10,10,100,100); // with line to look nice.
+    </script>
+</body>
+</html>
