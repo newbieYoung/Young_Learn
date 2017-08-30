@@ -7,6 +7,10 @@
 <body>
 <script src="https://pixijs.download/v4.5.5/pixi.min.js"></script>
 <script type="text/javascript">
+    /**
+     * 基本证明webgl的渲染性能确实比canvas的性能要高；
+     * 这个例子是基于pixi框架而言，还可以对比"webgl/demo20.html"和"canvas/demo6.html"也能得到相似结论。
+     */
     //var renderer = PIXI.autoDetectRenderer(1000, 1000);
     //var renderer = new PIXI.CanvasRenderer(5000, 5000);
     var renderer = new PIXI.WebGLRenderer(5000, 5000);

@@ -6,7 +6,7 @@
     <script type="text/javascript" src="./sim-tools.js"></script>
 </head>
 <body onload="main()">
-    <canvas id="webgl" width="256" height="256"></canvas>
+    <canvas id="webgl" width="5000" height="5000"></canvas>
     <!-- 片段着色器程序 -->
     <script id="shader-fs" type="x-shader/x-fragment">
         precision mediump float;
@@ -81,10 +81,10 @@
             //顶点坐标和纹理坐标映射关系
             var datas = new Float32Array([
                 //顶点坐标、纹理坐标
-                -1.0,1.0,0.0,1.0,
+                -1.0,1.0,0.0,16.0,
                 -1.0,-1.0,0.0,0.0,
-                1.0,1.0,1.0,1.0,
-                1.0,-1.0,1.0,0.0,
+                1.0,1.0,16.0,16.0,
+                1.0,-1.0,16.0,0.0,
             ]);
 
             var num = 4;//顶点数目
