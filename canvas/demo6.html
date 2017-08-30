@@ -12,7 +12,7 @@
             var context = canvas.getContext('2d');
 
             var img = new Image();
-            img.src = './sky.JPG';
+            img.src = '../img/sky.JPG';
             img.onload = function () {
                 var ptrn = context.createPattern(img, 'repeat'); // Create a pattern with this image, and set it to "repeat".
                 context.fillStyle = ptrn;
