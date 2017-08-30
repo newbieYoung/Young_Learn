@@ -54,7 +54,7 @@
 
             var u_Sampler = gl.getUniformLocation(shaderPorgram,'u_Sampler');
             var image = new Image();
-            image.src = './img/sky.JPG';
+            image.src = '../img/sky.JPG';
             image.onload = function(){
                 loadTextures(gl,n,texture,u_Sampler,image);
             }
