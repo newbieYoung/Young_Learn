@@ -63,7 +63,7 @@
 					-0.5,-0.5,0.0,1.0,0.0,
 					0.5,-0.5,0.0,0.0,1.0
 				]);
-			var size = datas.BYTES_PER_ELEMENT;
+			var size = datas.BYTES_PER_ELEMENT;//数组中的每个元素的大小（以字节为单位）
 			var num = 3;
 
 			//创建缓冲区对象
@@ -72,9 +72,9 @@
 				console.log('Failed to create the buffer object!');
 				return -1;
 			}
-			//将缓冲区对象绑定到目标
-			gl.bindBuffer(gl.ARRAY_BUFFER,vertexBuffer);
+
 			//向缓冲区对象中写入数据
+			gl.bindBuffer(gl.ARRAY_BUFFER,vertexBuffer);//将缓冲区对象绑定到目标
 			gl.bufferData(gl.ARRAY_BUFFER,datas,gl.STATIC_DRAW);
 
 
