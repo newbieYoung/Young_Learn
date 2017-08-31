@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WebGL在矩形表面贴上图像</title>
+    <title>WebGL简单实现高斯模糊</title>
     <script type="text/javascript" src="./sim-tools.js"></script>
 </head>
 <body onload="main()">
@@ -46,9 +46,10 @@
 <script>
     var blur;
     var v_Blur;
+    var canvas;
 
     function main(){
-        var canvas = document.querySelector('#webgl');
+        canvas = document.querySelector('#webgl');
         var gl = canvas.getContext('webgl');//获取canvas上下文
         var shaderPorgram = initShaders(gl);//初始化着色器程序
         blur = {x:10/7/canvas.width,y:10/7/canvas.height};
@@ -65,6 +66,30 @@
             return;
         }
     }
+
+    var _createFramebufferTexture = function(gl) {
+        var fbo = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+
+        var renderbuffer = gl.createRenderbuffer();
+        gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+
+        var texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        return {fbo: fbo, texture: texture};
+    };
 
     //初始化纹理
     function initTextures(gl,shaderPorgram,n){
@@ -86,15 +111,30 @@
 
     //加载纹理图片
     function loadTextures(gl,n,texture,u_Sampler,image){
+        gl.clear(gl.COLOR_BUFFER_BIT);   // Clear <canvas>
+
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);//对纹理图像进行y轴反转
         gl.bindTexture(gl.TEXTURE_2D, texture);//绑定纹理对象
 
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);//配置纹理对象的参数
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);//配置纹理对象的参数
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);//将纹理图像分配给纹理对象
 
-        gl.uniform2f(v_Blur,blur.x,blur.y);
-        gl.clear(gl.COLOR_BUFFER_BIT);   // Clear <canvas>
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, n); // Draw the rectangle
+        // Vertical
+        gl.uniform2f(v_Blur, 0, blur.y);
+        var fbt = _createFramebufferTexture(gl);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbt.fbo);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
+
+        // Horizontal
+        gl.uniform2f(v_Blur, blur.x, 0);
+        gl.bindTexture(gl.TEXTURE_2D, fbt.texture);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
     }
 
     //初始化顶点位置
