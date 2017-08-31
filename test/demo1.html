@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试webgl-image-filter.js</title>
+</head>
+<body>
+    <script src="../lib/webgl-image-filter.js"></script>
+    <script>
+        try {
+            var filter = new WebGLImageFilter();
+        }catch( err ) {
+            // Handle browsers that don't support WebGL
+        }
+        filter.addFilter('blur', 10);
+        filter.addFilter('hue', 180);
+        filter.addFilter('negative');
+
+        var img = new Image();
+        img.src = '../img/sky.JPG';
+        img.onload = function () {
+            var filteredImage = filter.apply(img);
+            document.body.appendChild(filteredImage);
+        }
+
+    </script>
+</body>
+</html>
