@@ -11,9 +11,9 @@
 		var mediaRecorder;
 		var recordedBlobs = [];
 
-		navigator.webkitGetUserMedia({
-            audio: true
-        }, success, error);
+		navigator.mediaDevices.getUserMedia({
+			audio: true
+		}).then(success).catch(error);
 
 	    function success(stream) {
 	    	window.stream = stream;

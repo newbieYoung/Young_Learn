@@ -6,7 +6,6 @@
 </head>
 <body>
 	<ul>
-		<li>首先html5 UserMedia已经被Web标准废弃了</li>
 		<li>该例子最好在Android设备的QQ中浏览</li>
 		<li>就算部分浏览器支持，貌似正式发布时，也只能使用HTTPS协议</li>
 	</ul>
@@ -27,21 +26,14 @@
 				}
 			}
 
-			navigator.webkitGetUserMedia({
+			navigator.mediaDevices.getUserMedia({
 				video: {
 					optional:[{
 						sourceId:exArray[1]//0为前置摄像头，1为后置
 					}]
 				}
-			}, success, error);
+			}).then(success).catch(error);
 		});
-
-		function success(stream) {
-		    video.src = window.webkitURL.createObjectURL(stream);
-		    video.onloadedmetadata = function(e) {
-		    	renderCanvas();
-		    };
-	    }
 
 	    function error(err) {
 	        alert('video error: ' + err)
