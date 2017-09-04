@@ -31,6 +31,7 @@
         }
     </style>
     <script type="text/javascript" src="../lib/three.js"></script>
+    <script type="text/javascript" src="../lib/three-deviceorientation-controls.js"></script>
 </head>
 <body>
 <!-- Android手机摄像头视频全屏只需要给视频套个容器然后让容器全屏即可，视频本身不需要任何处理 -->
@@ -39,6 +40,10 @@
     <div class="canvas-frame"></div>
 </div>
 <script type="text/javascript">
+
+    /**
+     * 这种方式只是简单的叠加WebGL场景和摄像头场景，由于WebGL场景中的摄像机位置和光照等参数并没有和摄像头场景中的参数达成一致，因此效果并不好。
+     */
     window.onload = function () {
 
         //user-media
@@ -49,9 +54,24 @@
         videoWrap.style.width = window.innerWidth+'px';
         videoWrap.style.height = window.innerHeight+'px';
 
-        navigator.webkitGetUserMedia({
-            video: true
-        }, success, error);
+        var exArray = []; //存储设备源ID
+        MediaStreamTrack.getSources(function (sourceInfos) {
+            for (var i = 0; i != sourceInfos.length; ++i) {
+                var sourceInfo = sourceInfos[i];
+                //这里会遍历audio,video，所以要加以区分
+                if (sourceInfo.kind === 'video') {
+                    exArray.push(sourceInfo.id);
+                }
+            }
+
+            navigator.mediaDevices.getUserMedia({
+                video: {
+                    optional:[{
+                        sourceId:exArray[1]//0为前置摄像头，1为后置
+                    }]
+                }
+            }).then(success).catch(error);
+        });
 
         function success(stream) {
             video.src = window.webkitURL.createObjectURL(stream);
@@ -100,17 +120,7 @@
         var camera;
         function initCamera() {
             camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
-            camera.position.x = 0;
-            camera.position.y = 0;
-            camera.position.z = 600;
-            camera.up.x = 0;//正方向
-            camera.up.y = 1;
-            camera.up.z = 0;
-            camera.lookAt({
-                x : 0,
-                y : 0,
-                z : 0
-            });
+            controls = new THREE.DeviceOrientationControls( camera );
         }
         //创建场景，后续元素需要加入到场景中才会显示出来
         var scene;
@@ -146,6 +156,8 @@
             }
             var cubemat = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
             cube = new THREE.Mesh( cubegeo, cubemat );
+            cube.position.z = 400;
+
             scene.add( cube );
         }
         //渲染
@@ -153,6 +165,7 @@
             renderer.clear();
             cube.rotation.y += 10/1000;//绕y轴旋转
             renderer.render(scene, camera);
+            controls.update();
             window.requestAnimationFrame( render );
         }
 
