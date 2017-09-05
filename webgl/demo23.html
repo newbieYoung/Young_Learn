@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>ThreeJS 加载fbx模型并展示模型动画</title>
+    <script type="text/javascript" src="../lib/inflate.min.js"></script>
     <script type="text/javascript" src="../lib/three.js"></script>
-    <script type="text/javascript" src="../lib/three-FBXLoader2.js"></script>
+    <script type="text/javascript" src="../lib/three-FBXLoader.js"></script>
     <script type="text/javascript" src="../lib/three-nurbscurve.js"></script>
     <script type="text/javascript" src="../lib/three-nurbsutils.js"></script>
     <script type="text/javascript" src="../lib/three-orbit-controls.js"></script>
@@ -62,9 +63,9 @@
     var camera,controls;
     function initCamera() {
         camera = new THREE.PerspectiveCamera(45, width / height, 1, 2000);
-        camera.position.set( 2, 18, 28 );
+        camera.position.set( 2, 180, 280 );
         controls = new THREE.OrbitControls( camera, renderer.domElement );
-        controls.target.set( 0, 12, 0 );
+        controls.target.set( 0, 120, 10 );
         controls.update();
     }
 
@@ -80,32 +81,24 @@
         light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
         light.position.set(0, 1, 0);
         scene.add(light);
-
-        light = new THREE.DirectionalLight(0xffffff, 1.0);
-        light.position.set(0, 1, 0);
-        scene.add(light);
     }
 
     //创建展示场景所需的各种元素
-    var mixers = [];
+    var mixers = [];//AnimationMixer动画数组，每个单独的动画模型需要单独的AnimationMixer控制
     function initObject() {
-        // grid
-        var gridHelper = new THREE.GridHelper( 28, 28, 0x303030, 0x303030 );
-        gridHelper.position.set( 0, - 0.04, 0 );
-        scene.add( gridHelper );
-
         // model
         var manager = new THREE.LoadingManager();
         manager.onProgress = function( item, loaded, total ) {
             console.log( item, loaded, total );
         };
-        //threejs貌似不支持二进制的fbx模型
         var loader = new THREE.FBXLoader( manager );
-        loader.load( './fbx/xsi_man_skinning.fbx', function( object ) {
+        loader.load( './fbx/xbot.fbx', function( object ) {
+
             object.mixer = new THREE.AnimationMixer( object );
             mixers.push( object.mixer );
             var action = object.mixer.clipAction( object.animations[ 0 ] );
             action.play();
+
             scene.add( object );
         }, onProgress, onError );
     }
@@ -124,12 +117,17 @@
     //渲染
     var clock = new THREE.Clock();
     function render(){
+        //console.log('render');
         renderer.clear();
+
+        //更新动画
+        //console.log(mixers.length);
         if ( mixers.length > 0 ) {
             for ( var i = 0; i < mixers.length; i ++ ) {
                 mixers[ i ].update( clock.getDelta() );
             }
         }
+
         renderer.render(scene, camera);
         window.requestAnimFrame(render);
     }
