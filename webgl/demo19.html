@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>ThreeJS 加载obj以及mtl模型</title>
     <script type="text/javascript" src="../lib/three.js"></script>
-    <script type="text/javascript" src="../lib/three-dds-Loader.js"></script>
     <script type="text/javascript" src="../lib/three-obj-loader.js"></script>
     <script type="text/javascript" src="../lib/three-mtl-loader.js"></script>
     <script type="text/javascript" src="../lib/three-orbit-controls.js"></script>
@@ -112,7 +111,6 @@
     //创建展示场景所需的各种元素
     function initObject() {
 
-        THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
         var mtlLoader = new THREE.MTLLoader();
         mtlLoader.setPath( './mtl/' );
         mtlLoader.load( 'monu9.mtl', function( materials ) {
