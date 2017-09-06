@@ -98,7 +98,8 @@
         };
         var loader = new THREE.FBXLoader( manager );
         loader.load( './fbx/xbot.fbx', function( object ) {
-            object.scale.set(0.01,0.01,0.01);//缩放为原来的0.01
+            //调整模型尺寸
+            object.scale.set(0.01,0.01,0.01);
 
             object.mixer = new THREE.AnimationMixer( object );
             mixers.push( object.mixer );
