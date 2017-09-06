@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ThreeJS 加载dae模型并展示模型动画</title>
+    <script type="text/javascript" src="../lib/three.js"></script>
+    <script type="text/javascript" src="../lib/three-colladaLoader2.js"></script>
+    <script type="text/javascript" src="../lib/three-orbit-controls.js"></script>
+    <style type="text/css">
+        body{
+            padding:0;
+            margin:0;
+        }
+        div#canvas-frame {
+            cursor: pointer;
+            width:100%;
+            height:100%;
+            background-color: #EEEEEE;
+        }
+    </style>
+</head>
+<body onload="threeStart();">
+<div id="canvas-frame"></div>
+<script>
+    var renderer;//渲染器
+    var width;//页面宽度
+    var height;//页面高度
+
+    window.requestAnimFrame = (function() {//如果有变化则可能还需要requestAnimationFrame刷新
+        return window.requestAnimationFrame ||
+                window.mozRequestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                window.webkitRequestAnimationFrame;
+    })();
+
+    //开始
+    function threeStart() {
+        initThree();
+        initCamera();
+        initScene();
+        initLight();
+        initObject();
+        render();
+    }
+
+    //根据页面宽度和高度创建渲染器，并添加容器中
+    function initThree() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        renderer = new THREE.WebGLRenderer({
+            antialias : true
+        });
+        renderer.setSize(width, height);
+        renderer.setClearColor( 0x000000 );
+        document.getElementById('canvas-frame').appendChild(renderer.domElement);
+    }
+
+    //创建相机，并设置正方向和中心点
+    var camera,controls;
+    function initCamera() {
+        camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 2000 );
+        camera.position.set( 8, 10, 8 );
+        camera.lookAt( new THREE.Vector3( 0, 3, 0 ) );
+        controls = new THREE.OrbitControls( camera, renderer.domElement );
+        controls.update();
+    }
+
+    //创建场景，后续元素需要加入到场景中才会显示出来
+    var scene;
+    function initScene() {
+        scene = new THREE.Scene();
+    }
+
+    //创建光线
+    var light;
+    function initLight() {
+        light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
+        light.position.set(0, 1, 0);
+        scene.add(light);
+    }
+
+    //创建展示场景所需的各种元素
+    var elf;
+    function initObject() {
+        // model
+        var manager = new THREE.LoadingManager(function() {
+            scene.add( elf );
+        });
+        manager.onProgress = function( item, loaded, total ) {
+            console.log( item, loaded, total );
+        };
+        var loader = new THREE.ColladaLoader( manager );
+        loader.load( './dae/xbot.dae', function( collada ) {
+            elf = collada.scene;
+        }, onProgress, onError );
+    }
+
+    //模型加载回掉函数
+    var onProgress = function( xhr ) {
+        if ( xhr.lengthComputable ) {
+            var percentComplete = xhr.loaded / xhr.total * 100;
+            console.log( Math.round( percentComplete, 2 ) + '% downloaded' );
+        }
+    };
+    var onError = function( xhr ) {
+        console.error( xhr );
+    };
+
+    //渲染
+    var clock = new THREE.Clock();
+    function render(){
+        //console.log('render');
+        renderer.clear();
+        renderer.render(scene, camera);
+        window.requestAnimFrame(render);
+    }
+</script>
+</body>
+</html>
