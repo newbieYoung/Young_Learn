@@ -59,9 +59,8 @@
     //创建相机，并设置正方向和中心点
     var camera,controls;
     function initCamera() {
-        camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 2000 );
-        camera.position.set( 8, 10, 8 );
-        camera.lookAt( new THREE.Vector3( 0, 3, 0 ) );
+        camera = new THREE.PerspectiveCamera( 25, window.innerWidth / window.innerHeight, 1, 10000 );
+        camera.position.set( 15, 10, - 15 );
         controls = new THREE.OrbitControls( camera, renderer.domElement );
         controls.update();
     }
@@ -73,16 +72,23 @@
     }
 
     //创建光线
-    var light;
+    var ambientLight,directionalLight;
     function initLight() {
-        light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
-        light.position.set(0, 1, 0);
-        scene.add(light);
+        var ambientLight = new THREE.AmbientLight( 0xffffff, 0.2 );
+        scene.add( ambientLight );
+
+        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+        directionalLight.position.set( 1, 1, - 1 );
+        scene.add( directionalLight );
     }
 
     //创建展示场景所需的各种元素
     var mixers = [];//AnimationMixer动画数组，每个单独的动画模型需要单独的AnimationMixer控制
     function initObject() {
+        //grid
+        var gridHelper = new THREE.GridHelper( 10, 20 );
+        scene.add( gridHelper );
+
         // model
         var manager = new THREE.LoadingManager();
         manager.onProgress = function( item, loaded, total ) {
