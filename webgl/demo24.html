@@ -81,18 +81,24 @@
     }
 
     //创建展示场景所需的各种元素
-    var elf;
+    var mixers = [];//AnimationMixer动画数组，每个单独的动画模型需要单独的AnimationMixer控制
     function initObject() {
         // model
-        var manager = new THREE.LoadingManager(function() {
-            scene.add( elf );
-        });
+        var manager = new THREE.LoadingManager();
         manager.onProgress = function( item, loaded, total ) {
+            console.log('--- manager onProgress ---');
             console.log( item, loaded, total );
         };
         var loader = new THREE.ColladaLoader( manager );
         loader.load( './dae/xbot.dae', function( collada ) {
-            elf = collada.scene;
+
+            var object = collada.scene;
+            object.mixer = new THREE.AnimationMixer( object );
+            mixers.push( object.mixer );
+            var action = object.mixer.clipAction( collada.animations[ 0 ] );
+            action.play();
+
+            scene.add(object);
         }, onProgress, onError );
     }
 
@@ -112,6 +118,15 @@
     function render(){
         //console.log('render');
         renderer.clear();
+
+        //更新动画
+        //console.log(mixers.length);
+        if ( mixers.length > 0 ) {
+            for ( var i = 0; i < mixers.length; i ++ ) {
+                mixers[ i ].update( clock.getDelta() );
+            }
+        }
+
         renderer.render(scene, camera);
         window.requestAnimFrame(render);
     }
