@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ThreeJS 加载3ds模型</title>
+    <script type="text/javascript" src="../lib/three.js"></script>
+    <script type="text/javascript" src="../lib/three-TDSLoader.js"></script>
+    <script type="text/javascript" src="../lib/three-orbit-controls.js"></script>
+    <style type="text/css">
+        body{
+            padding:0;
+            margin:0;
+        }
+        div#canvas-frame {
+            cursor: pointer;
+            width:100%;
+            height:100%;
+            background-color: #EEEEEE;
+        }
+    </style>
+</head>
+<body onload="threeStart();">
+<div id="canvas-frame"></div>
+<script>
+    var renderer;//渲染器
+    var width;//页面宽度
+    var height;//页面高度
+
+    window.requestAnimFrame = (function() {//如果有变化则可能还需要requestAnimationFrame刷新
+        return window.requestAnimationFrame ||
+                window.mozRequestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                window.webkitRequestAnimationFrame;
+    })();
+
+    //开始
+    function threeStart() {
+        initThree();
+        initCamera();
+        initScene();
+        initLight();
+        initObject();
+        render();
+    }
+
+    //根据页面宽度和高度创建渲染器，并添加容器中
+    function initThree() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        renderer = new THREE.WebGLRenderer({
+            antialias : true
+        });
+        renderer.setSize(width, height);
+        renderer.setClearColor( 0x000000 );
+        document.getElementById('canvas-frame').appendChild(renderer.domElement);
+    }
+
+    //创建相机，并设置正方向和中心点
+    var camera,controls;
+    function initCamera() {
+        camera = new THREE.PerspectiveCamera( 25, window.innerWidth / window.innerHeight, 1, 10000 );
+        camera.position.set( 15, 10, - 15 );
+        controls = new THREE.OrbitControls( camera, renderer.domElement );
+        controls.update();
+    }
+
+    //创建场景，后续元素需要加入到场景中才会显示出来
+    var scene;
+    function initScene() {
+        scene = new THREE.Scene();
+    }
+
+    //创建光线
+    var ambientLight,directionalLight;
+    function initLight() {
+        var ambientLight = new THREE.AmbientLight( 0xffffff, 0.2 );
+        scene.add( ambientLight );
+
+        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+        directionalLight.position.set( 1, 1, - 1 );
+        scene.add( directionalLight );
+    }
+
+    //创建展示场景所需的各种元素
+    function initObject() {
+        //grid
+        var gridHelper = new THREE.GridHelper( 10, 20 );
+        scene.add( gridHelper );
+
+        // model
+        var manager = new THREE.LoadingManager();
+        manager.onProgress = function( item, loaded, total ) {
+            console.log('--- manager onProgress ---');
+            console.log( item, loaded, total );
+        };
+        var loader = new THREE.TDSLoader( manager );
+        loader.load( './3ds/static-xbot.3ds', function( object ) {
+
+            //处理一下模型位置以及方向
+            object.rotateX(-90/180*Math.PI);
+            object.rotateZ(90/180*Math.PI);
+
+            scene.add(object);
+        }, onProgress, onError );
+    }
+
+    //模型加载回掉函数
+    var onProgress = function( xhr ) {
+        if ( xhr.lengthComputable ) {
+            var percentComplete = xhr.loaded / xhr.total * 100;
+            console.log( Math.round( percentComplete, 2 ) + '% downloaded' );
+        }
+    };
+    var onError = function( xhr ) {
+        console.error( xhr );
+    };
+
+    //渲染
+    var clock = new THREE.Clock();
+    function render(){
+        //console.log('render');
+        renderer.clear();
+        renderer.render(scene, camera);
+        window.requestAnimFrame(render);
+    }
+</script>
+</body>
+</html>
