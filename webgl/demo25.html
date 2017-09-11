@@ -98,8 +98,7 @@
         loader.load( './3ds/static-xbot.3ds', function( object ) {
 
             //处理一下模型位置以及方向
-            object.rotateX(-90/180*Math.PI);
-            object.rotateZ(90/180*Math.PI);
+            object.rotation.set(-90/180*Math.PI,0,90/180*Math.PI);
 
             scene.add(object);
         }, onProgress, onError );
