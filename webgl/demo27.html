@@ -113,7 +113,6 @@
             prevBone = bone;
         }
         var skeleton = new THREE.Skeleton( bones );
-        console.log(skeleton);
 
         //创建形状
         var geometry = new THREE.CylinderGeometry(
@@ -134,8 +133,22 @@
             geometry.skinWeights.push( new THREE.Vector4( 1 - skinWeight, skinWeight, 0, 0 ) );
         }
         console.log(geometry.vertices);
+        console.log(skeleton);
         console.log(geometry.skinIndices);
         console.log(geometry.skinWeights);
+        /**
+         * e.g.
+         * geometry.skinIndices[10] = new THREE.Vector4(   0,   3,   4, 0 );
+         * geometry.skinWeights[10] = new THREE.Vector4( 0, 0.3333333730697632, 0.6666666269302368, 0 );
+         *
+         * geometry.vertices[10] = new THREE.Vector3(5,13.333333015441895,3.0616169991140216e-16);
+         *
+         * 在SkinnedMesh中每个顶点最多只能被四个骨骼影响，那么影响第10个顶点的骨骼以及影响权重分别如下：
+         * skeleton.bones[0]; // weight of 0
+         * skeleton.bones[3]; // weight of 0.3333333730697632
+         * skeleton.bones[4]; // weight of 0.6666666269302368
+         * skeleton.bones[10]; // weight of 0
+         */
 
         var material = new THREE.MeshPhongMaterial( {
             skinning : true,
