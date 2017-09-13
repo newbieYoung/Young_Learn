@@ -2,84 +2,103 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>自定义选择框</title>
+	<title>自定义checkbox radio</title>
 	<style>
-		.choose-box-container{
-			margin:10px;
-		/* basic css start */
-			position:relative;
-			border:1px solid #000;
-			padding:12px;
+
+		input[type="checkbox"] {
+			display:none;
 		}
-		.choose-box{
-			padding-left: 25px;
-			color: #0C4757;
-			cursor: pointer;
-			font-size: 13px;
+		input[type="checkbox"] + label {
+			font-size:24px;
+			color:#000;
+		}
+
+		input[type="checkbox"] + label span {
 			display:inline-block;
+			width:27px;
+			height:27px;
+			margin:-2px 10px 0 0;
+			vertical-align:middle;
+			cursor:pointer;
+			border:3px solid rgb(217, 177, 93);
+			border-radius:8px;
+			position: relative;
 		}
-		.choose-box input{
+
+		input[type="checkbox"]:checked + label span {
+			background-color:rgb(217, 177, 93);
+		}
+		input[type="checkbox"]:checked + label span:after{
+			content:'';
+			width:19px;
+			height:15px;
+			background-image:url(../img/icon-right.png);
+			background-size:100% 100%;
 			position: absolute;
-			left: -9999px;
+			top:0;
+			left:0;
+			right:0;
+			bottom:0;
+			margin:auto;
 		}
-		.choose-box i{
+
+
+
+		input[type="radio"] {
+			display:none;
+		}
+
+		input[type="radio"] + label {
+			font-size:24px;
+			color:#000;
+		}
+
+		input[type="radio"] + label span {
+			display:inline-block;
+			width:27px;
+			height:27px;
+			margin:-2px 10px 0 0;
+			vertical-align:middle;
+			cursor:pointer;
+			border:3px solid rgb(217, 177, 93);
+			border-radius:50%;
+			position: relative;
+		}
+
+		input[type="radio"]:checked + label span {
+			background-color:rgb(217, 177, 93);
+		}
+		input[type="radio"]:checked + label span:after{
+			content:'';
+			width:19px;
+			height:15px;
+			background-image:url(../img/icon-right.png);
+			background-size:100% 100%;
 			position: absolute;
-			top: 14px;
-			left: 10px;
-			display: block;
-			width: 15px;
-			height: 15px;
-			outline: 0px none;
-			border: 1px solid #d6d6de;
+			top:0;
+			left:0;
+			right:0;
+			bottom:0;
+			margin:auto;
 		}
-		.choose-box.radio i{
-			border-radius:10px;
-		}
-		.choose-box.checkbox i{
-			border-radius:0;
-		}
-		.choosed i::after{
-			content: "\2714";
-			top: -3px;
-			left: 1px;
-			width: 15px;
-			height: 15px;
-			font: 400 16px/19px FontAwesome;
-			text-align: center;
-			opacity: 1;
-			position: absolute;
-			color:#E6543F;
-		}
-		.choosed i{
-			border: 1px solid #e54d38;
-		}
-		/* basic css end */
 	</style>
 </head>
 <body>
-	<div class="choose-box-container">
-		<label class="choose-box checkbox choosed">
-		    <input type="checkbox">
-		    <i></i>这是被选择的checkbox
-		</label>
+	<div class="self-checkbox">
+		<input type="checkbox" id="c1" name="cc" />
+		<label for="c1"><span></span>Check Box 1</label>
 	</div>
-	<div class="choose-box-container">
-		<label class="choose-box checkbox">
-		    <input type="checkbox">
-		    <i></i>这是未被选择的checkbox
-		</label>
+	<div class="self-checkbox">
+		<input type="checkbox" id="c2" name="cc" />
+		<label for="c2"><span></span>Check Box 2</label>
 	</div>
-	<div class="choose-box-container">
-		<label class="choose-box radio choosed">
-		    <input type="radio">
-		    <i></i>这是被选择的radio
-		</label>
+	<div class="self-radio">
+		<input type="radio" id="r1" name="rr" />
+		<label for="r1"><span></span>Check Box 2</label>
 	</div>
-	<div class="choose-box-container">
-		<label class="choose-box radio">
-		    <input type="radio">
-		    <i></i>这是未被选择的radio
-		</label>
+	<div class="self-radio">
+		<input type="radio" id="r2" name="rr" />
+		<label for="r2"><span></span>Check Box 2</label>
 	</div>
 </body>
 </html>
