@@ -103,7 +103,7 @@
 
             //顶点着色器接受顶点坐标和纹理坐标映射关系
             var a_Position = gl.getAttribLocation(shaderPorgram,'a_Position');
-            gl.vertexAttribPointer(a_Position,2,gl.FLOAT,false,size*4,0,0);
+            gl.vertexAttribPointer(a_Position,2,gl.FLOAT,false,size*4,0);
             gl.enableVertexAttribArray(a_Position);
 
             var a_TexCoord = gl.getAttribLocation(shaderPorgram,'a_TexCoord');

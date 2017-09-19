@@ -14,7 +14,7 @@
         uniform sampler2D u_Sampler;//纹理取样器
         uniform vec2 v_Blur;
 
-        //关于这个高斯模糊算法为什么要采用多重处理，主要是因为分为纵横二次处理，某个点的颜色会被以其为原点的坐标系的x和y轴上的点影响，但是如果单次处理，某个点的颜色则只会被过该点以及坐标系的一、三象限的对角线上的点影响。
+        //高斯模糊 线性可分
         void main(void) {
             gl_FragColor = vec4(0.0);
             gl_FragColor += texture2D(u_Sampler, v_TexCoord + vec2(-7.0*v_Blur.x, -7.0*v_Blur.y))*0.0044299121055113265;
@@ -170,7 +170,7 @@
 
         //顶点着色器接受顶点坐标和纹理坐标映射关系
         var a_Position = gl.getAttribLocation(shaderPorgram,'a_Position');
-        gl.vertexAttribPointer(a_Position,2,gl.FLOAT,false,size*4,0,0);
+        gl.vertexAttribPointer(a_Position,2,gl.FLOAT,false,size*4,0);
         gl.enableVertexAttribArray(a_Position);
 
         var a_TexCoord = gl.getAttribLocation(shaderPorgram,'a_TexCoord');
