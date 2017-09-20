@@ -12,12 +12,12 @@
         }catch( err ) {
             // Handle browsers that don't support WebGL
         }
-        filter.addFilter('blur', 10);
-        //filter.addFilter('hue', 180);
-        //filter.addFilter('negative');
+        //filter.addFilter('blur', 10);
+        filter.addFilter('contrast',100000);
 
         var img = new Image();
-        img.src = '../img/sky.JPG';
+        //img.src = '../img/sky.JPG';
+        img.src = '../img/flower.jpg';
         img.onload = function () {
             var filteredImage = filter.apply(img);
             document.body.appendChild(filteredImage);
