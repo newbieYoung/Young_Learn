@@ -39,7 +39,7 @@
         var shaderPorgram = initShaders(gl);//初始化着色器程序
 
         /**
-         * 在我理解来说invert反转滤镜属于色相变化滤镜，hue-rotate色相旋转滤镜也属于色相变化滤镜，只不过区别变化方式不一样，hue-rotate色相旋转滤镜应该是所有色相绕成一个环然后旋转而invert反转滤镜则是直接翻转滤镜。
+         * 在我理解来说invert反转滤镜属于色相变化滤镜，hue-rotate色相旋转滤镜也属于色相变化滤镜，只不过区别在于变化方式不一样，hue-rotate色相旋转滤镜应该是所有色相绕成一个环然后旋转变化而invert反转滤镜则是直接翻转变换，从变换矩阵也可以看出。
          */
         var invertMatrix = [
             -1, 0, 0, 0, 255,
