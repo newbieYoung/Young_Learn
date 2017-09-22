@@ -37,10 +37,15 @@
         var canvas = document.querySelector('#webgl');
         var gl = canvas.getContext('webgl');//获取canvas上下文
         var shaderPorgram = initShaders(gl);//初始化着色器程序
-        var brightness = 2;//brightness值
+        var brightness = 0.5;//brightness值
 
-        //生成brightness矩阵
+        /**
+         * 由于这里会在设置的brightness值的基础再加1导致该算法只能增加亮度而不能像CSS原生filter那样设置brightness为小数的时候会降低亮度；
+         * 要想和CSS的原生filter保持一致去掉该加1逻辑即可；
+         * 另外增加亮度就是让所有色值向255（WebGL中是1）靠拢，那么也就意味着亮度滤镜算法并不是固定的，你可以实现其它多种算法。
+         */
         var a = (brightness || 0) + 1;
+
         var brightMatrix = [
             a, 0, 0, 0, 0,
             0, a, 0, 0, 0,
@@ -49,11 +54,10 @@
         ];
         var m = new Float32Array(brightMatrix);
 
-        var num = initVertexBuffers(gl,shaderPorgram);
-
         var brightM = gl.getUniformLocation(shaderPorgram,'brightM');
         gl.uniform1fv(brightM, m);
 
+        var num = initVertexBuffers(gl,shaderPorgram);
         gl.clearColor(0.0,0.0,0.0,1.0);
 
         // Set texture
