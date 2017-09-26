@@ -15,11 +15,12 @@
         //filter.addFilter('blur', 10);
         //filter.addFilter('contrast',100);
         //filter.addFilter('brightness',0.5);
-        filter.addFilter('invert');
+        //filter.addFilter('invert');
+        filter.addFilter('hue',10);
 
         var img = new Image();
-        //img.src = '../img/sky.JPG';
-        img.src = '../img/flower.jpg';
+        img.src = '../img/sky.JPG';
+        //img.src = '../img/flower.jpg';
         img.onload = function () {
             var filteredImage = filter.apply(img);
             document.body.appendChild(filteredImage);
