@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>photo-sphere-viewer.js 柱状全景图</title>
+</head>
+<body>
+    <div id="container"></div>
+    <script src="../lib/three.js"></script>
+    <script src="../lib/photo-sphere-viewer.js"></script>
+    <script>
+        window.onload = function(){
+            var div = document.getElementById('container');
+            var PSV = new PhotoSphereViewer({
+                panorama:'./textures/360-full-view.jpg',
+                container:div,
+                time_anim:false,
+                size:{
+                    width:'100%',
+                    height:'500px'
+                },
+                tilt_down_max:Math.PI/7,
+                tilt_up_max:Math.PI/7
+            });
+        }
+    </script>
+</body>
+</html>
