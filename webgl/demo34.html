@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>球型全景图</title>
+    <script src="../lib/three.js"></script>
+    <style type="text/css">
+        body{
+            padding:0;
+            margin:0;
+        }
+        div#canvas-frame {
+            cursor: pointer;
+            width:100%;
+            height:100%;
+            background-color: #EEEEEE;
+        }
+    </style>
+</head>
+<body onload="threeStart();">
+<div id="canvas-frame"></div>
+<script>
+    var renderer;
+    var width;
+    var height;
+    var center = {x:0,y:0,alpha:0,beta:90};//屏幕中心点
+    var canNext = true;//是否能进行下一次渲染，防止mousemove事件触发频率过快导致性能问题
+
+    window.requestAnimFrame = (function() {//如果有变化则可能还需要requestAnimationFrame刷新
+        return window.requestAnimationFrame ||
+                window.mozRequestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                window.webkitRequestAnimationFrame;
+    })();
+
+    function initThree() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        //创建渲染器
+        renderer = new THREE.WebGLRenderer({
+            antialias : true
+        });
+        renderer.setSize(width, height);
+        renderer.setClearColor(0xFFFFFF, 1.0);
+        //并添加容器中
+        document.getElementById('canvas-frame').appendChild(renderer.domElement);
+    }
+
+    var camera;
+    function initCamera() {
+        //创建相机
+        camera = new THREE.PerspectiveCamera( 60, width / height, 1, 2000 );
+        camera.target = new THREE.Vector3( 0, 0, 0 );
+    }
+
+    var scene;
+    function initScene() {
+        //创建场景
+        scene = new THREE.Scene();
+    }
+
+    var light;
+    function initLight() {
+        //创建光线
+    }
+
+    function initObject() {
+        //球体
+        var loader = new THREE.TextureLoader();
+        loader.load( 'textures/360-full-view.jpg', function ( texture ) {
+            var geometry = new THREE.SphereGeometry( 500, 60, 40 );
+            geometry.scale( - 1, 1, 1 );
+            var material = new THREE.MeshBasicMaterial( { map: texture, overdraw: 0.5 } );
+            var mesh = new THREE.Mesh( geometry, material );
+            scene.add( mesh );
+            render();//再次渲染
+        },function ( xhr ) {
+            console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+        },function ( xhr ) {
+            console.log( 'An error happened' );
+        });
+    }
+
+    function render(){
+        //渲染
+        renderer.clear();
+        renderer.render(scene, camera);
+        canNext = true;
+    }
+
+    function threeStart() {
+        initThree();
+        initCamera();
+        initScene();
+        initLight();
+        initObject();
+
+        document.addEventListener('mousemove',onMouseMove,false);
+    }
+
+    //获得鼠标当前坐标
+    function _mousePosition(e){
+        var xPos, yPos;
+        e = e || window.event;
+        if (e.pageX) {
+            xPos = e.pageX;
+            yPos = e.pageY;
+        } else {
+            xPos = e.clientX + document.body.scrollLeft - document.body.clientLeft;
+            yPos = e.clientY + document.body.scrollTop - document.body.clientTop;
+        }
+        return {
+            x: xPos,
+            y: yPos
+        }
+    }
+
+    //鼠标移动
+    function onMouseMove(e){
+        if(canNext){
+            canNext = false;
+            var mouse = _mousePosition(e);
+            var alpha = (height/2 - mouse.y)/(height/2)*(Math.PI/2);
+            var beta = (mouse.x - width/2)/(width/2)*Math.PI;
+            var ex = 10 * Math.cos(alpha) * Math.sin(beta);
+            var ey = 10 *  Math.sin(alpha);
+            var ez = - 10 * Math.cos(alpha) * Math.cos(beta);
+            var e = new THREE.Vector3(camera.position.x + ex , camera.position.y + ey , camera.position.z + ez);
+            camera.lookAt(e);
+            window.requestAnimFrame(render);
+        }
+    }
+</script>
+</body>
+</html>
