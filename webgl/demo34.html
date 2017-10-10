@@ -70,8 +70,12 @@
         var loader = new THREE.TextureLoader();
         loader.load( 'textures/360-full-view.jpg', function ( texture ) {
             var geometry = new THREE.SphereGeometry( 500, 60, 40 );
-            geometry.scale( - 1, 1, 1 );
-            var material = new THREE.MeshBasicMaterial( { map: texture, overdraw: 0.5 } );
+            /**
+             * THREE.BackSide表示内面；
+             * 如果不设置内面也可以先调用scale(-1,1,1)镜像变换然后就贴外面即可。
+             * geometry.scale( -1, 1, 1 );
+             */
+            var material = new THREE.MeshBasicMaterial( { map: texture, overdraw: 0.5 ,side:THREE.BackSide} );
             var mesh = new THREE.Mesh( geometry, material );
             scene.add( mesh );
             render();//再次渲染
