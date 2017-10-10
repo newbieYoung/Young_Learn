@@ -70,12 +70,12 @@
         //创建光线
     }
 
-    var images = ['textures/rect-full-01.jpg',
-                  'textures/rect-full-02.jpg',
-                  'textures/rect-full-03.jpg',
-                  'textures/rect-full-04.jpg',
-                  'textures/rect-full-05.jpg',
-                  'textures/rect-full-06.jpg'];
+    var images = ['textures/bridge-full-01.jpg',
+                  'textures/bridge-full-02.jpg',
+                  'textures/bridge-full-03.jpg',
+                  'textures/bridge-full-04.jpg',
+                  'textures/bridge-full-05.jpg',
+                  'textures/bridge-full-06.jpg'];
     var textures = [];
 
     function initObject() {
@@ -116,7 +116,6 @@
         initScene();
         initLight();
         initObject();
-        render();
     }
 
     //生成全景立方体模型
@@ -128,6 +127,7 @@
         var skyBox = new THREE.Mesh( new THREE.CubeGeometry( 200, 200, 200 ), materials );
         skyBox.applyMatrix( new THREE.Matrix4().makeScale( 1, 1, - 1 ) );
         scene.add( skyBox );
+        render();
     }
 </script>
 </body>
