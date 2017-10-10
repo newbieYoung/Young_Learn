@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>立方体全景图</title>
+    <script src="../lib/three.js"></script>
+    <script type="text/javascript" src="../lib/three-orbit-controls.js"></script>
+    <style type="text/css">
+        body{
+            padding:0;
+            margin:0;
+        }
+        div#canvas-frame {
+            cursor: pointer;
+            width:100%;
+            height:100%;
+            background-color: #EEEEEE;
+        }
+    </style>
+</head>
+<body onload="threeStart();">
+<div id="canvas-frame"></div>
+<script>
+    var renderer;
+    var width;
+    var height;
+
+    window.requestAnimFrame = (function() {//如果有变化则可能还需要requestAnimationFrame刷新
+        return window.requestAnimationFrame ||
+                window.mozRequestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                window.webkitRequestAnimationFrame;
+    })();
+
+    function initThree() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        //创建渲染器
+        renderer = new THREE.WebGLRenderer({
+            antialias : true
+        });
+        renderer.setSize(width, height);
+        renderer.setClearColor(0xFFFFFF, 1.0);
+        //并添加容器中
+        document.getElementById('canvas-frame').appendChild(renderer.domElement);
+    }
+
+    var camera;
+    var controller;
+    function initCamera() {
+        //创建相机
+        camera = new THREE.PerspectiveCamera( 60, width / height, 1, 2000 );
+
+        camera.position.z = 0.01;
+
+        controls = new THREE.OrbitControls( camera );
+        controls.enableZoom = false;
+        controls.enablePan = false;
+    }
+
+    var scene;
+    function initScene() {
+        //创建场景
+        scene = new THREE.Scene();
+    }
+
+    var light;
+    function initLight() {
+        //创建光线
+    }
+
+    var images = ['textures/rect-full-01.jpg',
+                  'textures/rect-full-02.jpg',
+                  'textures/rect-full-03.jpg',
+                  'textures/rect-full-04.jpg',
+                  'textures/rect-full-05.jpg',
+                  'textures/rect-full-06.jpg'];
+    var textures = [];
+
+    function initObject() {
+        for(var i=0;i<images.length;i++){
+            (function(index){
+                var image = new Image();
+                image.src = images[index];
+                image.onload = function(){
+                    textures[ index ] = new THREE.Texture();
+                    var width = image.width;
+                    var height = image.height;
+                    var canvas = document.createElement( 'canvas' );
+                    var context = canvas.getContext( '2d' );
+                    canvas.height = width;
+                    canvas.width = height;
+                    context.drawImage( image,0,0,width,height );
+                    textures[ index ].image = canvas
+                    textures[ index ].needsUpdate = true;
+
+                    if(index==images.length-1){
+                        initBox();
+                    }
+                }
+            })(i);
+        }
+    }
+
+    function render(){
+        //渲染
+        renderer.clear();
+        renderer.render(scene, camera);
+        window.requestAnimFrame(render);
+    }
+
+    function threeStart() {
+        initThree();
+        initCamera();
+        initScene();
+        initLight();
+        initObject();
+        render();
+    }
+
+    //生成全景立方体模型
+    function initBox(){
+        var materials = [];
+        for ( var i = 0; i < images.length; i ++ ) {
+            materials.push( new THREE.MeshBasicMaterial( { map: textures[ i ] } ) );
+        }
+        var skyBox = new THREE.Mesh( new THREE.CubeGeometry( 200, 200, 200 ), materials );
+        skyBox.applyMatrix( new THREE.Matrix4().makeScale( 1, 1, - 1 ) );
+        scene.add( skyBox );
+    }
+</script>
+</body>
+</html>
