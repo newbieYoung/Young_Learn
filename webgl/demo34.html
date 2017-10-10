@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>球型全景图</title>
     <script src="../lib/three.js"></script>
+    <script type="text/javascript" src="../lib/three-orbit-controls.js"></script>
     <style type="text/css">
         body{
             padding:0;
@@ -51,7 +52,8 @@
     function initCamera() {
         //创建相机
         camera = new THREE.PerspectiveCamera( 60, width / height, 1, 2000 );
-        camera.target = new THREE.Vector3( 0, 0, 0 );
+        camera.position.z = 0.001;
+        controls = new THREE.OrbitControls( camera );
     }
 
     var scene;
@@ -90,7 +92,7 @@
         //渲染
         renderer.clear();
         renderer.render(scene, camera);
-        canNext = true;
+        window.requestAnimFrame(render);
     }
 
     function threeStart() {
@@ -99,41 +101,6 @@
         initScene();
         initLight();
         initObject();
-
-        document.addEventListener('mousemove',onMouseMove,false);
-    }
-
-    //获得鼠标当前坐标
-    function _mousePosition(e){
-        var xPos, yPos;
-        e = e || window.event;
-        if (e.pageX) {
-            xPos = e.pageX;
-            yPos = e.pageY;
-        } else {
-            xPos = e.clientX + document.body.scrollLeft - document.body.clientLeft;
-            yPos = e.clientY + document.body.scrollTop - document.body.clientTop;
-        }
-        return {
-            x: xPos,
-            y: yPos
-        }
-    }
-
-    //鼠标移动
-    function onMouseMove(e){
-        if(canNext){
-            canNext = false;
-            var mouse = _mousePosition(e);
-            var alpha = (height/2 - mouse.y)/(height/2)*(Math.PI/2);
-            var beta = (mouse.x - width/2)/(width/2)*Math.PI;
-            var ex = 10 * Math.cos(alpha) * Math.sin(beta);
-            var ey = 10 *  Math.sin(alpha);
-            var ez = - 10 * Math.cos(alpha) * Math.cos(beta);
-            var e = new THREE.Vector3(camera.position.x + ex , camera.position.y + ey , camera.position.z + ez);
-            camera.lookAt(e);
-            window.requestAnimFrame(render);
-        }
     }
 </script>
 </body>
