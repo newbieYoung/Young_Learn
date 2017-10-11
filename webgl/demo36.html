@@ -6,14 +6,35 @@
     <script type="text/javascript" src="./sim-tools.js"></script>
 </head>
 <body onload="main()">
-<canvas id="webgl" width="4000" height="2000"></canvas>
+<canvas id="webgl" width="500" height="500"></canvas>
 <!-- 片段着色器程序 -->
 <script id="shader-fs" type="x-shader/x-fragment">
         precision mediump float;
         varying vec2 v_TexCoord;
         uniform sampler2D u_Sampler;//纹理取样器
+        uniform float PI;
 	    void main() {
-	        gl_FragColor = texture2D(u_Sampler,v_TexCoord);
+
+            vec2 orig = vec2(v_TexCoord.x-0.5,v_TexCoord.y-0.5);
+            float r = 0.5;
+
+	        //x正面
+            float theta = atan(orig.x,r);
+            float phi = atan(orig.y*cos(theta),r);
+
+            //y正面
+            //float theta = atan(r,orig.x);
+            //float phi = atan(orig.y*sin(theta),r);
+
+            //z正面
+            //float theta = asin(2.0*orig.x*orig.y/r*r)/2.0;
+            //float phi = atan(r*cos(theta),orig.y);
+
+            float x = theta/PI*0.5 + 0.5;
+            float y = phi/PI*2.0*0.5 + 0.5;
+
+            gl_FragColor = texture2D(u_Sampler, vec2(x,y));
+
 	    }
 	</script>
 <!-- 顶点着色器程序 -->
@@ -33,6 +54,8 @@
         var shaderPorgram = initShaders(gl);//初始化着色器程序
 
         var num = initVertexBuffers(gl,shaderPorgram);
+        var PI = gl.getUniformLocation(shaderPorgram,'PI');
+        gl.uniform1f(PI,Math.PI);
 
         gl.clearColor(0.0,0.0,0.0,1.0);
 
