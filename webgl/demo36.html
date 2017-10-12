@@ -23,21 +23,34 @@
             //float theta = atan(orig.x,r);
             //float phi = atan(orig.y*cos(theta),r);
 
+            //x反面
+            //theta = theta+PI;
+
             //y正面
             //vec2 orig = vec2(0.5-v_TexCoord.x,v_TexCoord.y-0.5);
             //float theta = atan(r,orig.x);
             //float phi = atan(orig.y*sin(theta),r);
 
+            //y反面
+            //theta = theta+2.0*PI;
+
             //z正面
-            vec2 orig = vec2(v_TexCoord.x-0.5,0.5-v_TexCoord.y);
+            //vec2 orig = vec2(v_TexCoord.x-0.5,0.5-v_TexCoord.y);
+            //float theta = atan(orig.x,orig.y);
+            //float phi = atan(r*sin(theta),orig.x);
+
+            //z反面
+            vec2 orig = vec2(v_TexCoord.x-0.5,v_TexCoord.y-0.5);
             float theta = atan(orig.x,orig.y);
             float phi = atan(r*sin(theta),orig.x);
+            phi = -phi;
 
+            //超出范围处理
             if(abs(theta)>PI){
                 if(theta>PI){
-                    theta -= 2PI;
+                    theta -= 2.0*PI;
                 }else{
-                    theta += 2PI;
+                    theta += 2.0*PI;
                 }
             }
             if(abs(phi)>PI/2.0){
