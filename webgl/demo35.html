@@ -70,12 +70,19 @@
         //创建光线
     }
 
-    var images = ['textures/bridge-full-01.jpg',
-                  'textures/bridge-full-02.jpg',
-                  'textures/bridge-full-03.jpg',
-                  'textures/bridge-full-04.jpg',
-                  'textures/bridge-full-05.jpg',
-                  'textures/bridge-full-06.jpg'];
+//    var images = ['textures/bridge-y.jpg',
+//                  'textures/bridge-ny.jpg',
+//                  'textures/bridge-z.jpg',
+//                  'textures/bridge-nz.jpg',
+//                  'textures/bridge-x.jpg',
+//                  'textures/bridge-nx.jpg'];
+
+    var images = ['textures/house-y.png',
+                  'textures/house-ny.png',
+                  'textures/house-z.png',
+                  'textures/house-nz.png',
+                  'textures/house-x.png',
+                  'textures/house-nx.png'];
     var textures = [];
 
     function initObject() {
@@ -96,7 +103,9 @@
                     textures[ index ].needsUpdate = true;
 
                     if(index==images.length-1){
-                        initBox();
+                        setTimeout(function(){
+                            initBox();
+                        });
                     }
                 }
             })(i);

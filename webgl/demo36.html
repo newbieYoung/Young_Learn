@@ -18,28 +18,28 @@
 
             float r = 0.5;
 
-	        //x正面
+	        //x.png
 	        //vec2 orig = vec2(v_TexCoord.x-0.5,v_TexCoord.y-0.5);
             //float theta = atan(orig.x,r);
             //float phi = atan(orig.y*cos(theta),r);
 
-            //x反面
+            //nx.png
             //theta = theta+PI;
 
-            //y正面
+            //y.png
             //vec2 orig = vec2(0.5-v_TexCoord.x,v_TexCoord.y-0.5);
             //float theta = atan(r,orig.x);
             //float phi = atan(orig.y*sin(theta),r);
 
-            //y反面
-            //theta = theta+2.0*PI;
+            //ny.png
+            //theta = theta+PI;
 
-            //z正面
+            //z.png
             //vec2 orig = vec2(v_TexCoord.x-0.5,0.5-v_TexCoord.y);
             //float theta = atan(orig.x,orig.y);
             //float phi = atan(r*sin(theta),orig.x);
 
-            //z反面
+            //nz.png
             vec2 orig = vec2(v_TexCoord.x-0.5,v_TexCoord.y-0.5);
             float theta = atan(orig.x,orig.y);
             float phi = atan(r*sin(theta),orig.x);
