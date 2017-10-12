@@ -15,20 +15,24 @@
         uniform float PI;
 	    void main() {
 
-            vec2 orig = vec2(v_TexCoord.x-0.5,v_TexCoord.y-0.5);
+
             float r = 0.5;
 
 	        //x正面
-            float theta = atan(orig.x,r);
-            float phi = atan(orig.y*cos(theta),r);
+            float theta = atan(v_TexCoord.x-0.5,r);
+            float phi = atan((0.5-v_TexCoord.y)*cos(theta),r);
+
+            //x反面
+            //float theta = atan(v_TexCoord.x-0.5,r);
+            //float phi = atan((v_TexCoord.y-0.5)*cos(theta),r);
 
             //y正面
-            //float theta = atan(r,orig.x);
-            //float phi = atan(orig.y*sin(theta),r);
+            //float theta = atan(r,0.5-v_TexCoord.x);
+            //float phi = atan((0.5-v_TexCoord.y)*sin(theta),r);
 
             //z正面
-            //float theta = asin(2.0*orig.x*orig.y/r*r)/2.0;
-            //float phi = atan(r*cos(theta),orig.y);
+            //float theta = atan(v_TexCoord.x-0.5,v_TexCoord.y-0.5);
+            //float phi = atan(r*sin(theta),v_TexCoord.x-0.5);
 
             float x = theta/PI*0.5 + 0.5;
             float y = phi/PI*2.0*0.5 + 0.5;
