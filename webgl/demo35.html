@@ -77,12 +77,19 @@
 //                  'textures/bridge-x.jpg',
 //                  'textures/bridge-nx.jpg'];
 
-    var images = ['textures/house-y.png',
-                  'textures/house-ny.png',
-                  'textures/house-z.png',
-                  'textures/house-nz.png',
-                  'textures/house-x.png',
-                  'textures/house-nx.png'];
+//    var images = ['textures/house-y.png',
+//                  'textures/house-ny.png',
+//                  'textures/house-z.png',
+//                  'textures/house-nz.png',
+//                  'textures/house-x.png',
+//                  'textures/house-nx.png'];
+
+    var images = ['textures/park-y.png',
+                  'textures/park-ny.png',
+                  'textures/park-z.png',
+                  'textures/park-nz.png',
+                  'textures/park-x.png',
+                  'textures/park-nx.png'];
     var textures = [];
 
     function initObject() {
@@ -103,9 +110,11 @@
                     textures[ index ].needsUpdate = true;
 
                     if(index==images.length-1){
+                        //有时候某个面显示不出来不知为啥，延迟貌似能避免这种情况
                         setTimeout(function(){
                             initBox();
-                        });
+                        },10);
+
                     }
                 }
             })(i);

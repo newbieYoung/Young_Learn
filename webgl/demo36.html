@@ -19,12 +19,12 @@
             float r = 0.5;
 
 	        //x.png
-	        //vec2 orig = vec2(v_TexCoord.x-0.5,v_TexCoord.y-0.5);
-            //float theta = atan(orig.x,r);
-            //float phi = atan(orig.y*cos(theta),r);
+	        vec2 orig = vec2(v_TexCoord.x-0.5,v_TexCoord.y-0.5);
+            float theta = atan(orig.x,r);
+            float phi = atan(orig.y*cos(theta),r);
 
             //nx.png
-            //theta = theta+PI;
+            theta = theta+PI;
 
             //y.png
             //vec2 orig = vec2(0.5-v_TexCoord.x,v_TexCoord.y-0.5);
@@ -40,10 +40,10 @@
             //float phi = atan(r*sin(theta),orig.x);
 
             //nz.png
-            vec2 orig = vec2(v_TexCoord.x-0.5,v_TexCoord.y-0.5);
-            float theta = atan(orig.x,orig.y);
-            float phi = atan(r*sin(theta),orig.x);
-            phi = -phi;
+            //vec2 orig = vec2(v_TexCoord.x-0.5,v_TexCoord.y-0.5);
+            //float theta = atan(orig.x,orig.y);
+            //float phi = atan(r*sin(theta),orig.x);
+            //phi = -phi;
 
             //超出范围处理
             if(abs(theta)>PI){
@@ -106,7 +106,7 @@
 
         var u_Sampler = gl.getUniformLocation(shaderPorgram,'u_Sampler');
         var image = new Image();
-        image.src = './textures/360-full-view-2.jpg';
+        image.src = './textures/360-full-view.jpg';
         image.onload = function(){
             loadTextures(gl,n,texture,u_Sampler,image);
         }
