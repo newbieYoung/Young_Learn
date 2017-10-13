@@ -11,32 +11,45 @@
 	</video>
 	<script type="text/javascript">
 		document.addEventListener('DOMContentLoaded',function(){
-			var first = true;
+
+			window.requestAnimFrame = (function() {
+				return window.requestAnimationFrame ||
+						window.mozRequestAnimationFrame ||
+						window.webkitRequestAnimationFrame ||
+						window.msRequestAnimationFrame ||
+						window.webkitRequestAnimationFrame;
+			})();
+
 			var width;
 			var height;
+
+			var video = document.querySelector('video');
 
 			var canvas = document.querySelector('canvas');
 			var context = canvas.getContext('2d');
 
-			var video = document.querySelector('video');
-
 			document.addEventListener('click',function(){
+				initCanvas();
 				video.play();
 			},false);
 
-			video.addEventListener('timeupdate',function(){
-				if(first){
-					var videoStyle = window.getComputedStyle(video);
-					width = parseInt(videoStyle.width);
-					height = parseInt(videoStyle.height);
-					canvas.style.width = width+'px';
-					canvas.style.height = height+'px';
-					canvas.width = width;
-					canvas.height = height;
-				}
-				context.drawImage(video,0,0,width,height);
+			video.addEventListener('play',function(){
+				drawVideo();
 			},false);
 
+			function drawVideo(){
+				context.drawImage(video,0,0,width,height);
+				window.requestAnimFrame(drawVideo);
+			}
+			function initCanvas(){
+				var videoStyle = window.getComputedStyle(video);
+				width = parseInt(videoStyle.width);
+				height = parseInt(videoStyle.height);
+				canvas.style.width = width+'px';
+				canvas.style.height = height+'px';
+				canvas.width = width;
+				canvas.height = height;
+			}
 		},false);
 	</script>
 </body>
