@@ -24,6 +24,7 @@
 			right:0;
 			margin:auto;
 			z-index:-1;
+			display:none;
 		}
 	</style>
 </head>
@@ -44,6 +45,8 @@
 						window.webkitRequestAnimationFrame;
 			})();
 
+			var img = document.querySelector('img');
+
 			//canvas、video宽高
 			var width;
 			var height;
@@ -63,6 +66,9 @@
 			},false);
 
 			function drawVideo(){
+				var currentTime = parseFloat(video.currentTime);
+				var nums = 0;
+
 				context.drawImage(video,0,0,width,height);
 
 				//色值处理
@@ -73,9 +79,43 @@
 					var g = data[i+1];
 					var b = data[i+2];
 					if(r>=250&&g>=250&&b>=250){
+						//nums++;
 						data[i+3] = 0;
 					}
 				}
+
+				//判断每一幕时间点
+				//console.log(nums+' '+video.currentTime);
+
+				//第二页
+				if(currentTime>=2.955){
+					img.style.display = 'block';
+				}
+				if(currentTime>6.255){
+					img.style.display = 'none';
+				}
+
+				//第三页
+				if(currentTime>=6.623){
+					img.style.display = 'block';
+				}
+				if(currentTime>9.520){
+					img.style.display = 'none';
+				}
+
+				//第四页
+				if(currentTime>=9.930){
+					img.style.display = 'block';
+				}
+				if(currentTime>12.552){
+					img.style.display = 'none';
+				}
+
+				//第五页
+				if(currentTime>=12.975){
+					img.style.display = 'block';
+				}
+
 				idata.data = data;
 				context.putImageData(idata,0,0);
 
