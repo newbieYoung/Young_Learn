@@ -8,14 +8,27 @@
 		body{
 			padding:0;
 			margin:0;
+			background-color:white;
 		}
 		video{
 			width:100%;
-			/*opacity: 0;*/
+			opacity: 0;
+		}
+		img{
+			width:172px;
+			height:237px;
+			position: absolute;
+			top:0;
+			left:0;
+			bottom:0;
+			right:0;
+			margin:auto;
+			z-index:-1;
 		}
 	</style>
 </head>
 <body>
+	<img src="../img/girl.png" alt="">
 	<canvas></canvas>
 	<video preload="auto" webkit-playsinline="true" playsinline="true">
 		<source src="../media/birthday-demo.mp4" type="video/mp4">
@@ -59,8 +72,8 @@
 					var r = data[i];
 					var g = data[i+1];
 					var b = data[i+2];
-					if(r==0&&g==0&&b==0){
-						data[i+3] = 0;//如果为黑色则设置为透明
+					if(r>=250&&g>=250&&b>=250){
+						data[i+3] = 0;
 					}
 				}
 				idata.data = data;
