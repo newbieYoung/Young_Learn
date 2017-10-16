@@ -2,23 +2,24 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<title>Canvas render Video</title>
 	<style>
-		video{
-			width:200px;
-			opacity: 0;
+		body{
+			padding:0;
+			margin:0;
 		}
-		button{
-			display:block;
+		video{
+			width:100%;
+			/*opacity: 0;*/
 		}
 	</style>
 </head>
 <body>
 	<canvas></canvas>
 	<video preload="auto" webkit-playsinline="true" playsinline="true">
-		<source src="../video/step1.mp4" type="video/mp4">
+		<source src="../media/birthday-demo.mp4" type="video/mp4">
 	</video>
-	<button>开始播放</button>
 	<script type="text/javascript">
 		document.addEventListener('DOMContentLoaded',function(){
 
@@ -30,6 +31,7 @@
 						window.webkitRequestAnimationFrame;
 			})();
 
+			//canvas、video宽高
 			var width;
 			var height;
 
@@ -49,6 +51,21 @@
 
 			function drawVideo(){
 				context.drawImage(video,0,0,width,height);
+
+				//色值处理
+				var idata = context.getImageData(0,0,width,height);
+				var data = idata.data;
+				for(var i = 0; i < data.length; i+=4) {
+					var r = data[i];
+					var g = data[i+1];
+					var b = data[i+2];
+					if(r==0&&g==0&&b==0){
+						data[i+3] = 0;//如果为黑色则设置为透明
+					}
+				}
+				idata.data = data;
+				context.putImageData(idata,0,0);
+
 				window.requestAnimFrame(drawVideo);
 			}
 			function initCanvas(){
