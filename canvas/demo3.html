@@ -79,16 +79,16 @@
 					var g = data[i+1];
 					var b = data[i+2];
 					if(r>=250&&g>=250&&b>=250){
-						//nums++;
+						nums++;
 						data[i+3] = 0;
 					}
 				}
 
 				//判断每一幕时间点
-				//console.log(nums+' '+video.currentTime);
+				console.log(nums+' '+video.currentTime);
 
 				//第二页
-				if(currentTime>=2.955){
+				if(currentTime>=3){
 					img.style.display = 'block';
 				}
 				if(currentTime>6.255){
@@ -96,7 +96,7 @@
 				}
 
 				//第三页
-				if(currentTime>=6.623){
+				if(currentTime>=6.7){
 					img.style.display = 'block';
 				}
 				if(currentTime>9.520){
@@ -104,7 +104,7 @@
 				}
 
 				//第四页
-				if(currentTime>=9.930){
+				if(currentTime>=10){
 					img.style.display = 'block';
 				}
 				if(currentTime>12.552){
@@ -112,7 +112,7 @@
 				}
 
 				//第五页
-				if(currentTime>=12.975){
+				if(currentTime>=13){
 					img.style.display = 'block';
 				}
 
