@@ -80,30 +80,26 @@
 
     function initObject() {
         for(var i=0;i<images.length;i++){
-            (function(index){
-                var image = new Image();
-                image.src = images[index];
-                image.onload = function(){
-                    textures[ index ] = new THREE.Texture();
-                    var width = image.width;
-                    var height = image.height;
-                    var canvas = document.createElement( 'canvas' );
-                    var context = canvas.getContext( '2d' );
-                    canvas.height = width;
-                    canvas.width = height;
-                    context.drawImage( image,0,0,width,height );
-                    textures[ index ].image = canvas
-                    textures[ index ].needsUpdate = true;
+            textures[i] = new THREE.Texture();
+            loadTexture(i);
+        }
+        initBox();
+    }
 
-                    if(index==images.length-1){
-                        //有时候某个面显示不出来不知为啥，延迟貌似能避免这种情况
-                        setTimeout(function(){
-                            initBox();
-                        },10);
-
-                    }
-                }
-            })(i);
+    //加载图片纹理
+    function loadTexture(index){
+        var image = new Image();
+        image.src = images[index];
+        image.onload = function(){
+            var width = image.width;
+            var height = image.height;
+            var canvas = document.createElement( 'canvas' );
+            var context = canvas.getContext( '2d' );
+            canvas.height = width;
+            canvas.width = height;
+            context.drawImage( image,0,0,width,height );
+            textures[ index ].image = canvas
+            textures[ index ].needsUpdate = true;
         }
     }
 
