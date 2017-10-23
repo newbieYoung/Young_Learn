@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CSSRender 全景图</title>
+    <title>CanvasRender 全景图</title>
     <script src="../lib/three.js"></script>
-    <script src="../lib/three-CSS3DRenderer.js"></script>
+    <script src="../lib/three-projector.js"></script>
+    <script src="../lib/three-canvas-render.js"></script>
     <style type="text/css">
         body{
             padding:0;
@@ -38,7 +39,8 @@
             width = window.innerWidth;
             height = window.innerHeight;
             //创建渲染器
-            renderer = new THREE.CSS3DRenderer();
+            renderer = new THREE.CanvasRenderer();
+            renderer.setPixelRatio( window.devicePixelRatio );
             renderer.setSize(width, height);
             //并添加容器中
             document.getElementById('canvas-frame').appendChild(renderer.domElement);
@@ -61,57 +63,45 @@
             //创建光线
         }
 
-        var sides = [
-            {
-                url: 'textures/park-panorama-cube-nx.jpg',
-                position: [ -512, 0, 0 ],
-                rotation: [ 0, Math.PI / 2, 0 ]
-            },
-            {
-                url: 'textures/park-panorama-cube-x.jpg',
-                position: [ 512, 0, 0 ],
-                rotation: [ 0, -Math.PI / 2, 0 ]
-            },
-            {
-                url: 'textures/park-panorama-cube-y.jpg',
-                position: [ 0,  512, 0 ],
-                rotation: [ Math.PI / 2, 0, Math.PI ]
-            },
-            {
-                url: 'textures/park-panorama-cube-ny.jpg',
-                position: [ 0, -512, 0 ],
-                rotation: [ - Math.PI / 2, 0, Math.PI ]
-            },
-            {
-                url: 'textures/park-panorama-cube-z.jpg',
-                position: [ 0, 0,  512 ],
-                rotation: [ 0, Math.PI, 0 ]
-            },
-            {
-                url: 'textures/park-panorama-cube-nz.jpg',
-                position: [ 0, 0, -512 ],
-                rotation: [ 0, 0, 0 ]
-            }
-        ];
+        /**
+         * 图片纹理之间存在小间隙，暂时不知道咋解决。
+         * /
+        var texture_placeholder;//默认纹理
+        function initObject(){
+            texture_placeholder = document.createElement( 'canvas' );
+            texture_placeholder.width = 1024;
+            texture_placeholder.height = 1024;
+            var context = texture_placeholder.getContext( '2d' );
+            context.fillStyle = 'rgb( 200, 200, 200 )';
+            context.fillRect( 0, 0, texture_placeholder.width, texture_placeholder.height );
 
-        function initObject() {
-            for ( var i = 0; i < sides.length; i ++ ) {
+            var materials = [
+                loadTexture( 'textures/park-panorama-cube-nx.jpg' ),
+                loadTexture( 'textures/park-panorama-cube-x.jpg' ),
 
-                var side = sides[ i ];
+                loadTexture( 'textures/park-panorama-cube-y.jpg' ),
+                loadTexture( 'textures/park-panorama-cube-ny.jpg' ),
 
-                var element = document.createElement( 'img' );
-                /**
-                 * 图片宽度1024，但是这里需要设置为1026，如果不这么做则会出现场景中各个面连接的地方会出现白色的细线；
-                 * 至于为什么多设置2像素就能避免这个问题，暂时不是很清楚。
-                 */
-                element.width = 1026;
-                element.src = side.url;
+                loadTexture( 'textures/park-panorama-cube-z.jpg' ),
+                loadTexture( 'textures/park-panorama-cube-nz.jpg' )
+            ];
 
-                var object = new THREE.CSS3DObject( element );
-                object.position.fromArray( side.position );
-                object.rotation.fromArray( side.rotation );
-                scene.add( object );
-            }
+            var mesh = new THREE.Mesh( new THREE.BoxGeometry( 300, 300, 300, 7, 7, 7 ), materials );
+            mesh.scale.x = - 1;
+            scene.add( mesh );
+        }
+
+        //加载图片纹理
+        function loadTexture( path ) {
+            var texture = new THREE.Texture( texture_placeholder );
+            var material = new THREE.MeshBasicMaterial( { map: texture, overdraw: 0.5 } );
+            var image = new Image();
+            image.onload = function () {
+                texture.image = this;
+                texture.needsUpdate = true;
+            };
+            image.src = path;
+            return material;
         }
 
         function render(){
