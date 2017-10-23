@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSSRender 全景图</title>
+    <script src="../lib/three.js"></script>
+    <script src="../lib/three-CSS3DRenderer.js"></script>
+    <style type="text/css">
+        body{
+            padding:0;
+            margin:0;
+        }
+        div#canvas-frame {
+            cursor: pointer;
+            width:100%;
+            height:100%;
+            background-color: #EEEEEE;
+        }
+    </style>
+</head>
+<body onload="threeStart();">
+    <div id="canvas-frame"></div>
+    <script>
+        var renderer;
+        var width;
+        var height;
+        var target = new THREE.Vector3();
+
+        window.requestAnimFrame = (function() {//如果有变化则可能还需要requestAnimationFrame刷新
+            return window.requestAnimationFrame ||
+                    window.mozRequestAnimationFrame ||
+                    window.webkitRequestAnimationFrame ||
+                    window.msRequestAnimationFrame ||
+                    window.webkitRequestAnimationFrame;
+        })();
+
+        function initThree() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            //创建渲染器
+            renderer = new THREE.CSS3DRenderer();
+            renderer.setSize(width, height);
+            //并添加容器中
+            document.getElementById('canvas-frame').appendChild(renderer.domElement);
+        }
+
+        var camera;
+        function initCamera() {
+            //创建相机
+            camera = new THREE.PerspectiveCamera( 60, width / height, 1, 2000 );
+        }
+
+        var scene;
+        function initScene() {
+            //创建场景
+            scene = new THREE.Scene();
+        }
+
+        var light;
+        function initLight() {
+            //创建光线
+        }
+
+        var sides = [
+            {
+                url: 'textures/park-panorama-cube-nx.jpg',
+                position: [ -512, 0, 0 ],
+                rotation: [ 0, Math.PI / 2, 0 ]
+            },
+            {
+                url: 'textures/park-panorama-cube-x.jpg',
+                position: [ 512, 0, 0 ],
+                rotation: [ 0, -Math.PI / 2, 0 ]
+            },
+            {
+                url: 'textures/park-panorama-cube-y.jpg',
+                position: [ 0,  512, 0 ],
+                rotation: [ Math.PI / 2, 0, Math.PI ]
+            },
+            {
+                url: 'textures/park-panorama-cube-ny.jpg',
+                position: [ 0, -512, 0 ],
+                rotation: [ - Math.PI / 2, 0, Math.PI ]
+            },
+            {
+                url: 'textures/park-panorama-cube-z.jpg',
+                position: [ 0, 0,  512 ],
+                rotation: [ 0, Math.PI, 0 ]
+            },
+            {
+                url: 'textures/park-panorama-cube-nz.jpg',
+                position: [ 0, 0, -512 ],
+                rotation: [ 0, 0, 0 ]
+            }
+        ];
+
+        function initObject() {
+            for ( var i = 0; i < sides.length; i ++ ) {
+
+                var side = sides[ i ];
+
+                var element = document.createElement( 'img' );
+                element.width = 1024;
+                element.src = side.url;
+
+                var object = new THREE.CSS3DObject( element );
+                object.position.fromArray( side.position );
+                object.rotation.fromArray( side.rotation );
+                scene.add( object );
+            }
+        }
+
+        function render(){
+            //渲染
+            camera.lookAt( target );
+            renderer.render(scene, camera);
+            window.requestAnimFrame(render);
+        }
+
+        function threeStart() {
+            initThree();
+            initCamera();
+            initScene();
+            initLight();
+            initObject();
+            render();
+
+            //鼠标操作
+            document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+        }
+
+        /**
+         * 根据垂直和水平方向相对初始位置移动的角度更新视线焦点位置
+         * @param lat
+         * @param lon
+         */
+        function updateTarget(lat,lon){
+
+        }
+
+        //事件相关
+        var lon = 0;
+        var lat = 0;
+
+        function onDocumentMouseDown(event){
+            event.preventDefault();
+
+            document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+            document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+        }
+
+        function onDocumentMouseMove(event){
+            var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+            var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+            lon += movementX * 0.1;
+            lat += movementY * 0.1;
+        }
+
+        function onDocumentMouseUp( event ) {
+            document.removeEventListener( 'mousemove', onDocumentMouseMove );
+            document.removeEventListener( 'mouseup', onDocumentMouseUp );
+        }
+    </script>
+</body>
+</html>
