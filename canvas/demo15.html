@@ -20,12 +20,26 @@
 <script type="text/javascript">
     window.onload = function(){
 
+        var width = 282;
+        var height = 282;
+
         var source = document.querySelector('#source');
         var scontext = source.getContext('2d');
 
-        scontext.fillStyle = "rgba(255,192,0,255)";
+        //var img = new Image();
+        //img.src = '../img/sky.JPG';
+        //img.onload = function(){
+        //    scontext.filter = 'blur(7px)';
+        //    scontext.drawImage(img,0,0,width,height);
+        //}
+
+        scontext.fillStyle = "rgba(200,255,0,255)";
         scontext.filter = 'blur(20px)';
-        scontext.fillRect(0, 0, 282, 282);
+        scontext.fillRect(0, 0, width, height);
+
+        var data = scontext.getImageData(0,0,width,height);
+
+        console.log(data);
     };
 </script>
 </body>

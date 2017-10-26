@@ -14,24 +14,57 @@
         uniform sampler2D u_Sampler;//纹理取样器
         uniform vec2 v_Blur;
 
+        vec4 iterationColor(vec4 color,int index,vec2 blur,float weight){
+
+            float fi = float(index);
+            vec2 item = v_TexCoord+vec2(fi*blur.x,fi*blur.y);
+            vec4 temp = vec4(0.0);
+
+            /**
+             * 由于暂时不清楚怎么处理点超出边界的情况，因此webgl简单实现的blur高斯模糊滤镜不能处理纯色；
+             * 另外当blur参数设置过大时会出现明显的方块聚合的情况，实际模糊效果很不理想；
+             * 因此该算法和CSS blur、Canvas blur等通用的高斯滤镜还是存在一些差异的。
+             */
+            if(false){
+            //if(item.x<0.0||item.x>1.0||item.y>1.0||item.y<0.0){
+                if(item.x<0.0||item.x>1.0){
+                    item.x = 2.0*v_TexCoord.x-item.x;
+                }
+                if(item.y<0.0||item.y>1.0){
+                    item.y = 2.0*v_TexCoord.y-item.y;
+                }
+
+                temp = texture2D(u_Sampler, item);
+                temp.a = 0.0;
+                color += temp*weight;
+            }else{
+                temp = texture2D(u_Sampler, v_TexCoord + vec2(fi*blur.x, fi*blur.y));
+                color += temp*weight;
+            }
+
+            return color;
+        }
+
         //高斯模糊 线性可分
         void main(void) {
+
             gl_FragColor = vec4(0.0);
-            gl_FragColor += texture2D(u_Sampler, v_TexCoord + vec2(-7.0*v_Blur.x, -7.0*v_Blur.y))*0.0044299121055113265;
-            gl_FragColor += texture2D(u_Sampler, v_TexCoord + vec2(-6.0*v_Blur.x, -6.0*v_Blur.y))*0.00895781211794;
-            gl_FragColor += texture2D(u_Sampler, v_TexCoord + vec2(-5.0*v_Blur.x, -5.0*v_Blur.y))*0.0215963866053;
-            gl_FragColor += texture2D(u_Sampler, v_TexCoord + vec2(-4.0*v_Blur.x, -4.0*v_Blur.y))*0.0443683338718;
-            gl_FragColor += texture2D(u_Sampler, v_TexCoord + vec2(-3.0*v_Blur.x, -3.0*v_Blur.y))*0.0776744219933;
-            gl_FragColor += texture2D(u_Sampler, v_TexCoord + vec2(-2.0*v_Blur.x, -2.0*v_Blur.y))*0.115876621105;
-            gl_FragColor += texture2D(u_Sampler, v_TexCoord + vec2(-1.0*v_Blur.x, -1.0*v_Blur.y))*0.147308056121;
-            gl_FragColor += texture2D(u_Sampler, v_TexCoord                             )*0.159576912161;
-            gl_FragColor += texture2D(u_Sampler, v_TexCoord + vec2( 1.0*v_Blur.x,  1.0*v_Blur.y))*0.147308056121;
-            gl_FragColor += texture2D(u_Sampler, v_TexCoord + vec2( 2.0*v_Blur.x,  2.0*v_Blur.y))*0.115876621105;
-            gl_FragColor += texture2D(u_Sampler, v_TexCoord + vec2( 3.0*v_Blur.x,  3.0*v_Blur.y))*0.0776744219933;
-            gl_FragColor += texture2D(u_Sampler, v_TexCoord + vec2( 4.0*v_Blur.x,  4.0*v_Blur.y))*0.0443683338718;
-            gl_FragColor += texture2D(u_Sampler, v_TexCoord + vec2( 5.0*v_Blur.x,  5.0*v_Blur.y))*0.0215963866053;
-            gl_FragColor += texture2D(u_Sampler, v_TexCoord + vec2( 6.0*v_Blur.x,  6.0*v_Blur.y))*0.00895781211794;
-            gl_FragColor += texture2D(u_Sampler, v_TexCoord + vec2( 7.0*v_Blur.x,  7.0*v_Blur.y))*0.0044299121055113265;
+
+            gl_FragColor = iterationColor(gl_FragColor,-7,v_Blur,0.0044299121055113265);
+            gl_FragColor = iterationColor(gl_FragColor,-6,v_Blur,0.00895781211794);
+            gl_FragColor = iterationColor(gl_FragColor,-5,v_Blur,0.0215963866053);
+            gl_FragColor = iterationColor(gl_FragColor,-4,v_Blur,0.0443683338718);
+            gl_FragColor = iterationColor(gl_FragColor,-3,v_Blur,0.0776744219933);
+            gl_FragColor = iterationColor(gl_FragColor,-2,v_Blur,0.115876621105);
+            gl_FragColor = iterationColor(gl_FragColor,-1,v_Blur,0.147308056121);
+            gl_FragColor = iterationColor(gl_FragColor,0,v_Blur,0.159576912161);
+            gl_FragColor = iterationColor(gl_FragColor,1,v_Blur,0.147308056121);
+            gl_FragColor = iterationColor(gl_FragColor,2,v_Blur,0.115876621105);
+            gl_FragColor = iterationColor(gl_FragColor,3,v_Blur,0.0776744219933);
+            gl_FragColor = iterationColor(gl_FragColor,4,v_Blur,0.0443683338718);
+            gl_FragColor = iterationColor(gl_FragColor,5,v_Blur,0.0215963866053);
+            gl_FragColor = iterationColor(gl_FragColor,6,v_Blur,0.00895781211794);
+            gl_FragColor = iterationColor(gl_FragColor,7,v_Blur,0.0044299121055113265);
         }
 </script>
 <!-- 顶点着色器程序 -->
@@ -104,8 +137,8 @@
 
         var u_Sampler = gl.getUniformLocation(shaderPorgram,'u_Sampler');
         var image = new Image();
-        //image.src = '../img/sky.JPG';
-        image.src = '../img/pure.png';
+        image.src = '../img/sky.JPG';
+        //image.src = '../img/pure.png';
         image.onload = function(){
             loadTextures(gl,n,texture,u_Sampler,image);
         }
