@@ -20,12 +20,10 @@
 	<!-- 顶点着色器程序 -->
 	<script id="shader-vs" type="x-shader/x-vertex">
 		attribute vec4 a_position;
-		//attribute float a_pointSize;
 		attribute vec4 a_color;
 		varying vec4 v_color;
 	    void main() {
 	    	gl_Position = a_position;
-	    	//gl_PointSize = a_pointSize;
 	    	v_color = a_color;//将数据传给片元着色器
 	    }
 	</script>
@@ -43,20 +41,12 @@
 			gl.clear(gl.COLOR_BUFFER_BIT);//清空canvas绘图区域
 
 			gl.uniform4f(u_fragColor,1.0,0.0,0.0,1.0);
-			
-			//gl.drawArrays(gl.POINTS,0,num);
+
 			gl.drawArrays(gl.TRIANGLES,0,num);
 		}
 
 		//初始化顶点位置
 		function initVertexBuffers(gl,shaderPorgram){
-			// var datas = new Float32Array([
-			// 		//顶点坐标和顶点尺寸
-			// 		0.0,0.5,10.0,
-			// 		-0.5,-0.5,20.0,
-			// 		0.5,-0.5,30.0
-			// 	]);
-			
 			var datas = new Float32Array([
 					//顶点坐标和颜色
 					0.0,0.5,1.0,0.0,0.0,
@@ -87,10 +77,6 @@
 			var a_color = gl.getAttribLocation(shaderPorgram,'a_color');
 			gl.vertexAttribPointer(a_color,3,gl.FLOAT,false,size*5,size*2);
 			gl.enableVertexAttribArray(a_color);
-
-			//var a_pointSize = gl.getAttribLocation(shaderPorgram,'a_pointSize');
-			//gl.vertexAttribPointer(a_pointSize,1,gl.FLOAT,false,size*3,size*2);
-			//gl.enableVertexAttribArray(a_pointSize);
 
 			return num;
 		}
