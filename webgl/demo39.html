@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WebGL视点和视线</title>
+    <title>WebGL视点和视线以及视图模型矩阵</title>
     <script type="text/javascript" src="./sim-tools.js"></script>
 </head>
 <body onload="main()">
@@ -24,10 +24,13 @@
 		attribute vec4 a_position;
 		attribute vec4 a_color;
 		varying vec4 v_color;
-		uniform mat4 u_ViewMatrix;
-		uniform mat4 u_ModelMatrix;
+		/**
+		 * 视图模型矩阵 = 视图矩阵*模型矩阵；
+		 * 从视点看上去的变换后顶点坐标 = 视图矩阵*变换矩阵*原始顶点坐标
+		 */
+		uniform mat4 u_ModelViewMatrix;//视图模型矩阵
 	    void main() {
-	    	gl_Position = u_ViewMatrix*u_ModelMatrix*a_position;
+	    	gl_Position = u_ModelViewMatrix*a_position;
 	    	v_color = a_color;//将数据传给片元着色器
 	    }
 </script>
@@ -45,8 +48,7 @@
         var u_fragColor = gl.getUniformLocation(shaderPorgram,'u_fragColor');//获取uniform变量的存储位置
         gl.uniform4f(u_fragColor,1.0,0.0,0.0,1.0);
 
-        var u_ViewMatrix = gl.getUniformLocation(shaderPorgram,'u_ViewMatrix');
-        var u_ModelMatrix = gl.getUniformLocation(shaderPorgram,'u_ModelMatrix');
+        var u_ModelViewMatrix = gl.getUniformLocation(shaderPorgram,'u_ModelViewMatrix');
 
         var viewMatrix = new Matrix4();
         /**
@@ -60,8 +62,9 @@
         var modelMatrix = new Matrix4();
         modelMatrix.setRotate(50,0,0,1);
 
-        gl.uniformMatrix4fv(u_ViewMatrix,false,viewMatrix.elements);
-        gl.uniformMatrix4fv(u_ModelMatrix,false,modelMatrix.elements);
+        var modelViewMatrix = viewMatrix.multiply(modelMatrix);
+
+        gl.uniformMatrix4fv(u_ModelViewMatrix,false,modelViewMatrix.elements);
 
         gl.drawArrays(gl.TRIANGLES,0,num);
     }
