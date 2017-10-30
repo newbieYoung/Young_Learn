@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WebGL 投影矩阵+视图矩阵+模型矩阵</title>
+    <title>WebGL 投影矩阵+视图矩阵+模型矩阵以及隐藏面消除</title>
     <script type="text/javascript" src="./sim-tools.js"></script>
 </head>
 <body onload="main()">
@@ -54,6 +54,8 @@
         var num = initVertexBuffers(gl,shaderPorgram);
 
         gl.clearColor(0.0,0.0,1.0,1.0);//设置背景颜色
+        gl.enable(gl.DEPTH_TEST);//开启隐藏面消除
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);//清空颜色和深度缓冲区
 
         var u_ProjViewModelMatrix = gl.getUniformLocation(shaderPorgram,'u_ProjViewModelMatrix');
 
@@ -83,30 +85,30 @@
         //顶点坐标和颜色
         var datas = new Float32Array([
             // Three triangles on the right side
-            0.75,  1.0,  -4.0,  0.4,  1.0,  0.4, // The back green one
-            0.25, -1.0,  -4.0,  0.4,  1.0,  0.4,
-            1.25, -1.0,  -4.0,  1.0,  0.4,  0.4,
+            0.75,  1.0,   0.0,  0.4,  0.4,  1.0,  // The front blue one
+            0.25, -1.0,   0.0,  0.4,  0.4,  1.0,
+            1.25, -1.0,   0.0,  1.0,  0.4,  0.4,
 
             0.75,  1.0,  -2.0,  1.0,  1.0,  0.4, // The middle yellow one
             0.25, -1.0,  -2.0,  1.0,  1.0,  0.4,
             1.25, -1.0,  -2.0,  1.0,  0.4,  0.4,
 
-            0.75,  1.0,   0.0,  0.4,  0.4,  1.0,  // The front blue one
-            0.25, -1.0,   0.0,  0.4,  0.4,  1.0,
-            1.25, -1.0,   0.0,  1.0,  0.4,  0.4,
+            0.75,  1.0,  -4.0,  0.4,  1.0,  0.4, // The back green one
+            0.25, -1.0,  -4.0,  0.4,  1.0,  0.4,
+            1.25, -1.0,  -4.0,  1.0,  0.4,  0.4,
 
             // Three triangles on the left side
-            -0.75,  1.0,  -4.0,  0.4,  1.0,  0.4, // The back green one
-            -1.25, -1.0,  -4.0,  0.4,  1.0,  0.4,
-            -0.25, -1.0,  -4.0,  1.0,  0.4,  0.4,
+            -0.75,  1.0,   0.0,  0.4,  0.4,  1.0,  // The front blue one
+            -1.25, -1.0,   0.0,  0.4,  0.4,  1.0,
+            -0.25, -1.0,   0.0,  1.0,  0.4,  0.4,
 
             -0.75,  1.0,  -2.0,  1.0,  1.0,  0.4, // The middle yellow one
             -1.25, -1.0,  -2.0,  1.0,  1.0,  0.4,
             -0.25, -1.0,  -2.0,  1.0,  0.4,  0.4,
 
-            -0.75,  1.0,   0.0,  0.4,  0.4,  1.0,  // The front blue one
-            -1.25, -1.0,   0.0,  0.4,  0.4,  1.0,
-            -0.25, -1.0,   0.0,  1.0,  0.4,  0.4,
+            -0.75,  1.0,  -4.0,  0.4,  1.0,  0.4, // The back green one
+            -1.25, -1.0,  -4.0,  0.4,  1.0,  0.4,
+            -0.25, -1.0,  -4.0,  1.0,  0.4,  0.4,
         ]);
 
         var size = datas.BYTES_PER_ELEMENT;//数组中的每个元素的大小（以字节为单位）
