@@ -10,10 +10,8 @@
 	<!-- 片段着色器程序 -->
 	<script id="shader-fs" type="x-shader/x-fragment">
 		precision mediump float;//不写会报错 No precision specified for (float)，缺少精度描述
-		uniform vec4 u_fragColor;
 		varying vec4 v_color;
 	    void main() {
-	        gl_FragColor = u_fragColor;
 	    	gl_FragColor = v_color;//从顶点着色器接收数据
 	    }
 	</script>
@@ -35,12 +33,8 @@
 
 			var num = initVertexBuffers(gl,shaderPorgram);
 
-			var u_fragColor = gl.getUniformLocation(shaderPorgram,'u_fragColor');//获取uniform变量的存储位置
-
 			gl.clearColor(0.0,0.0,1.0,1.0);//设置背景颜色
 			gl.clear(gl.COLOR_BUFFER_BIT);//清空canvas绘图区域
-
-			gl.uniform4f(u_fragColor,1.0,0.0,0.0,1.0);
 
 			gl.drawArrays(gl.TRIANGLES,0,num);
 		}
