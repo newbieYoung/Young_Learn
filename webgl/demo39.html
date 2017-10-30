@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WebGL视点和视线以及视图模型矩阵</title>
+    <title>WebGL 视点、视线、视图模型矩阵</title>
     <script type="text/javascript" src="./sim-tools.js"></script>
 </head>
 <body onload="main()">
@@ -35,6 +35,13 @@
 	    }
 </script>
 <script type="text/javascript">
+
+    var EyePoint = {//视点以及默认位置
+        x:0.20,
+        y:0.25,
+        z:0.25
+    };
+
     function main(){
         var canvas = document.querySelector('#webgl');
         var gl = canvas.getContext('webgl');//获取canvas上下文
@@ -43,13 +50,34 @@
         var num = initVertexBuffers(gl,shaderPorgram);
 
         gl.clearColor(0.0,0.0,1.0,1.0);//设置背景颜色
-        gl.clear(gl.COLOR_BUFFER_BIT);//清空canvas绘图区域
 
         var u_fragColor = gl.getUniformLocation(shaderPorgram,'u_fragColor');//获取uniform变量的存储位置
         gl.uniform4f(u_fragColor,1.0,0.0,0.0,1.0);
 
         var u_ModelViewMatrix = gl.getUniformLocation(shaderPorgram,'u_ModelViewMatrix');
 
+        draw(gl,num,u_ModelViewMatrix);
+
+        //事件监听
+        document.onkeydown = function(ev){
+            keydown(ev,gl,num,u_ModelViewMatrix);
+        };
+    }
+
+    //键盘按键被按下
+    function keydown(ev,gl,n,u_ModelViewMatrix){
+        console.log(EyePoint);
+        if(ev.keyCode == 39){//按下右键
+            EyePoint.z += 0.01;
+        }else if(ev.keyCode == 37){//按下左键
+            EyePoint.z -= 0.01;
+        }else{
+            return;//按下其它键
+        }
+        draw(gl,n,u_ModelViewMatrix);
+    }
+
+    function draw(gl,n,u_ModelViewMatrix){
         var viewMatrix = new Matrix4();
         /**
          * setLookAt(eyeX,eyeY,eyeZ,atX,atY,atZ,upX,upY,upZ);
@@ -57,23 +85,22 @@
          * atX,atY,atZ     观察点；
          * upX,upY,upZ     上方向
          */
-        viewMatrix.setLookAt(0.25,0.25,0.25,0,0,0,0,1,0);
+        viewMatrix.setLookAt(EyePoint.x,EyePoint.y,EyePoint.z,0,0,0,0,1,0);
 
         var modelMatrix = new Matrix4();
-        modelMatrix.setRotate(50,0,0,1);
+        modelMatrix.setRotate(50,0,0,1);//绕Z轴旋转50度
 
         var modelViewMatrix = viewMatrix.multiply(modelMatrix);
-
         gl.uniformMatrix4fv(u_ModelViewMatrix,false,modelViewMatrix.elements);
 
-        gl.drawArrays(gl.TRIANGLES,0,num);
+        gl.clear(gl.COLOR_BUFFER_BIT);//清空canvas绘图区域
+        gl.drawArrays(gl.TRIANGLES,0,n);
     }
 
     //初始化顶点位置
     function initVertexBuffers(gl,shaderPorgram){
         //顶点坐标和颜色
         var datas = new Float32Array([
-
             0.0,  0.5,  -0.4,  0.4,  1.0,  0.4, // The back green one
             -0.5, -0.5,  -0.4,  0.4,  1.0,  0.4,
             0.5, -0.5,  -0.4,  1.0,  0.4,  0.4,
