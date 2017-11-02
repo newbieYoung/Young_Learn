@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <title>ThreeJS CPU 粒子系统 模型切换</title>
     <script type="text/javascript" src="../lib/three.js"></script>
-    <script type="text/javascript" src="../lib/three-projector.js"></script>
-    <script type="text/javascript" src="../lib/three-canvas-render.js"></script>
     <script type="text/javascript" src="../lib/tween.min.js"></script>
     <script type="text/javascript" src="../lib/stats.min.js"></script>
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
@@ -106,17 +104,17 @@
         loader.load('./json/teapot.js',function(obj){
             obj1 = obj;
             if(obj1&&obj2){
-                addParticle(obj1,obj2);
+                addParticles(obj1,obj2);
             }
         });
         loader.load('./json/head.js',function(obj){
             obj2 = obj;
             if(obj1&&obj2){
-                addParticle(obj1,obj2);
+                addParticles(obj1,obj2);
             }
         });
     }
-    function addParticle(obj1,obj2){//添加例子系统
+    function addParticles(obj1,obj2){//添加例子系统
         var moreObj,lessObj;
         if(obj1.vertices.length>obj2.vertices.length){
             moreObj = obj1;
@@ -128,17 +126,14 @@
 
         var morePoints = [];
         var lessPoints = [];
-
         var moreLen = moreObj.vertices.length;
         var lessLen = lessObj.vertices.length;
-
         moreObj.vertices.forEach(function(o){
             morePoints.push(o.clone());
         });
         lessObj.vertices.forEach(function(o){
             lessPoints.push(o.clone());
         });
-
         for(var i=lessLen,j=0;i<moreLen;i++,j++){
             lessPoints[i] = lessPoints[j];//两个模型顶点数量不一致则把顶点较少模型的用自身已经存在的顶点补齐
         }
@@ -186,9 +181,9 @@
             particle.position.y = lessItem.y*val+moreItem.y*(1-val);
             particle.position.z = lessItem.z*val+moreItem.z*(1-val);
 
-            particle.material.color.r = particle.position.z/20;//亮度变量
-            particle.material.color.g = particle.position.y/20;
-            particle.material.color.b = particle.position.x/20;
+            particle.material.color.r = particle.position.x/(20+10*val);//亮度变量
+            particle.material.color.g = particle.position.y/(20+10*val);
+            particle.material.color.b = particle.position.z/(20+10*val);
         }
     }
 
@@ -211,13 +206,6 @@
         renderer.render(scene, camera);
         window.requestAnimFrame(render);
     }
-
-    //画点
-    function program( context ) {
-        context.beginPath();
-        context.arc( 0, 0, 0.5, 0, Math.PI*2, true );
-        context.fill();
-    };
 </script>
 </body>
 </html>
