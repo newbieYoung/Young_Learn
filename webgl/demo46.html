@@ -58,15 +58,18 @@
     var camera;
     var percent = 0;
     function initCamera() {
-        var initPosition = curve.getPointAt(0);
         camera = new THREE.PerspectiveCamera(45, width / height, 0.001, 1000);
-        camera.position.set(initPosition.x,initPosition.y,initPosition.z);
+        //var initPosition = curve.getPointAt(0);
+        //camera.position.set(initPosition.x,initPosition.y,initPosition.z);
+
+        camera.position.z = 400;
     }
 
     //创建场景，后续元素需要加入到场景中才会显示出来
     var scene;
     function initScene() {
         scene = new THREE.Scene();
+        scene.fog = new THREE.Fog(0x000000,100,200);
     }
 
     //创建光线
@@ -93,25 +96,90 @@
         ] );
 
         //根据曲线路径生成管道
-        var geometry = new THREE.TubeGeometry( curve, 300, 2, 20, false );
+        //var geometry = new THREE.TubeGeometry( curve, 300, 2, 20, true );
 
 
         //demo1
-        var material = new THREE.MeshLambertMaterial({
-            color: 0xff0000,
-            side : THREE.BackSide
-        });
+//        var material = new THREE.MeshLambertMaterial({
+//            color: 0xff0000,
+//            side : THREE.BackSide
+//        });
 
         //demo2
-        for(var i=0,j=geometry.faces.length;i<j;i++){
-            geometry.faces[i].color = new THREE.Color("hsl("+Math.floor(Math.random()*360)+",50%,50%)");
+//        for(var i=0,j=geometry.faces.length;i<j;i++){
+//            geometry.faces[i].color = new THREE.Color("hsl("+Math.floor(Math.random()*360)+",50%,50%)");
+//        }
+//        var material = new THREE.MeshLambertMaterial({
+//            side : THREE.BackSide,
+//            vertexColors : THREE.FaceColors //We need to tell ThreeJs that the colors are coming from the faces
+//        });
+
+        //demo3
+//        var material = new THREE.MeshLambertMaterial({
+//            color:0xffffff,
+//            side : THREE.BackSide
+//        });
+//
+//        var tube = new THREE.Mesh( geometry, material );
+//        scene.add( tube );
+
+        //demo4
+//        var colors = [0xFF6138,0xFFFF9D,0xBEEB9F,0x79BD8F,0x00A388];
+//        for(var i=0;i<colors.length;i++){
+//            var geometry = new THREE.TubeBufferGeometry( curve, 100, (i*2)+4, 10, true );
+//            var material = new THREE.MeshBasicMaterial({
+//                color:colors[i],
+//                transparent:true,
+//                wireframe:true,
+//                opacity : ((1- i/5)*0.5 + 0.1)
+//            });
+//            var tube = new THREE.Mesh( geometry, material );
+//            scene.add( tube );
+//        }
+
+        //demo5
+        var segments = 1600;//数量
+        var circlesDetail = 40;
+        var radius = 4;
+
+        var frames = curve.computeFrenetFrames(segments,true);
+        var geometry = new THREE.Geometry();
+        var color = new THREE.Color(0x000000);
+
+        for(var i=0;i<segments;i++){
+            var normal = frames.normals[i];//弗莱纳公式
+            var binormal = frames.binormals[i];
+
+            var index = i/segments;
+
+            var p = curve.getPointAt(index);
+
+            for(var j=0;j<circlesDetail;j++){
+                var position = p.clone();
+                var angle = (j / circlesDetail) * Math.PI * 2 + (index * Math.PI * 5);
+                var sin = Math.sin(angle);
+                var cos = -Math.cos(angle);
+
+                var normalPoint = new THREE.Vector3(0,0,0);
+                normalPoint.x = (cos * normal.x + sin * binormal.x);
+                normalPoint.y = (cos * normal.y + sin * binormal.y);
+                normalPoint.z = (cos * normal.z + sin * binormal.z);
+
+                normalPoint.multiplyScalar(radius);
+
+                position.add(normalPoint);
+                var color = new THREE.Color("hsl(" + (index * 360 * 4) + ", 100%, 50%)");
+                geometry.colors.push(color);
+                geometry.vertices.push(position);
+            }
         }
-        var material = new THREE.MeshLambertMaterial({
-            side : THREE.BackSide,
-            vertexColors : THREE.FaceColors //We need to tell ThreeJs that the colors are coming from the faces
+
+        var material = new THREE.PointsMaterial({
+            size: 0.2,
+            vertexColors: THREE.VertexColors
         });
 
-        var tube = new THREE.Mesh( geometry, material );
+        var tube = new THREE.Points(geometry, material);
         scene.add( tube );
     }
 
