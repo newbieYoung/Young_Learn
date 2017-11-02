@@ -123,27 +123,25 @@
 
         var morePos = moreObj.attributes.position.array;
         var lessPos = lessObj.attributes.position.array;
-
         var moreLen = morePos.length;
         var lessLen = lessPos.length;
 
-        var targetLessPos = new Float32Array(moreLen);
-        targetLessPos.set(lessPos);
+        var newLessPos = new Float32Array(moreLen);
+        newLessPos.set(lessPos);
 
         for(var i = lessLen, j = 0; i < moreLen; i++, j++) {
-            j %= lessLen;
-            targetLessPos[i] = lessPos[j];
-            targetLessPos[i+1] = lessPos[j+1];
-            targetLessPos[i+2] = lessPos[j+2];
+            newLessPos[i] = lessPos[j];
         }
 
         var sizes = new Float32Array(moreLen);
         for (var i = 0; i < moreLen; i++) {
-            sizes[i] = Math.random()*28+16;
+            var time = Date.now()*0.005;
+            sizes[i] = 10*(2.0+Math.sin(0.02*i+time));
         }
 
         moreObj.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
-        moreObj.addAttribute('targetLessPos', new THREE.BufferAttribute(targetLessPos, 3));
+        moreObj.addAttribute('morePos', new THREE.BufferAttribute(morePos, 3));
+        moreObj.addAttribute('lessPos', new THREE.BufferAttribute(newLessPos, 3));
 
         var uniforms = {
             texture:{value: new THREE.TextureLoader().load( './textures/dot.png')},
@@ -211,24 +209,24 @@
 </script>
 <script id="vs" type="x-shader/x-vertex">
     attribute float size;
-    attribute vec3 targetLessPos;
+    attribute vec3 morePos;
+    attribute vec3 lessPos;
     uniform float val;
     varying vec3 color;
 
     void main() {
         vec3 vPos;
 
-        vPos.x = position.x * (1.0-val) + targetLessPos.x * val;
-        vPos.y = position.y * (1.0-val) + targetLessPos.y * val;
-        vPos.z = position.z * (1.0-val) + targetLessPos.z * val;
+        vPos.x = lessPos.x * val + morePos.x * (1.0-val);
+        vPos.y = lessPos.y * val + morePos.y * (1.0-val);
+        vPos.z = lessPos.z * val + morePos.z * (1.0-val);
 
         color.r = vPos.x/(20.0+10.0*val);
         color.g = vPos.y/(20.0+10.0*val);
         color.b = vPos.z/(20.0+10.0*val);
 
-        vec4 mvPosition = modelViewMatrix * vec4( vPos, 1.0 );
         gl_PointSize = size;
-        gl_Position = projectionMatrix * mvPosition;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( vPos, 1.0 );
 
     }
 </script>
