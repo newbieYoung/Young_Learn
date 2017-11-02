@@ -2,14 +2,19 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>ThreeJS CanvasRender 粒子系统</title>
+    <title>ThreeJS CPU 粒子系统 模型切换</title>
     <script type="text/javascript" src="../lib/three.js"></script>
     <script type="text/javascript" src="../lib/three-projector.js"></script>
     <script type="text/javascript" src="../lib/three-canvas-render.js"></script>
-    <script type="text/javascript" src="../lib/TweenMax.min.js"></script>
+    <script type="text/javascript" src="../lib/tween.min.js"></script>
     <script type="text/javascript" src="../lib/stats.min.js"></script>
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <style type="text/css">
+        /**
+         * 粒子系统 模型切换 有两点需要注意的：
+         * 一、两个模型之间顶点数量不同时，可以把顶点少的模型用其自身的顶点补齐；
+         * 二、模糊类型的材质在色值亮度变高的情况加以一定的大小变化更能凸显出效果来。
+         */
         body{
             margin:0;
             padding:0;
@@ -50,7 +55,7 @@
     function initThree() {
         width = window.innerWidth;
         height = window.innerHeight;
-        renderer = new THREE.CanvasRenderer();
+        renderer = new THREE.WebGLRenderer();
         renderer.setPixelRatio( window.devicePixelRatio );
         renderer.setSize(width, height);
         var container = document.getElementById('canvas-frame');
@@ -63,10 +68,10 @@
     //创建相机，并设置正方向和中心点
     var camera;
     function initCamera() {
-        camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
+        camera = new THREE.PerspectiveCamera(40, width / height, 1, 1000);
         camera.position.x = 0;
         camera.position.y = 0;
-        camera.position.z = 600;
+        camera.position.z = 150;
         camera.up.x = 0;//正方向
         camera.up.y = 1;
         camera.up.z = 0;
@@ -84,42 +89,126 @@
     //创建光线
     var light;
     function initLight() {
-        light = new THREE.AmbientLight(0xfefefe);
+        light = new THREE.DirectionalLight(0xffffff);
+        light.position.set(0,200,0);
         scene.add(light);
     }
     //创建展示场景所需的各种元素
-    var group
+    var group;
     function initObject() {
         group = new THREE.Group();
         scene.add( group );
-        //创建一个球型用作最后的形状
-        var geometry = new THREE.SphereGeometry( 500, 32, 32 );
-        var vl = geometry.vertices.length;//球型的所有顶点
-        for ( var i = 0; i < vl; i++ ) {
-            //为每个点附上材质
-            var material = new THREE.SpriteCanvasMaterial( {
-                color: Math.random() * 0x808008 + 0x808080,
-                program: program
-            } );
-            var particle = new THREE.Sprite( material );
-            particle.position.x = 0;
-            particle.position.y = 0;
-            particle.position.z = 0;
-            particle.scale.x = particle.scale.y = Math.random() * 6;//圆形的x和y同时缩放相应倍数
-            TweenMax.to(
-                particle.position,
-                1,
-                //最终坐标增加适当随机变化，来保证最终效果不是一个很规则的球型
-                {x:geometry.vertices[i].x+Math.random()*100,y:geometry.vertices[i].y+Math.random()*100,z:geometry.vertices[i].z+Math.random()*100,delay:0.5,}
-            );
+
+        var loader = new THREE.JSONLoader();
+        var obj1,obj2;
+
+        //加载模型
+        loader.load('./json/teapot.js',function(obj){
+            obj1 = obj;
+            if(obj1&&obj2){
+                addParticle(obj1,obj2);
+            }
+        });
+        loader.load('./json/head.js',function(obj){
+            obj2 = obj;
+            if(obj1&&obj2){
+                addParticle(obj1,obj2);
+            }
+        });
+    }
+    function addParticle(obj1,obj2){//添加例子系统
+        var moreObj,lessObj;
+        if(obj1.vertices.length>obj2.vertices.length){
+            moreObj = obj1;
+            lessObj = obj2;
+        }else{
+            moreObj = obj2;
+            lessObj = obj1;
+        }
+
+        var morePoints = [];
+        var lessPoints = [];
+
+        var moreLen = moreObj.vertices.length;
+        var lessLen = lessObj.vertices.length;
+
+        moreObj.vertices.forEach(function(o){
+            morePoints.push(o.clone());
+        });
+        lessObj.vertices.forEach(function(o){
+            lessPoints.push(o.clone());
+        });
+
+        for(var i=lessLen,j=0;i<moreLen;i++,j++){
+            lessPoints[i] = lessPoints[j];//两个模型顶点数量不一致则把顶点较少模型的用自身已经存在的顶点补齐
+        }
+
+        var particleSystem = new THREE.Group();
+        var texture = new THREE.TextureLoader().load('./textures/dot.png');
+
+        for(var i=0;i<moreLen;i++){
+            var lessItem = lessPoints[i];
+
+            var color = new THREE.Color();
+            color.r = lessItem.x/30;
+            color.g = lessItem.y/30;
+            color.b = lessItem.z/30;
+
+            var geometry = new THREE.Geometry();
+            geometry.vertices.push(new THREE.Vector3());
+            var material = new THREE.PointsMaterial({color:color,size:Math.random()*4+2,map:texture,blending:THREE.AddEquation,depthTest:false,transparent:true});
+            var particle = new THREE.Points(geometry, material );
+            particle.position.copy(lessItem);
             group.add( particle );
         }
+
+        var pos = {val:1};
+        var tween = new TWEEN.Tween(pos).to({val:0},2000).easing(TWEEN.Easing.Quadratic.InOut).delay(1000).onUpdate(function(){
+            tweenCallback(this.val,lessPoints,morePoints);
+        });
+        var tweenBack = new TWEEN.Tween(pos).to({val:1},2000).easing(TWEEN.Easing.Quadratic.InOut).delay(1000).onUpdate(function(){
+            tweenCallback(this.val,lessPoints,morePoints);
+        });
+        tween.chain(tweenBack);
+        tweenBack.chain(tween);
+        tween.start();
     }
+    function tweenCallback(val,lessPoints,morePoints){//更新每个粒子的位置
+        var particles = group.children;
+
+        for(var i=0;i<particles.length;i++){
+            var particle = particles[i];
+
+            var lessItem = lessPoints[i];
+            var moreItem = morePoints[i];
+
+            particle.position.x = lessItem.x*val+moreItem.x*(1-val);
+            particle.position.y = lessItem.y*val+moreItem.y*(1-val);
+            particle.position.z = lessItem.z*val+moreItem.z*(1-val);
+
+            particle.material.color.r = particle.position.z/20;//亮度变量
+            particle.material.color.g = particle.position.y/20;
+            particle.material.color.b = particle.position.x/20;
+        }
+    }
+
     //渲染
     function render(){
         renderer.clear();
-        renderer.render(scene, camera);
+        TWEEN.update();
         stats.update();
+
+        var time = Date.now()*0.005;
+        if(group){
+            group.rotation.y = 0.01*time;
+            var particles = group.children;
+            for(var i=0;i<particles.length;i++){
+                var material = particles[i].material;
+                material.size = 1.5*(2.0+Math.sin(0.02*i+time));//大小变化
+            }
+        }
+
+        renderer.render(scene, camera);
         window.requestAnimFrame(render);
     }
 
