@@ -14,7 +14,8 @@
         uniform sampler2D u_Sampler;//纹理取样器
         uniform sampler2D u_Sampler2;
 	    void main() {
-	        vec4 color = texture2D(u_Sampler,v_TexCoord);
+	        //vec4 color = texture2D(u_Sampler,v_TexCoord);
+	        vec4 color = vec4(0.0,0.0,1.0,1.0);
 	        vec4 color2 = texture2D(u_Sampler2,v_TexCoord);
 
 	        gl_FragColor = color*color2;
