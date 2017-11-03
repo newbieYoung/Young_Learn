@@ -6,14 +6,18 @@
     <script type="text/javascript" src="./sim-tools.js"></script>
 </head>
 <body onload="main()">
-    <canvas id="webgl" width="5000" height="5000"></canvas>
+    <canvas id="webgl" width="2000" height="2000"></canvas>
     <!-- 片段着色器程序 -->
     <script id="shader-fs" type="x-shader/x-fragment">
         precision mediump float;
         varying vec2 v_TexCoord;
         uniform sampler2D u_Sampler;//纹理取样器
+        uniform sampler2D u_Sampler2;
 	    void main() {
-	        gl_FragColor = texture2D(u_Sampler,v_TexCoord);
+	        vec4 color = texture2D(u_Sampler,v_TexCoord);
+	        vec4 color2 = texture2D(u_Sampler2,v_TexCoord);
+
+	        gl_FragColor = color*color2;
 	    }
 	</script>
     <!-- 顶点着色器程序 -->
@@ -34,7 +38,7 @@
 
             var num = initVertexBuffers(gl,shaderPorgram);
 
-            gl.clearColor(0.0,0.0,0.0,1.0);
+            gl.clearColor(0.0,0.0,1.0,1.0);
 
             // Set texture
             if (!initTextures(gl,shaderPorgram, num)) {
@@ -46,8 +50,9 @@
         //初始化纹理
         function initTextures(gl,shaderPorgram,n){
             var texture = gl.createTexture();//创建纹理对象
+            var texture2 = gl.createTexture();
 
-            if(!texture){
+            if(!texture||!texture2){
                 console.log('Failed to create the texture object!');
                 return false;
             }
@@ -56,24 +61,45 @@
             var image = new Image();
             image.src = '../img/sky.JPG';
             image.onload = function(){
-                loadTextures(gl,n,texture,u_Sampler,image);
+                loadTextures(gl,n,texture,u_Sampler,image,0);
+            }
+
+            var u_Sampler2 = gl.getUniformLocation(shaderPorgram,'u_Sampler2');
+            var image2 = new Image();
+            image2.src = './textures/dot.png';
+            image2.onload = function(){
+                loadTextures(gl,n,texture2,u_Sampler2,image2,1);
             }
             return true;
         }
 
         //加载纹理图片
-        function loadTextures(gl,n,texture,u_Sampler,image){
+        var g_texUnit0 = false;
+        var g_texUnit1 = false;
+        function loadTextures(gl,n,texture,u_Sampler,image,texUnit){
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);//对纹理图像进行y轴反转
-            gl.activeTexture(gl.TEXTURE0);//激活纹理单元
+
+            //激活纹理
+            if(texUnit===0){
+                gl.activeTexture(gl.TEXTURE0);
+                g_texUnit0 = true;
+            }else{
+                gl.activeTexture(gl.TEXTURE1);
+                g_texUnit1 = true;
+            }
             gl.bindTexture(gl.TEXTURE_2D, texture);//绑定纹理对象
 
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);//配置纹理对象的参数
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);//将纹理图像分配给纹理对象
 
-            gl.uniform1i(u_Sampler, 0);//将0号纹理传给着色器中的取样器变量
+            //如果纹理中存在透明通道则需要设置为gl.RGBA，如果不存在则可以设置为gl.RGB
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);//将纹理图像分配给纹理对象
 
-            gl.clear(gl.COLOR_BUFFER_BIT);   // Clear <canvas>
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, n); // Draw the rectangle
+            gl.uniform1i(u_Sampler, texUnit);//将对应纹理传给着色器中的取样器变量
+
+            if(g_texUnit0&&g_texUnit1){
+                gl.clear(gl.COLOR_BUFFER_BIT);   // Clear <canvas>
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, n); // Draw the rectangle
+            }
         }
 
         //初始化顶点位置
