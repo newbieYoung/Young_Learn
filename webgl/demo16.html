@@ -148,9 +148,12 @@
             color.g = lessItem.y/30;
             color.b = lessItem.z/30;
 
+            var time = Date.now()*0.005;
+            var size = 1.5*(2.0+Math.sin(0.02*i+time));
+
             var geometry = new THREE.Geometry();
             geometry.vertices.push(new THREE.Vector3());
-            var material = new THREE.PointsMaterial({color:color,size:Math.random()*4+2,map:texture,blending:THREE.AddEquation,depthTest:false,transparent:true});
+            var material = new THREE.PointsMaterial({color:color,size:size,map:texture,blending:THREE.AddEquation,depthTest:false,transparent:true});
             var particle = new THREE.Points(geometry, material );
             particle.position.copy(lessItem);
             group.add( particle );
