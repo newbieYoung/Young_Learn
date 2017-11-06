@@ -136,7 +136,7 @@
         var sizes = new Float32Array(moreLen);
         for (var i = 0; i < moreLen; i++) {
             var time = Date.now()*0.005;
-            sizes[i] = 10*(2.0+Math.sin(0.02*i+time));
+            sizes[i] = 1.5*(2.0+Math.sin(0.02*i+time));
         }
 
         moreObj.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
@@ -188,7 +188,7 @@
             var sizes = bufferObj.attributes.size.array;
             var len = sizes.length;
             for (var i = 0; i < len; i++) {
-                sizes[i] = 10*(2.0+Math.sin(0.02*i+time));
+                sizes[i] = 1.5*(2.0+Math.sin(0.02*i+time));
             }
             bufferObj.attributes.size.needsUpdate = true;
         }
