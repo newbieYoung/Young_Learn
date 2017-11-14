@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WebGL 每个面不同颜色立方体 + 点光源 + 环境光 + 漫反射</title>
+    <title>WebGL 每个面不同颜色立方体 + 平行光 + 环境光 + 漫反射</title>
     <script type="text/javascript" src="./sim-tools.js"></script>
 </head>
 <body onload="main()">
@@ -23,8 +23,9 @@
 		attribute vec4 a_color;
 
 		attribute vec4 a_Normal;//表面法向量
-		uniform vec3 u_LightColor;//点光源颜色
-		uniform vec3 u_LightDirection;//归一化的点光源光线方向
+		uniform vec3 u_LightColor;//平行光颜色
+		uniform vec3 u_LightDirection;//归一化的平行光方向
+	    uniform mat4 u_NormalMatrix;//法向量变换矩阵
 
         uniform vec3 u_AmbientLight;//环境光
 
@@ -33,7 +34,7 @@
 	    void main() {
 	    	gl_Position = u_ProjViewModelMatrix*a_position;
 
-	    	vec3 normal = normalize(vec3(a_Normal));
+	    	vec3 normal = normalize(vec3(u_NormalMatrix * a_Normal));
 	    	float nDotL = max(dot(u_LightDirection,normal),0.0);
 	    	vec3 diffuse = u_LightColor*vec3(a_color)*nDotL;
 
@@ -71,7 +72,7 @@
         gl.enable(gl.DEPTH_TEST);//开启隐藏面消除
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);//清空颜色和深度缓冲区
 
-        //点光源
+        //平行光
         var u_LightColor = gl.getUniformLocation(shaderPorgram, 'u_LightColor');
         gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
         var u_LightDirection = gl.getUniformLocation(shaderPorgram, 'u_LightDirection');
@@ -84,26 +85,37 @@
         gl.uniform3f(u_AmbientLight, 0.2, 0.2, 0.2);
 
         var u_ProjViewModelMatrix = gl.getUniformLocation(shaderPorgram,'u_ProjViewModelMatrix');
-        draw(gl,num,u_ProjViewModelMatrix);
+        var u_NormalMatrix = gl.getUniformLocation(shaderPorgram,'u_NormalMatrix');
+
+        draw(gl,num,u_ProjViewModelMatrix,u_NormalMatrix);
     }
 
-    function draw(gl,n,u_ProjViewModelMatrix){
+    function draw(gl,n,u_ProjViewModelMatrix,u_NormalMatrix){
+        //视图矩阵
         var viewMatrix = new Matrix4();
         viewMatrix.setLookAt(EyePoint.x,EyePoint.y,EyePoint.z,0, 0, 0, 0, 1, 0);
 
+        //模型矩阵
         var modelMatrix = new Matrix4();
-        modelMatrix.setRotate(45,0,0,1);
+        modelMatrix.setTranslate(0,1,0);//沿着Y轴平移
+        modelMatrix.rotate(45,0,0,1);//绕着Z轴旋转
 
+        //法向量变换矩阵是模型矩阵的逆转置矩阵
+        var normalMatrix = new Matrix4();
+        normalMatrix.setInverseOf(modelMatrix);
+        normalMatrix.transpose();
+        gl.uniformMatrix4fv(u_NormalMatrix,false,normalMatrix.elements);
+
+        //投影矩阵
         var projMatrix = new Matrix4();
         projMatrix.setPerspective(30,width/height,PerspParams.g_near,PerspParams.g_far);
 
+        //组合变换矩阵
         var prjViewModel = projMatrix.multiply(viewMatrix).multiply(modelMatrix);
-
         gl.uniformMatrix4fv(u_ProjViewModelMatrix,false,prjViewModel.elements);
 
         gl.clear(gl.COLOR_BUFFER_BIT);//清空canvas绘图区域
         gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
-
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);//绘制完成之后可以解绑索引数据了
     }
 
