@@ -17,11 +17,6 @@ function initShaders(gl){
 	gl.useProgram(shaderProgram);
 
 	//启用顶点缓冲区数组
-    //gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
-    //shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
-    //gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
-    //shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-    //shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
     return shaderProgram;
 }
 
