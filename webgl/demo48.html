@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WebGL 逐顶点 点光源 + 环境光 + 漫反射</title>
+    <title>WebGL 逐片元 点光源 + 环境光 + 漫反射</title>
     <script type="text/javascript" src="./sim-tools.js"></script>
 </head>
 <body onload="main()">
@@ -12,37 +12,47 @@
 <!-- 片段着色器程序 -->
 <script id="shader-fs" type="x-shader/x-fragment">
         precision mediump float;
+
+        uniform vec3 u_LightColor;
+        uniform vec3 u_LightPosition;
+        uniform vec3 u_AmbientLight;
+
+        varying vec3 v_Position;//变换后的顶点坐标
         varying vec4 v_Color;
+        varying vec3 v_Normal;//变换后的法向量
+
         void main() {
-            gl_FragColor = v_Color;
+
+            vec3 normal = normalize(v_Normal);
+            vec3 lightDirection = normalize(u_LightPosition - v_Position);
+            float nDotL = max(dot(lightDirection,normal),0.0);//如果反射角大于90度，则该光线无法照射到该片元。
+
+            vec3 diffuse = u_LightColor * v_Color.rgb * nDotL;
+            vec3 ambient = u_AmbientLight * v_Color.rgb;
+
+            gl_FragColor = vec4(diffuse + ambient, v_Color.a);
         }
 </script>
 <!-- 顶点着色器程序 -->
 <script id="shader-vs" type="x-shader/x-vertex">
-        /**
-         * 逐顶点点光源的原理在于WebGL系统会根据顶点颜色，内插出表面上每个片元的颜色；
-         * 但实际上，点光源光照射到一个表面上所产生的效果（即每个片元获得的颜色）与简单使用4个顶点颜色（虽然这4个顶点的颜色也是由点光源产生）内插出的效果并不完全相同；
-         * 在某些极端情况下甚至很不一样。
-         */
 		attribute vec4 a_Position;
         attribute vec4 a_Color;
         attribute vec4 a_Normal;
+
         uniform mat4 u_MvpMatrix;
-        uniform mat4 u_ModelMatrix;
         uniform mat4 u_NormalMatrix;
-        uniform vec3 u_LightColor;
-        uniform vec3 u_LightPosition;
-        uniform vec3 u_AmbientLight;
+        uniform mat4 u_ModelMatrix;
+
+        varying vec3 v_Position;
         varying vec4 v_Color;
+        varying vec3 v_Normal;
+
         void main() {
             gl_Position = u_MvpMatrix * a_Position;
-            vec3 normal = normalize(vec3(u_NormalMatrix * a_Normal));
-            vec4 vertexPosition = u_ModelMatrix * a_Position;
-            vec3 lightDirection = normalize(u_LightPosition - vec3(vertexPosition));
-            float nDotL = max(dot(lightDirection, normal), 0.0);//如果反射角大于90度，则该光线无法照射到该顶点。
-            vec3 diffuse = u_LightColor * a_Color.rgb * nDotL;
-            vec3 ambient = u_AmbientLight * a_Color.rgb;
-            v_Color = vec4(diffuse + ambient, a_Color.a);
+
+            v_Position = vec3(u_ModelMatrix * a_Position);
+            v_Color = a_Color;
+            v_Normal = normalize(vec3(u_NormalMatrix * a_Normal));
         }
 </script>
 <script type="text/javascript">
