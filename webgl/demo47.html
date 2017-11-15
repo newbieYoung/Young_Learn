@@ -19,6 +19,11 @@
 </script>
 <!-- 顶点着色器程序 -->
 <script id="shader-vs" type="x-shader/x-vertex">
+        /**
+         * 逐顶点点光源的原理在于WebGL系统会根据顶点颜色，内插出表面上每个片元的颜色；
+         * 但实际上，点光源光照射到一个表面上所产生的效果（即每个片元获得的颜色）与简单使用4个顶点颜色（虽然这4个顶点的颜色也是由点光源产生）内插出的效果并不完全相同；
+         * 在某些极端情况下甚至很不一样。
+         */
 		attribute vec4 a_Position;
         attribute vec4 a_Color;
         attribute vec4 a_Normal;
