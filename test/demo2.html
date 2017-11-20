@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>匿名函数事件解绑</title>
+    <style>
+        ul{
+            padding:10px;
+            background-color: lightsalmon;
+        }
+        li{
+            height:50px;
+            background-color:lightseagreen;
+        }
+    </style>
+</head>
+<body>
+    <ul id="parent">
+        <li id="child"></li>
+    </ul>
+    <script>
+        window.onload = function () {
+            var parent = document.querySelector('#parent');
+            var child = document.querySelector('#child');
+
+            parent.addEventListener('click',func);
+            parent.removeEventListener('click',func);
+
+            /**
+             * 匿名函数的事件绑定是不能被removeEventListener接触绑定的，jQuery之所以能实现类似的功能是因为jQuery实际事件绑定时还是使用的具名函数。
+             */
+//            parent.addEventListener('click',function () {
+//                func();
+//            });
+//            parent.removeEventListener('click',function () {
+//                func();
+//            });
+
+            function func(){
+                console.log('click');
+            }
+        }
+    </script>
+</body>
+</html>
