@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>测试zip.js 根据单个文件生成zip包</title>
+    <title>测试zip.js 根据多个文件生成zip包并下载到本地</title>
 </head>
 <body>
     <script type="text/javascript" src="../lib/zip.js"></script>
@@ -13,28 +13,44 @@
         zip.useWebWorkers = true;
         zip.workerScriptsPath = '../lib/';
 
-        var TEXT_CONTENT = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat facer possim assum. Typi non habent claritatem insitam; est usus legentis in iis qui facit eorum claritatem. Investigationes demonstraverunt lectores legere me lius quod ii legunt saepius. Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum. Mirum est notare quam littera gothica, quam nunc putamus parum claram, anteposuerit litterarum formas humanitatis per seacula quarta decima et quinta decima. Eodem modo typi, qui nunc nobis videntur parum clari, fiant sollemnes in futurum.";
-        var FILENAME = "lorem.txt";
+        var TEXT_CONTENT = 'hello world';
         var ZIPNAME = 'lorem.zip';
-        var blob;
+        var blobArray = [];
+        var nameArray = ['lorem1.txt','lorem2.txt'];
 
         function onerror(message) {
             console.error(message);
         }
 
-        function zipBlob(blob, callback) {
-            zip.createWriter(new zip.BlobWriter("application/zip"), function(zipWriter) {
-                zipWriter.add(FILENAME, new zip.BlobReader(blob), function() {
-                    zipWriter.close(callback);
-                });
+        function zipBlob(blobArray,nameArray,callback) {
+            var index = 0;
+            zip.createWriter(new zip.BlobWriter("application/zip"), function(writer) {
+                zipWriter(writer,blobArray,nameArray,index,callback)
             }, onerror);
         }
 
-        blob = new Blob([ TEXT_CONTENT ], {
-            type : zip.getMimeType(FILENAME)
-        });
+        //根据多个文件生成zip包时需要依次生成
+        function zipWriter(writer,blobArray,nameArray,index,callback){
+            writer.add(nameArray[index], new zip.BlobReader(blobArray[index]), function() {
+                if(index==nameArray.length-1){
+                    writer.close(callback);
+                }else{
+                    index++;
+                    zipWriter(writer,blobArray,nameArray,index,callback);
+                }
+            });
+        }
 
-        zipBlob(blob, function(zippedBlob) {
+        for(var i=0;i<nameArray.length;i++){
+            (function(index){
+                blobArray[index] = new Blob([ TEXT_CONTENT + Date.now()], {
+                    type : zip.getMimeType(nameArray[index])
+                });
+            })(i);
+        }
+
+        zipBlob(blobArray,nameArray,function(zippedBlob) {
+            console.log(zippedBlob);
             var aLink = document.createElement('a');//生出a标签
             aLink.download = ZIPNAME;
             aLink.href = URL.createObjectURL(zippedBlob);
