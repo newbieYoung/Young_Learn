@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WebGL 每个面不同颜色立方体 + 平行光 + 环境光 + 漫反射</title>
+    <title>WebGL 层次模型</title>
     <script type="text/javascript" src="./sim-tools.js"></script>
 </head>
 <body onload="main()">
@@ -46,15 +46,18 @@
 <script type="text/javascript">
 
     var EyePoint = {//视点以及默认位置
-        x:3.0,
-        y:3.0,
-        z:7.0
+        x:20.0,
+        y:10.0,
+        z:30.0
     };
     var PerspParams = {//透视投影参数
-        fovy:30.0,
+        fovy:50.0,
         g_near:1.0,
         g_far:100.0
     };
+
+    var g_arm1Angle = -90.0; // The rotation angle of arm1 (degrees)
+    var g_joint1Angle = 0.0; // The rotation angle of joint1 (degrees)
 
     var width,height;
 
@@ -71,13 +74,12 @@
 
         gl.clearColor(0.0,0.0,0.0,1.0);//设置背景颜色
         gl.enable(gl.DEPTH_TEST);//开启隐藏面消除
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);//清空颜色和深度缓冲区
 
         //平行光
         var u_LightColor = gl.getUniformLocation(shaderPorgram, 'u_LightColor');
-        gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
+        gl.uniform3f(u_LightColor, 1.0, 0.4, 0.0);
         var u_LightDirection = gl.getUniformLocation(shaderPorgram, 'u_LightDirection');
-        var lightDirection = new Vector3([0.5, 3.0, 4.0]);
+        var lightDirection = new Vector3([0.0, 0.5, 0.7]);
         lightDirection.normalize();
         gl.uniform3fv(u_LightDirection, lightDirection.elements);
 
@@ -92,14 +94,37 @@
     }
 
     function draw(gl,n,u_ProjViewModelMatrix,u_NormalMatrix){
-        //视图矩阵
-        var viewMatrix = new Matrix4();
-        viewMatrix.setLookAt(EyePoint.x,EyePoint.y,EyePoint.z,0, 0, 0, 0, 1, 0);
+        // Clear color and depth buffer
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        //模型矩阵
+        var viewProjMatrix = new Matrix4();
+        //投影矩阵
+        viewProjMatrix.setPerspective(PerspParams.fovy,width/height,PerspParams.g_near,PerspParams.g_far);
+        //视图矩阵
+        viewProjMatrix.lookAt(EyePoint.x,EyePoint.y,EyePoint.z,0, 0, 0, 0, 1, 0);
+
+        // Arm1
+        var arm1Length = 10.0;// Length of arm1
         var modelMatrix = new Matrix4();
-        modelMatrix.setTranslate(0,1,0);//沿着Y轴平移
-        modelMatrix.rotate(90,0,0,1);//绕着Z轴旋转
+        modelMatrix.setTranslate(0.0, -12.0, 0.0);
+        modelMatrix.rotate(g_arm1Angle, 0.0, 1.0, 0.0);// Rotate around the y-axis
+        drawBox(gl, n, viewProjMatrix, modelMatrix,u_NormalMatrix,u_ProjViewModelMatrix);
+
+        // Arm2
+        modelMatrix.translate(0.0, arm1Length, 0.0); 　　　// Move to joint1
+        modelMatrix.rotate(g_joint1Angle, 0.0, 0.0, 1.0);  // Rotate around the z-axis
+        modelMatrix.scale(1.3, 1.0, 1.3); // Make it a little thicker
+        drawBox(gl, n, viewProjMatrix, modelMatrix,u_NormalMatrix,u_ProjViewModelMatrix);
+
+        //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);//绘制完成之后可以解绑索引数据了
+    }
+
+    function drawBox(gl,n,viewProjMatrix,modelMatrix,u_NormalMatrix,u_ProjViewModelMatrix){
+        //组合变换矩阵
+        var prjViewModelMatrix = new Matrix4();
+        prjViewModelMatrix.set(viewProjMatrix);
+        prjViewModelMatrix.multiply(modelMatrix);
+        gl.uniformMatrix4fv(u_ProjViewModelMatrix,false,prjViewModelMatrix.elements);
 
         //法向量变换矩阵是模型矩阵的逆转置矩阵
         var normalMatrix = new Matrix4();
@@ -107,61 +132,42 @@
         normalMatrix.transpose();
         gl.uniformMatrix4fv(u_NormalMatrix,false,normalMatrix.elements);
 
-        //投影矩阵
-        var projMatrix = new Matrix4();
-        projMatrix.setPerspective(PerspParams.fovy,width/height,PerspParams.g_near,PerspParams.g_far);
-
-        //组合变换矩阵
-        var prjViewModel = projMatrix.multiply(viewMatrix).multiply(modelMatrix);
-        gl.uniformMatrix4fv(u_ProjViewModelMatrix,false,prjViewModel.elements);
-
-        gl.clear(gl.COLOR_BUFFER_BIT);//清空canvas绘图区域
         gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);//绘制完成之后可以解绑索引数据了
     }
 
     //初始化顶点位置
     function initVertexBuffers(gl,shaderPorgram){
-        // Create a cube
-        //    v6----- v5
-        //   /|      /|
-        //  v1------v0|
-        //  | |     | |
-        //  | |v7---|-|v4
-        //  |/      |/
-        //  v2------v3
-
-        //顶点
+        // Vertex coordinates（a cuboid 3.0 in width, 10.0 in height, and 3.0 in length with its origin at the center of its bottom)
         var vertices = new Float32Array([
-            1.0, 1.0, 1.0,  -1.0, 1.0, 1.0,  -1.0,-1.0, 1.0,   1.0,-1.0, 1.0,  // v0-v1-v2-v3 front
-            1.0, 1.0, 1.0,   1.0,-1.0, 1.0,   1.0,-1.0,-1.0,   1.0, 1.0,-1.0,  // v0-v3-v4-v5 right
-            1.0, 1.0, 1.0,   1.0, 1.0,-1.0,  -1.0, 1.0,-1.0,  -1.0, 1.0, 1.0,  // v0-v5-v6-v1 up
-            -1.0, 1.0, 1.0,  -1.0, 1.0,-1.0,  -1.0,-1.0,-1.0,  -1.0,-1.0, 1.0,  // v1-v6-v7-v2 left
-            -1.0,-1.0,-1.0,   1.0,-1.0,-1.0,   1.0,-1.0, 1.0,  -1.0,-1.0, 1.0,  // v7-v4-v3-v2 down
-            1.0,-1.0,-1.0,  -1.0,-1.0,-1.0,  -1.0, 1.0,-1.0,   1.0, 1.0,-1.0   // v4-v7-v6-v5 back
+            1.5, 10.0, 1.5, -1.5, 10.0, 1.5, -1.5,  0.0, 1.5,  1.5,  0.0, 1.5, // v0-v1-v2-v3 front
+            1.5, 10.0, 1.5,  1.5,  0.0, 1.5,  1.5,  0.0,-1.5,  1.5, 10.0,-1.5, // v0-v3-v4-v5 right
+            1.5, 10.0, 1.5,  1.5, 10.0,-1.5, -1.5, 10.0,-1.5, -1.5, 10.0, 1.5, // v0-v5-v6-v1 up
+            -1.5, 10.0, 1.5, -1.5, 10.0,-1.5, -1.5,  0.0,-1.5, -1.5,  0.0, 1.5, // v1-v6-v7-v2 left
+            -1.5,  0.0,-1.5,  1.5,  0.0,-1.5,  1.5,  0.0, 1.5, -1.5,  0.0, 1.5, // v7-v4-v3-v2 down
+            1.5,  0.0,-1.5, -1.5,  0.0,-1.5, -1.5, 10.0,-1.5,  1.5, 10.0,-1.5  // v4-v7-v6-v5 back
         ]);
 
-        //颜色
-        var colors = new Float32Array([
-            0.4, 0.4, 1.0,  0.4, 0.4, 1.0,  0.4, 0.4, 1.0,  0.4, 0.4, 1.0,  // v0-v1-v2-v3 front(blue)
-            0.4, 1.0, 0.4,  0.4, 1.0, 0.4,  0.4, 1.0, 0.4,  0.4, 1.0, 0.4,  // v0-v3-v4-v5 right(green)
-            1.0, 0.4, 0.4,  1.0, 0.4, 0.4,  1.0, 0.4, 0.4,  1.0, 0.4, 0.4,  // v0-v5-v6-v1 up(red)
-            1.0, 1.0, 0.4,  1.0, 1.0, 0.4,  1.0, 1.0, 0.4,  1.0, 1.0, 0.4,  // v1-v6-v7-v2 left
-            1.0, 1.0, 1.0,  1.0, 1.0, 1.0,  1.0, 1.0, 1.0,  1.0, 1.0, 1.0,  // v7-v4-v3-v2 down
-            0.4, 1.0, 1.0,  0.4, 1.0, 1.0,  0.4, 1.0, 1.0,  0.4, 1.0, 1.0   // v4-v7-v6-v5 back
-        ]);
-
-        //各个面法向量
+        // Normal
         var normals = new Float32Array([
-            0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  // v0-v1-v2-v3 front
-            1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  // v0-v3-v4-v5 right
-            0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,  // v0-v5-v6-v1 up
-            -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  // v1-v6-v7-v2 left
-            0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,  // v7-v4-v3-v2 down
-            0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0   // v4-v7-v6-v5 back
+            0.0, 0.0, 1.0,  0.0, 0.0, 1.0,  0.0, 0.0, 1.0,  0.0, 0.0, 1.0, // v0-v1-v2-v3 front
+            1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0, // v0-v3-v4-v5 right
+            0.0, 1.0, 0.0,  0.0, 1.0, 0.0,  0.0, 1.0, 0.0,  0.0, 1.0, 0.0, // v0-v5-v6-v1 up
+            -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, // v1-v6-v7-v2 left
+            0.0,-1.0, 0.0,  0.0,-1.0, 0.0,  0.0,-1.0, 0.0,  0.0,-1.0, 0.0, // v7-v4-v3-v2 down
+            0.0, 0.0,-1.0,  0.0, 0.0,-1.0,  0.0, 0.0,-1.0,  0.0, 0.0,-1.0  // v4-v7-v6-v5 back
         ]);
 
-        //顶点索引
+        // Colors
+        var colors = new Float32Array([
+            1.0, 0.4, 0.0,   1.0, 0.4, 0.0,   1.0, 0.4, 0.0,  1.0, 0.4, 0.0,     // v0-v1-v2-v3 front
+            1.0, 0.4, 0.0,   1.0, 0.4, 0.0,   1.0, 0.4, 0.0,  1.0, 0.4, 0.0,     // v0-v3-v4-v5 right
+            1.0, 0.4, 0.0,   1.0, 0.4, 0.0,   1.0, 0.4, 0.0,  1.0, 0.4, 0.0,     // v0-v5-v6-v1 up
+            1.0, 0.4, 0.0,   1.0, 0.4, 0.0,   1.0, 0.4, 0.0,  1.0, 0.4, 0.0,     // v1-v6-v7-v2 left
+            1.0, 0.4, 0.0,   1.0, 0.4, 0.0,   1.0, 0.4, 0.0,  1.0, 0.4, 0.0,     // v7-v4-v3-v2 down
+            1.0, 0.4, 0.0,   1.0, 0.4, 0.0,   1.0, 0.4, 0.0,  1.0, 0.4, 0.0,　    // v4-v7-v6-v5 back
+        ]);
+
+        // Indices of the vertices
         var indices = new Uint8Array([
             0, 1, 2,   0, 2, 3,    // front
             4, 5, 6,   4, 6, 7,    // right
@@ -213,7 +219,7 @@
         gl.enableVertexAttribArray(a_attribute);
 
         //解绑缓冲区
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        //gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
         return true;
     }
