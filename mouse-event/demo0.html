@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>代码触发A标签的鼠标点击事件</title>
+</head>
+<body>
+    <script>
+        window.onload = function(){
+            downloadFile('test.ini','hello world');
+        }
+
+        function downloadFile(fileName, content){
+            var aLink = document.createElement('a');//生出a标签
+            aLink.download = fileName;
+            aLink.href = "data:text/plain," + content;
+            var evt = new MouseEvent("click");//生出鼠标事件
+            aLink.dispatchEvent(evt);//触发鼠标事件
+        }
+    </script>
+</body>
+</html>
