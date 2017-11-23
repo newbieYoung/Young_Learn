@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>fetch根据url获取文件</title>
+</head>
+<body>
+    <script>
+        window.onload = function(){
+            //fetch通过url获取文件
+            fetch('../fetch/demo0.html')
+            .then(function(res){
+                return res.blob();
+            })
+            .then(function(blob){
+                console.log(blob);
+            });
+        }
+    </script>
+</body>
+</html>
