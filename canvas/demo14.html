@@ -387,11 +387,31 @@
     <script src="../lib/html2canvas.js"></script>
     <script>
         window.onload = function(){
-            //var dom = document.querySelector('.colors-container');//直接转换部分貌似有问题，暂时不了解具体原因，解决办法是先转换整体，然后裁切
+            //直接转换部分貌似有问题，暂时不了解具体原因，解决办法是先转换整体，然后裁切；
+            //var dom = document.querySelector('.colors-container');
+
+            //转换整体然后裁切
             var dom = document.querySelector('body');
 
+            var scrollX = window.scrollX;
+            var scrollY = window.scrollY;
             html2canvas(dom).then(function(canvas) {
-                document.body.appendChild(canvas);
+                //获取出现缩放后真正的内容区域
+                var $content = document.createElement('canvas');
+                $content.width = document.body.scrollWidth;
+                $content.height = document.body.scrollHeight;
+                var $contentContext = $content.getContext('2d');
+                $contentContext.drawImage(canvas,scrollX*2,scrollY*2,$content.width,$content.height,0,0,$content.width,$content.height);
+
+                var $colorsContainer = document.querySelector('.colors-container');
+                var imgRect = $colorsContainer.getBoundingClientRect();
+                var tempCanvas = document.createElement('canvas');
+                tempCanvas.width = imgRect.width;
+                tempCanvas.height = imgRect.height;
+                var tempContext = tempCanvas.getContext('2d');
+                tempContext.drawImage($content, imgRect.left+scrollX, imgRect.top+scrollY, imgRect.width, imgRect.height, 0, 0, tempCanvas.width, tempCanvas.height);
+
+                document.body.appendChild(tempCanvas);
             });
         }
     </script>
