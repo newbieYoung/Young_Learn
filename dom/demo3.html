@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body{
+            background-color:lightblue;
+        }
+        /**
+         * 元素背景透明并不会影响内部的内容
+         */
+        input[type=text],
+        div,
+        p,
+        h1,
+        span,
+        textarea{
+            background-color:rgba(0,0,0,0);
+        }
+    </style>
+</head>
+<body>
+    <textarea rows="3"></textarea>
+    <input type="text">
+    <div>div</div>
+    <p>p</p>
+    <h1>h1</h1>
+    <span>span</span>
+</body>
+</html>
