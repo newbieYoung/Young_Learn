@@ -53,7 +53,7 @@
             left:0;
             bottom:0;
             right:0;
-            background-image:url(../images/tool/grid-cover.png);
+            background-image:url(../img/grid-cover.png);
             backround-size:cover;
             background-position: 50% 50%;
             z-index:20;
@@ -71,7 +71,7 @@
         .img-container .img-default{
             width:67px;
             height:80px;
-            background-image:url(../images/tool/img-default.png);
+            background-image:url(../img/img-default.png);
             background-size:cover;
             background-position: 50% 50%;
             margin:81px auto 12px auto;
@@ -111,7 +111,7 @@
             display:inline-block;
             width:48px;
             height:48px;
-            background-image:url(../images/tool/refresh-icon.png);
+            background-image:url(../img/refresh-icon.png);
             background-size:cover;
             background-position: 50% 50%;
         }
@@ -138,13 +138,13 @@
             display:inline-block;
             width:22px;
             height:22px;
-            background-image:url(../images/tool/radio-icon.png);
+            background-image:url(../img/radio-icon.png);
             background-size:cover;
             background-position: 50% 50%;
             margin-top:13px;
         }
         .btns-container .show-grid.active .icon{
-            background-image:url(../images/tool/radio-icon-active.png);
+            background-image:url(../img/radio-icon-active.png);
         }
 
         /* 颜色选择区域 */
@@ -387,31 +387,44 @@
     <script src="../lib/html2canvas.js"></script>
     <script>
         window.onload = function(){
-            //直接转换部分貌似有问题，暂时不了解具体原因，解决办法是先转换整体，然后裁切；
-            //var dom = document.querySelector('.colors-container');
+            /**
+             * 在retina屏上直接转换部分会因为缩放的原因导致位置不对，可以先转换整体，然后裁切；
+             * 在非retina屏上直接转换部分也有问题，只会显示窗口内可视部分，暂时不知道原因。
+             * @type {Element}
+             */
 
             //转换整体然后裁切
             var dom = document.querySelector('body');
 
             var scrollX = window.scrollX;
             var scrollY = window.scrollY;
+
             html2canvas(dom).then(function(canvas) {
-                //获取出现缩放后真正的内容区域
-                var $content = document.createElement('canvas');
-                $content.width = document.body.scrollWidth;
-                $content.height = document.body.scrollHeight;
-                var $contentContext = $content.getContext('2d');
-                $contentContext.drawImage(canvas,scrollX*2,scrollY*2,$content.width,$content.height,0,0,$content.width,$content.height);
+                var $colors = document.querySelector('.colors-container .colors');
+                var imgRect = $colors.getBoundingClientRect();
 
-                var $colorsContainer = document.querySelector('.colors-container');
-                var imgRect = $colorsContainer.getBoundingClientRect();
-                var tempCanvas = document.createElement('canvas');
-                tempCanvas.width = imgRect.width;
-                tempCanvas.height = imgRect.height;
-                var tempContext = tempCanvas.getContext('2d');
-                tempContext.drawImage($content, imgRect.left+scrollX, imgRect.top+scrollY, imgRect.width, imgRect.height, 0, 0, tempCanvas.width, tempCanvas.height);
+                if(window.devicePixelRatio>1){//retina屏幕
+                    //获取出现缩放后真正的内容区域
+                    var $content = document.createElement('canvas');
+                    $content.width = document.body.scrollWidth;
+                    $content.height = document.body.scrollHeight;
+                    var $contentContext = $content.getContext('2d');
+                    $contentContext.drawImage(canvas,scrollX*2,scrollY*2,$content.width,$content.height,0,0,$content.width,$content.height);
 
-                document.body.appendChild(tempCanvas);
+                    var tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = imgRect.width;
+                    tempCanvas.height = imgRect.height;
+                    var tempContext = tempCanvas.getContext('2d');
+                    tempContext.drawImage($content, imgRect.left+scrollX, imgRect.top+scrollY, imgRect.width, imgRect.height, 0, 0, tempCanvas.width, tempCanvas.height);
+                    document.body.appendChild(tempCanvas);
+                }else{
+                    var tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = imgRect.width;
+                    tempCanvas.height = imgRect.height;
+                    var tempContext = tempCanvas.getContext('2d');
+                    tempContext.drawImage(canvas, imgRect.left, imgRect.top, imgRect.width, imgRect.height,0,0,imgRect.width,imgRect.height);
+                    document.body.appendChild(tempCanvas);
+                }
             });
         }
     </script>
