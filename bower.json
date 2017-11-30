@@ -1,0 +1,21 @@
+{
+  "name": "h5_learn",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "young"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/newbieYoung/Html_learn",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "text-encoding": "^0.6.4"
+  }
+}
