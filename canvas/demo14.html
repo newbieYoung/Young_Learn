@@ -399,32 +399,28 @@
             var scrollX = window.scrollX;
             var scrollY = window.scrollY;
 
+            var option = {};
+            if(window.devicePixelRatio==1){//非retina屏强制使用缩放
+                option.scale = 2;
+            }
+
             html2canvas(dom).then(function(canvas) {
                 var $colors = document.querySelector('.colors-container .colors');
                 var imgRect = $colors.getBoundingClientRect();
 
-                if(window.devicePixelRatio>1){//retina屏幕
-                    //获取出现缩放后真正的内容区域
-                    var $content = document.createElement('canvas');
-                    $content.width = document.body.scrollWidth;
-                    $content.height = document.body.scrollHeight;
-                    var $contentContext = $content.getContext('2d');
-                    $contentContext.drawImage(canvas,scrollX*2,scrollY*2,$content.width,$content.height,0,0,$content.width,$content.height);
+                //获取出现缩放后真正的内容区域
+                var $content = document.createElement('canvas');
+                $content.width = document.body.scrollWidth;
+                $content.height = document.body.scrollHeight;
+                var $contentContext = $content.getContext('2d');
+                $contentContext.drawImage(canvas,scrollX*2,scrollY*2,$content.width,$content.height,0,0,$content.width,$content.height);
 
-                    var tempCanvas = document.createElement('canvas');
-                    tempCanvas.width = imgRect.width;
-                    tempCanvas.height = imgRect.height;
-                    var tempContext = tempCanvas.getContext('2d');
-                    tempContext.drawImage($content, imgRect.left+scrollX, imgRect.top+scrollY, imgRect.width, imgRect.height, 0, 0, tempCanvas.width, tempCanvas.height);
-                    document.body.appendChild(tempCanvas);
-                }else{
-                    var tempCanvas = document.createElement('canvas');
-                    tempCanvas.width = imgRect.width;
-                    tempCanvas.height = imgRect.height;
-                    var tempContext = tempCanvas.getContext('2d');
-                    tempContext.drawImage(canvas, imgRect.left, imgRect.top, imgRect.width, imgRect.height,0,0,imgRect.width,imgRect.height);
-                    document.body.appendChild(tempCanvas);
-                }
+                var tempCanvas = document.createElement('canvas');
+                tempCanvas.width = imgRect.width;
+                tempCanvas.height = imgRect.height;
+                var tempContext = tempCanvas.getContext('2d');
+                tempContext.drawImage($content, imgRect.left+scrollX, imgRect.top+scrollY, imgRect.width, imgRect.height, 0, 0, tempCanvas.width, tempCanvas.height);
+                document.body.appendChild(tempCanvas);
             });
         }
     </script>
