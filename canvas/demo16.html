@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>智图</title>
+</head>
+<body>
+    <script>
+        window.onload = function(){
+
+            var start = 99;
+            var end = 60;
+            var step = 1;
+
+            var img = new Image();
+            img.onload = function(){
+                $context.drawImage(img,0,0,width,height);
+
+                for(var i=start;i>=end;i=i-step){
+                    var itemImg = $canvas.toDataURL('image/jpeg', i/100);
+                    var $itemImg = document.createElement('img');
+                    $itemImg.id = 'item-'+parseInt(i);
+                    $itemImg.src = itemImg;
+                    document.body.appendChild($itemImg);
+                }
+
+                setTimeout(function(){
+                    var data = $context.getImageData(0,0,width,height);
+
+                    for(var i=start;i>=end;i=i-step){
+                        var $itemCanvas = document.createElement('canvas');
+                        $itemCanvas.width = width;
+                        $itemCanvas.height = height;
+                        var $itemContext = $itemCanvas.getContext('2d');
+                        var itemId = 'item-'+parseInt(i);
+                        console.log(itemId);
+                        var $itemImg = document.querySelector('#'+itemId);
+                        $itemContext.drawImage($itemImg,0,0,width,height);
+                        var itemData = $itemContext.getImageData(0,0,width,height);
+                        var itemResult = getDiffValue(data,itemData);
+                        console.log(itemResult);
+                    }
+                });
+            };
+
+//            var width = 512;
+//            var height = 512;
+//            img.src = '../img/lena.jpg';
+
+//            var width = 256;
+//            var height = 256;
+//            img.src = '../img/sky.JPG';
+
+            var width = 172;
+            var height = 237;
+            img.src = '../img/girl.png';
+
+            var $canvas = document.createElement('canvas');
+            $canvas.width = width;
+            $canvas.height = height;
+            var $context = $canvas.getContext('2d');
+            document.body.appendChild($canvas);
+
+            function getDiffValue(origin,value){
+                var oData = origin.data;
+                var vData = value.data;
+
+                //console.log(origin);
+                //console.log(value);
+
+                var result = {
+                    num:0,
+                    value:0
+                };
+
+                for(var i=0;i<oData.length;i++){
+                    var oItem = oData[i];
+                    var vItem = vData[i];
+                    if(oItem!=vItem){
+                        //console.log(i+' '+oItem+' '+vItem);
+                        result.num++;
+                        result.value += Math.pow((oItem-vItem),2);
+                    }
+                }
+
+                return result;
+
+
+            }
+        }
+    </script>
+</body>
+</html>
