@@ -5,11 +5,27 @@
     <title>智图</title>
 </head>
 <body>
+    <div id="container" style="width: 600px;height:400px;"></div>
+    <script src="../lib/highcharts.js"></script>
     <script>
         window.onload = function(){
 
+            //图表
+            var options = {
+                title: {
+                    text: 'JPG压缩率和失真指数'
+                },
+                xAxis: {},
+                yAxis: {},
+                series: [{
+                    type:'line',
+                    name: '失真指数'
+                }]
+            };
+            var chart = Highcharts.chart('container', options);
+
             var start = 99;
-            var end = 60;
+            var end = 1;
             var step = 1;
 
             var img = new Image();
@@ -25,6 +41,7 @@
                 }
 
                 setTimeout(function(){
+                    var lineData = [];
                     var data = $context.getImageData(0,0,width,height);
 
                     for(var i=start;i>=end;i=i-step){
@@ -38,22 +55,42 @@
                         $itemContext.drawImage($itemImg,0,0,width,height);
                         var itemData = $itemContext.getImageData(0,0,width,height);
                         var itemResult = getDiffValue(data,itemData);
-                        console.log(itemResult);
+                        var percent = itemResult.value/itemResult.num;
+                        var precent2 = itemResult.num/(width*height);
+                        if(isNaN(percent)){
+                            percent = 0;
+                        }
+                        lineData.push([i,percent]);
+                        console.log(itemResult.value+' '+itemResult.num+' '+percent+' '+precent2);
                     }
+
+                    chart.series[0].setData(lineData);
                 });
             };
 
-//            var width = 512;
-//            var height = 512;
-//            img.src = '../img/lena.jpg';
+            var width = 512;
+            var height = 512;
+            img.src = '../img/lena.jpg';
+
+//            var width = 300;
+//            var height = 100;
+//            img.src = '../img/flower.jpg';
+
+//            var width = 270;
+//            var height = 1620;
+//            img.src = '../img/i.jpg';
+
+//            var width = 188;
+//            var height = 188;
+//            img.src = '../img/188x188.jpg';
 
 //            var width = 256;
 //            var height = 256;
 //            img.src = '../img/sky.JPG';
 
-            var width = 172;
-            var height = 237;
-            img.src = '../img/girl.png';
+//            var width = 216;
+//            var height = 324;
+//            img.src = '../img/thumb-may-first.jpg';
 
             var $canvas = document.createElement('canvas');
             $canvas.width = width;
@@ -79,7 +116,7 @@
                     if(oItem!=vItem){
                         //console.log(i+' '+oItem+' '+vItem);
                         result.num++;
-                        result.value += Math.pow((oItem-vItem),2);
+                        result.value += Math.pow(Math.abs(oItem-vItem),2);
                     }
                 }
 
