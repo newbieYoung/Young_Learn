@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WebGL 投影矩阵+视图矩阵+模型矩阵以及隐藏面消除或者颜色混合模式</title>
+    <title>WebGL 投影矩阵+视图矩阵+模型矩阵+隐藏面消除+颜色混合模式+多次绘制+透明物体和不透明物体共存</title>
     <script type="text/javascript" src="./sim-tools.js"></script>
+    <style>
+        body{
+            background-image:url(../img/lena.jpg);
+            background-repeat: no-repeat;
+        }
+    </style>
 </head>
 <body onload="main()">
 <canvas id="webgl" width="400" height="400"></canvas>
@@ -48,78 +54,84 @@
         width = canvas.width;
         height = canvas.height;
 
-        var gl = canvas.getContext('webgl');//获取canvas上下文
+        var gl = canvas.getContext('webgl',{antialias:true});//获取canvas上下文
         var shaderPorgram = initShaders(gl);//初始化着色器程序
 
-        var num = initVertexBuffers(gl,shaderPorgram);
-
-        gl.clearColor(0.0,0.0,1.0,1.0);//设置背景颜色
-
-        //开启隐藏面消除
-        //gl.enable(gl.DEPTH_TEST);
-
-        //开启混合功能
-        gl.enable (gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        setUniform(gl,shaderPorgram);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);//清空颜色和深度缓冲区
 
-        var u_ProjViewModelMatrix = gl.getUniformLocation(shaderPorgram,'u_ProjViewModelMatrix');
-
-        draw(gl,num,u_ProjViewModelMatrix);
-    }
-
-    function draw(gl,n,u_ProjViewModelMatrix){
-        var viewMatrix = new Matrix4();
-        viewMatrix.setLookAt(EyePoint.x,EyePoint.y,EyePoint.z,0, 0, -100, 0, 1, 0);
-
-        var modelMatrix = new Matrix4();
-        modelMatrix.setRotate(45,0,0,1);
-
-        var projMatrix = new Matrix4();
-        projMatrix.setPerspective(30,width/height,PerspParams.g_near,PerspParams.g_far);
-
-        var prjViewModel = projMatrix.multiply(viewMatrix).multiply(modelMatrix);
-
-        gl.uniformMatrix4fv(u_ProjViewModelMatrix,false,prjViewModel.elements);
-
-        gl.clear(gl.COLOR_BUFFER_BIT);//清空canvas绘图区域
-        gl.drawArrays(gl.TRIANGLES,0,n);
-    }
-
-    //初始化顶点位置
-    function initVertexBuffers(gl,shaderPorgram){
-        //顶点坐标和颜色
-        var datas = new Float32Array([
-            // Three triangles on the right side
+        //不透明三角形
+        var data1 = new Float32Array([
             0.75,  1.0,   0.0,  0.4,  0.4,  1.0,  1.0,  // The front blue one
             0.25, -1.0,   0.0,  0.4,  0.4,  1.0,  1.0,
             1.25, -1.0,   0.0,  0.4,  0.4,  1.0,  1.0,
-
-            0.75,  1.0,  -2.0,  1.0,  1.0,  0.4,  0.4, // The middle yellow one
-            0.25, -1.0,  -2.0,  1.0,  1.0,  0.4,  0.4,
-            1.25, -1.0,  -2.0,  1.0,  1.0,  0.4,  0.4,
 
             0.75,  1.0,  -4.0,  0.4,  1.0,  0.4,  1.0, // The back green one
             0.25, -1.0,  -4.0,  0.4,  1.0,  0.4,  1.0,
             1.25, -1.0,  -4.0,  0.4,  1.0,  0.4,  1.0,
 
-            // Three triangles on the left side
             -0.75,  1.0,   0.0,  0.4,  0.4,  1.0,  1.0,  // The front blue one
             -1.25, -1.0,   0.0,  0.4,  0.4,  1.0,  1.0,
             -0.25, -1.0,   0.0,  0.4,  0.4,  1.0,  1.0,
-
-            -0.75,  1.0,  -2.0,  1.0,  1.0,  0.4,  0.4, // The middle yellow one
-            -1.25, -1.0,  -2.0,  1.0,  1.0,  0.4,  0.4,
-            -0.25, -1.0,  -2.0,  1.0,  1.0,  0.4,  0.4,
 
             -0.75,  1.0,  -4.0,  0.4,  1.0,  0.4,  1.0, // The back green one
             -1.25, -1.0,  -4.0,  0.4,  1.0,  0.4,  1.0,
             -0.25, -1.0,  -4.0,  0.4,  1.0,  0.4,  1.0,
         ]);
+        var num1 = initVertexBuffers(gl,shaderPorgram,12,data1);
+        draw(gl,num1,false);
 
+        //透明三角形
+        var data2 = new Float32Array([
+            0.75,  1.0,  -2.0,  1.0,  1.0,  0.4,  0.4, // The middle yellow one
+            0.25, -1.0,  -2.0,  1.0,  1.0,  0.4,  0.4,
+            1.25, -1.0,  -2.0,  1.0,  1.0,  0.4,  0.4,
+
+            -0.75,  1.0,  -2.0,  1.0,  1.0,  0.4,  0.4, // The middle yellow one
+            -1.25, -1.0,  -2.0,  1.0,  1.0,  0.4,  0.4,
+            -0.25, -1.0,  -2.0,  1.0,  1.0,  0.4,  0.4,
+        ]);
+        var num2 = initVertexBuffers(gl,shaderPorgram,6,data2);
+        draw(gl,num2,true);
+    }
+
+    //设置uniform变量
+    function setUniform(gl,shaderPorgram){
+        var u_ProjViewModelMatrix = gl.getUniformLocation(shaderPorgram,'u_ProjViewModelMatrix');
+
+        var viewMatrix = new Matrix4();
+        viewMatrix.setLookAt(EyePoint.x,EyePoint.y,EyePoint.z,0, 0, -100, 0, 1, 0);
+        var modelMatrix = new Matrix4();
+        modelMatrix.setRotate(45,0,0,1);
+        var projMatrix = new Matrix4();
+        projMatrix.setPerspective(30,width/height,PerspParams.g_near,PerspParams.g_far);
+        var prjViewModel = projMatrix.multiply(viewMatrix).multiply(modelMatrix);
+
+        gl.uniformMatrix4fv(u_ProjViewModelMatrix,false,prjViewModel.elements);
+    }
+
+    //绘制
+    function draw(gl,num,isOpacity){
+        /**
+         * 先开启隐藏面消除绘制不透明物体，然后再开启颜色混合绘制透明物体（半透明或者完全透明），锁定深度缓冲区貌似没啥用。
+         */
+        if(!isOpacity){
+            gl.enable(gl.DEPTH_TEST);//开启隐藏面消除
+            gl.drawArrays(gl.TRIANGLES,0,num);
+            //gl.depthMask(false);
+        }else{
+            gl.enable (gl.BLEND);//开启颜色混合
+            gl.blendFunc(gl.SRC_ALPHA, gl.ZERO);//透明遮挡
+            //gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);//加法混合
+            gl.drawArrays(gl.TRIANGLES,0,num);
+            //gl.depthMask(true);
+        }
+    }
+
+    //初始化顶点位置
+    function initVertexBuffers(gl,shaderPorgram,num,datas){
         var size = datas.BYTES_PER_ELEMENT;//数组中的每个元素的大小（以字节为单位）
-        var num = 18;
 
         //创建缓冲区对象
         var vertexBuffer = gl.createBuffer();
@@ -131,7 +143,6 @@
         //向缓冲区对象中写入数据
         gl.bindBuffer(gl.ARRAY_BUFFER,vertexBuffer);//将缓冲区对象绑定到目标
         gl.bufferData(gl.ARRAY_BUFFER,datas,gl.STATIC_DRAW);
-
 
         var a_position = gl.getAttribLocation(shaderPorgram,'a_position');//获取attribute变量的存储位置
         //将缓冲区对象分配给a_position变量
