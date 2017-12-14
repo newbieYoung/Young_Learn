@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>trackingjs 测试颜色追踪</title>
+    <script src="../lib/tracking-min.js"></script>
+    <style>
+        .demo-container{
+            position: relative;
+        }
+        .demo-container #canvas{
+            position: absolute;
+            top:0;
+            left:0;
+            right:0;
+            bottom:0;
+        }
+    </style>
+</head>
+<body>
+<div class="demo-frame">
+    <div class="demo-container">
+        <video id="video" width="600" height="450" preload autoplay loop muted></video>
+        <canvas id="canvas" width="600" height="450"></canvas>
+    </div>
+</div>
+<script>
+    window.onload = function () {
+        var video = document.getElementById('video');
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+
+        tracking.ColorTracker.registerColor('black', function(r, g, b) {
+            if (r >= 250 && g >= 250 && b >= 250) {
+                return true;
+            }
+            return false;
+        });
+
+        var colors = new tracking.ColorTracker(['black']);
+
+        colors.on('track', function(event) {
+            context.clearRect(0,0,canvas.width,canvas.height);
+            event.data.forEach(function(rect) {
+                if (rect.color === 'custom') {
+                    rect.color = tracker.customColor;
+                }
+                context.strokeStyle = rect.color;
+                context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+                context.font = '11px Helvetica';
+                context.fillStyle = "#fff";
+                context.fillText('x: ' + rect.x + 'px', rect.x + rect.width + 5, rect.y + 11);
+                context.fillText('y: ' + rect.y + 'px', rect.x + rect.width + 5, rect.y + 22);
+            });
+        });
+
+        tracking.track('#video', colors , { camera: true });
+    }
+</script>
+</body>
+</html>
