@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>rgbaster.js 测试图片主色获取</title>
+</head>
+<body>
+    <script src="../lib/rgbaster.js"></script>
+    <script>
+        window.onload = function(){
+            var img = '../img/thumb-may-first.jpg';
+
+            RGBaster.colors(img, {
+                success: function(payload) {
+                    // You now have the payload.
+                    console.log(payload.dominant);
+                    console.log(payload.secondary);
+                    console.log(payload.palette);
+
+                    document.body.style.backgroundColor = payload.dominant;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
