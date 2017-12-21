@@ -10,6 +10,9 @@
         window.onload = function(){
             var img = '../img/thumb-may-first.jpg';
 
+            /**
+             * 主要原理是忽略掉alpha透明的以及设置的忽略颜色值，遍历所有像素点的颜色值并统计出现的次数，出现次数最多的为主色，次之的为次要色，按出现次数从大到小排列取考前的颜色值为颜色梯度。
+             */
             RGBaster.colors(img, {
                 success: function(payload) {
                     // You now have the payload.
