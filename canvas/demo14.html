@@ -395,18 +395,22 @@
 
             //转换整体然后裁切
             var dom = document.querySelector('body');
+            var $target = document.querySelector('.btns-container');
 
             var scrollX = window.scrollX;
             var scrollY = window.scrollY;
 
             var option = {};
-            if(window.devicePixelRatio==1){//非retina屏强制使用缩放
+            var ratio = window.devicePixelRatio;
+            if(ratio==1){//非retina屏强制使用缩放
+                ratio = 2;
                 option.scale = 2;
             }
+            $target.style.transform = 'scale('+ratio+')';//为了防止模糊强制缩放
 
-            html2canvas(dom).then(function(canvas) {
-                var $colors = document.querySelector('.colors-container .colors');
-                var imgRect = $colors.getBoundingClientRect();
+            html2canvas(dom,option).then(function(canvas) {
+                var imgRect = $target.getBoundingClientRect();
+                $target.style.transform = 'none';//还原
 
                 //获取出现缩放后真正的内容区域
                 var $content = document.createElement('canvas');
