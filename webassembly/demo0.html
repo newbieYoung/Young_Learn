@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <script src="./loadWebAssembly.js"></script>
+    <script>
+        window.onload = function(){
+            var obj = loadWebAssembly('demo.wasm');
+            console.log(obj);
+        }
+    </script>
+</body>
+</html>
