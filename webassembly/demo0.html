@@ -2,14 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>简单加载wasm文件并在js中执行</title>
 </head>
 <body>
     <script src="./loadWebAssembly.js"></script>
     <script>
         window.onload = function(){
-            var obj = loadWebAssembly('demo.wasm');
-            console.log(obj);
+            loadWebAssembly('./demo0.wasm')
+            .then(instance => {
+                const add = instance.exports._add
+                const minus = instance.exports._minus
+
+                console.log('2 + 4 =', add(2, 4));
+                console.log('3 - 2 =', minus(3,2));
+            })
         }
     </script>
 </body>
