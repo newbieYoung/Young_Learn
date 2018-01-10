@@ -90,9 +90,6 @@
                     y : 0,
                     z : 0
                 });
-                //视角控制
-                controller = new THREE.OrbitControls(camera, renderer.domElement);
-                controller.target = new THREE.Vector3(0, 0, 0);//设置控制点
             }
 
             var scene;
@@ -254,13 +251,17 @@
                 render();
 
                 window.addEventListener('resize', onWindowResize, false);
-                window.addEventListener('mousemove', moveCube, false );
-                window.addEventListener('mousedown', startCube, false);
-                window.addEventListener('mouseup', stopCube,false);
+                renderer.domElement.addEventListener('mousemove', moveCube, false );
+                renderer.domElement.addEventListener('mousedown', startCube, false);
+                renderer.domElement.addEventListener('mouseup', stopCube,false);
 
-                window.addEventListener('touchstart', startCube, false);
-                window.addEventListener('touchend', stopCube, false);
-                window.addEventListener('touchmove', moveCube, false);
+                renderer.domElement.addEventListener('touchstart', startCube, false);
+                renderer.domElement.addEventListener('touchend', stopCube, false);
+                renderer.domElement.addEventListener('touchmove', moveCube, false);
+
+                //视角控制
+                controller = new THREE.OrbitControls(camera, renderer.domElement);
+                controller.target = new THREE.Vector3(0, 0, 0);//设置控制点
             }
 
             //屏幕尺寸变化
@@ -298,9 +299,6 @@
                     }catch(err){
                         //nothing
                     }
-                    controller.enabled = false;
-                }else{
-                    controller.enabled = true;
                 }
             }
 
@@ -336,6 +334,9 @@
                 getIntersects(event);
                 if(!isRotating&&intersect){
                     startPoint = intersect.point;
+                    controller.enabled = false;
+                }else{
+                    controller.enabled = true;
                 }
             }
 
