@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tesseract.js</title>
+</head>
+<body>
+    <p id="text"></p>
+    <script src='https://cdn.rawgit.com/naptha/tesseract.js/1.0.10/dist/tesseract.js'></script>
+    <script>
+        window.onload = function(){
+            var myImage = new Image();
+            myImage.src = '../img/text.png';
+            myImage.onload = function () {
+                document.body.appendChild(myImage);
+
+                //chi_sim 中文
+                Tesseract.recognize(myImage,'chi_sim')
+                        .then(function(result){
+                            var $p = document.querySelector('#text');
+                            $p.innerHTML = result.text;
+                        })
+            }
+        }
+    </script>
+</body>
+</html>
