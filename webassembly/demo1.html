@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试多个文件编译的wasm是否正常</title>
+</head>
+<body>
+<script src="./loadWebAssembly.js"></script>
+<script>
+    window.onload = function(){
+        loadWebAssembly('./demo1.wasm')
+                .then(instance => {
+            const mixed = instance.exports.__Z5mixedii;
+
+            console.log('result =', mixed(3,2));
+        })
+    }
+</script>
+</body>
+</html>
