@@ -13,7 +13,18 @@
             var $file = document.querySelector('#file');
 
             $file.addEventListener('change',function(e){
-                readURL(this.files[0],function(unit8){
+
+                console.log(this.files[0]);//原始图片信息
+
+                readURL(this.files[0],function(dataurl){
+                    //显示原始图片
+                    var image = new Image();
+                    image.onload = function(){
+                        document.body.appendChild(image);
+                    }
+                    image.src = dataurl;
+
+                    var unit8 = dataURLtoUint8(dataurl);
                     //对应本地编译的 pngquant --quality=65-80 input.png
                     worker.postMessage({
                         type: 'command',
@@ -29,10 +40,11 @@
             function readURL(file,callback){
                 var dataUrlReader = new FileReader();
                 dataUrlReader.onload = function(e) {
-                    callback(dataURLtoUint8(e.target.result));
+                    callback(e.target.result);
                 }
                 dataUrlReader.readAsDataURL(file);
             }
+
 
             function dataURLtoUint8(dataurl) {
                 var arr = dataurl.split(','),
@@ -58,7 +70,17 @@
                         console.log('start');
                     } else if (message.type == 'done') {
                         console.log('done');
-                        console.log(message);
+                        console.log(message);//压缩图片信息
+
+                        //显示压缩后图片
+                        var blob = new Blob([message.data[0].data], {type: 'image/png'});
+                        readURL(blob,function(dataurl){
+                            var image = new Image();
+                            image.onload = function(){
+                                document.body.appendChild(image);
+                            }
+                            image.src = dataurl;
+                        });
                     }
                 };
                 return worker;
