@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>pngquant.js</title>
+</head>
+<body>
+    <input id="file" type="file" accept="image/png">
+    <script>
+        window.onload = function(){
+
+            var worker = initWorker();
+            var $file = document.querySelector('#file');
+
+            $file.addEventListener('change',function(e){
+                readURL(this.files[0],function(unit8){
+                    //对应本地编译的 pngquant --quality=65-80 input.png
+                    worker.postMessage({
+                        type: 'command',
+                        arguments: {quality:'65-80',speed:'5'},
+                        file: {
+                            'name': 'input.png',
+                            'data': unit8
+                        }
+                    });
+                });
+            },false);
+
+            function readURL(file,callback){
+                var dataUrlReader = new FileReader();
+                dataUrlReader.onload = function(e) {
+                    callback(dataURLtoUint8(e.target.result));
+                }
+                dataUrlReader.readAsDataURL(file);
+            }
+
+            function dataURLtoUint8(dataurl) {
+                var arr = dataurl.split(','),
+                        mime = arr[0].match(/:(.*?);/)[1],
+                        bstr = atob(arr[1]),
+                        n = bstr.length,
+                        u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                return u8arr;
+            }
+
+            function initWorker() {
+                var worker = new Worker('../lib/p-worker.js');
+                worker.onmessage = function(event) {
+                    var message = event.data;
+                    if (message.type == 'ready') {
+                        console.log('ready');
+                    } else if (message.type == 'stdout') {
+                        console.log('stdout');
+                    } else if (message.type == 'start') {
+                        console.log('start');
+                    } else if (message.type == 'done') {
+                        console.log('done');
+                        console.log(message);
+                    }
+                };
+                return worker;
+            }
+
+        }
+    </script>
+</body>
+</html>
