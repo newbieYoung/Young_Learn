@@ -2,56 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Service Worker 初步了解</title>
+    <title>clients.claim</title>
 </head>
 <body>
-    <h3>一些提示信息</h3>
-    <ul>
-        <li>浏览器是否支持：<span id="isSupport"></span></li>
-        <li>service worker是否注册成功：<span id="isSuccess"></span></li>
-        <li>当前注册状态：<span id="state"></span></li>
-        <li>当前service worker状态：<span id="swState"></span></li>
-    </ul>
     <script>
-        window.onload = function(){
-            var $isSupport = document.querySelector('#isSupport');
-            var $isSuccess = document.querySelector('#isSuccess');
-            var $state = document.querySelector('#state');
-            var $swState = document.querySelector('#swState');
+        navigator.serviceWorker.register("./demo0.js")
+                .then(reg => console.log("SW registered!", reg))
+                .catch(err => console.log("Boo!", err));
 
-            if ('serviceWorker' in navigator) {
-                $isSupport.innerText = '支持';
-
-                // 开始注册service workers
-                navigator.serviceWorker.register('./sw.js', {
-                    scope: './'
-                }).then(function (registration) {
-                    $isSuccess.innerText = '注册成功';
-
-                    var serviceWorker;
-                    if (registration.installing) {
-                        serviceWorker = registration.installing;
-                        $state.innerText = 'installing';
-                    } else if (registration.waiting) {
-                        serviceWorker = registration.waiting;
-                        $state.innerText = 'waiting';
-                    } else if (registration.active) {
-                        serviceWorker = registration.active;
-                        $state.innerText = 'active';
-                    }
-                    if (serviceWorker) {
-                        $swState.innerText = serviceWorker.state
-                        serviceWorker.addEventListener('statechange', function (e) {
-                            $swState.innerText += '&emsp;状态变化为' + e.target.state;
-                        });
-                    }
-                }).catch (function (error) {
-                    $isSuccess.innerText = '注册没有成功';
-                });
-            } else {
-                $isSupport.innerText = '不支持';
-            }
-        }
+        //3秒后加载一张图片
+        setTimeout(() => {
+            const img = new Image();
+            img.src = '../img/2.png';
+            document.body.appendChild(img);
+        }, 3000);
     </script>
 </body>
 </html>
