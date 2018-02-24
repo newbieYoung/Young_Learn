@@ -22,13 +22,15 @@ self.addEventListener("activate", event => {
 
     // 删除额外的缓存，static-v1 将被删掉
     event.waitUntil(
-        caches.keys().then(keys => Promise.all(
-            keys.map(key => {
+        caches.keys().then(keys => {
+            console.log('keys '+keys);
+
+            Promise.all(keys.map(key => {
                 if (!expectedCaches.includes(key)) {
                     return caches.delete(key);
                 }
-            })
-        )).then(() => {
+            })) 
+        }).then(() => {
             console.log("V2 now ready to handle fetches!");
 
             //默认情况下，页面的请求（fetch）不会通过 SW，除非它本身是通过 SW 获取的，也就是说，在安装 SW 之后，需要刷新页面才能有效果，clients.claim()可以改变这种默认行为。
