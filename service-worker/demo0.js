@@ -49,3 +49,22 @@ self.addEventListener("fetch", event => {
         event.respondWith(caches.match("../img/3.png"));
     }
 });
+
+//错误监控相关
+self.addEventListener('error', event => {
+    console.log(event);
+    // 上报错误信息
+    // 常用的属性：
+    // event.message
+    // event.filename
+    // event.lineno
+    // event.colno
+    // event.error.stack
+})
+
+self.addEventListener('unhandledrejection', event => {
+    console.log(event);
+    // 上报错误信息
+    // 常用的属性：
+    // event.reason
+})
