@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>context-blender.js</title>
+</head>
+<body>
+	<script src="../lib/context_blender.js"></script>
+	<script>
+		window.onload = function(){
+			var overCanvas = document.createElement('canvas');	
+			overCanvas.width = 100;
+			overCanvas.height = 100;
+			var overContext = overCanvas.getContext('2d');
+			var gradient = overContext.createLinearGradient(0,100,0,0);
+	        gradient.addColorStop(0,"#FFE7EB");
+	        gradient.addColorStop(1,"#fcaaaa");
+	        overContext.fillStyle = gradient;
+			overContext.fillRect(0,0,100,100);
+
+			var underCanvas = document.createElement('canvas');
+			underCanvas.width = 100;
+			underCanvas.height = 100;
+			var underContext = underCanvas.getContext('2d');
+			underContext.moveTo(10,0);
+			underContext.lineTo(0,60);
+			underContext.lineTo(60,60);
+			underContext.filter = "blur(20px)";
+			underContext.fillStyle = "#ffffff";
+			underContext.fill();
+
+			underContext.blendOnto(overContext,'overlay');
+
+			document.body.appendChild(overCanvas);
+		}
+	</script>
+</body>
+</html>
