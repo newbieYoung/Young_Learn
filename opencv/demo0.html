@@ -16,13 +16,13 @@
 
             //var src = cv.imread('input');
 
-            //let dst = new cv.Mat();
-            //cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);//颜色空间转换，比如RGB<-->BGR、RGB<-->GRAY等
+            let dst = new cv.Mat();
+            cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);//颜色空间转换，比如RGB<-->BGR、RGB<-->GRAY等
 
-            cv.imshow('output', src);//显示图片
+            cv.imshow('output', dst);//显示图片
 
             src.delete();
-            //dst.delete();
+            dst.delete();
         }
     </script>
 </body>
