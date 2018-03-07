@@ -5,32 +5,22 @@
     <title>Hello OpenCV.js</title>
 </head>
 <body>
-<p id="status">OpenCV.js is loading...</p>
-<div>
-    <div class="inputoutput">
-        <img id="imageSrc" alt="No Image" />
-        <div class="caption">imageSrc <input type="file" id="fileInput" name="file" /></div>
-    </div>
-    <div class="inputoutput">
-        <canvas id="canvasOutput" ></canvas>
-        <div class="caption">canvasOutput</div>
-    </div>
-</div>
-<script type="text/javascript">
-    let imgElement = document.getElementById('imageSrc');
-    let inputElement = document.getElementById('fileInput');
-    inputElement.addEventListener('change', (e) => {
-        imgElement.src = URL.createObjectURL(e.target.files[0]);
-    }, false);
-    imgElement.onload = function() {
-        let mat = cv.imread(imgElement);
-        cv.imshow('canvasOutput', mat);
-        mat.delete();
-    };
-    function onOpenCvReady() {
-        document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
-    }
-</script>
-<script async src="../lib/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+    <img id="input" src="../img/lena.jpg" alt="">
+    <canvas id="output" width="512" height="512"></canvas>
+    <script src="../lib/opencv.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        window.onload = function(){
+
+            var src = cv.imread('input');//读取图片
+
+            //let dst = new cv.Mat();
+            //cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);//颜色空间转换，比如RGB<-->BGR、RGB<-->GRAY等
+
+            cv.imshow('output', src);//显示图片
+
+            src.delete();
+            //dst.delete();
+        }
+    </script>
 </body>
 </html>
