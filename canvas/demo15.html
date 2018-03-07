@@ -33,9 +33,16 @@
         //    scontext.drawImage(img,0,0,width,height);
         //}
 
+        scontext.globalAlpha = '0.4';
         scontext.fillStyle = "rgba(200,255,0,255)";
         scontext.filter = 'blur(20px)';
-        scontext.fillRect(0, 0, width, height);
+
+        //scontext.fillRect(0, 0, width, height);
+
+        scontext.moveTo(0,0);
+        scontext.lineTo(width,0);
+        scontext.lineTo(width,height);
+        scontext.fill();
 
         var data = scontext.getImageData(0,0,width,height);
 
