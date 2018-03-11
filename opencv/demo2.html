@@ -26,8 +26,8 @@
 									console.log("An error occured! " + err);
 								});
 
-			let src = new cv.Mat(height, width, cv.CV_8UC4);
-			let dst = new cv.Mat(height, width, cv.CV_8UC1);
+			let src = new cv.Mat(height, width, cv.CV_8UC4);//8UC4:4通道阵列，8bit无符号整数，RGBA4通道，每个通道为0-255的8bit无符号整数；
+			let dst = new cv.Mat(height, width, cv.CV_8UC1);//8UC1:1通道阵列，8bit无符号整数。
 
 			//canvas render video
 			// let $canvasFrame = document.createElement('canvas');
