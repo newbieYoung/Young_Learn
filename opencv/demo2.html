@@ -29,17 +29,23 @@
 			let src = new cv.Mat(height, width, cv.CV_8UC4);
 			let dst = new cv.Mat(height, width, cv.CV_8UC1);
 
-			let $canvasFrame = document.createElement('canvas');
-			$canvasFrame.width = width;
-			$canvasFrame.height = height;
-			let frameContext = $canvasFrame.getContext('2d');
+			//canvas render video
+			// let $canvasFrame = document.createElement('canvas');
+			// $canvasFrame.width = width;
+			// $canvasFrame.height = height;
+			// let frameContext = $canvasFrame.getContext('2d');
+
+			//VideoCapture
+			let cap = new cv.VideoCapture($video);
 			
 			const FPS = 30;
 			function processVideo() {
 			    let begin = Date.now();
 
-			    frameContext.drawImage($video, 0, 0, width, height);
-			    src.data.set(frameContext.getImageData(0, 0, width, height).data);
+			    //frameContext.drawImage($video, 0, 0, width, height);
+			    //src.data.set(frameContext.getImageData(0, 0, width, height).data);
+
+			    cap.read(src);
 
 			    cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
 			    cv.imshow('canvasOutput', dst);
