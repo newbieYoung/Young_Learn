@@ -14,7 +14,6 @@
             var $input = document.querySelector('#input');
             var src = cv.imread($input);//读取图片
             //var src = cv.imread('input');
-
             //输出图片的基本信息
             console.log('src properties ---');
             console.log('image width: ' + src.cols + '\n' +
@@ -24,7 +23,6 @@
                         'image channels ' + src.channels() + '\n' +
                         'image data length ' + src.data.length + '\n' +
                         'image type: ' + src.type() + '\n');
-
             //输出图片的各通道信息
             let row = 0, col = 1;
             if (src.isContinuous()) {
@@ -43,10 +41,25 @@
                 }
             }
 
-            let dst = new cv.Mat();//Don't forget to delete cv.Mat when you don't want to use it any more.
+            //clone Mat
+            let dst3 = src.clone();
+            //Splitting and Merging Image Channels
+            let rgbaPlanes = new cv.MatVector();
+            cv.split(src, rgbaPlanes);// Split the Mat
+            let rChannel = rgbaPlanes.get(0);// Get R channel
+            for(let j=0;j<rChannel.data.length;j++){
+                rChannel.data[j] = 0;
+            }
+            cv.merge(rgbaPlanes, dst3);
+            var $rChannel = document.createElement('canvas');
+            $rChannel.width = 512;
+            $rChannel.height = 512;
+            cv.imshow($rChannel, dst3);
+            document.body.appendChild($rChannel);
 
-            cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);//颜色空间转换，比如RGB<-->BGR、RGB<-->GRAY等
-
+            //颜色空间转换，比如RGB<-->BGR、RGB<-->GRAY等
+            let dst = new cv.Mat();
+            cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
             console.log('dst properties ---');
             console.log('image width: ' + dst.cols + '\n' +
                         'image height: ' + dst.rows + '\n' +
@@ -55,16 +68,16 @@
                         'image channels ' + dst.channels() + '\n' +
                         'image data length ' + dst.data.length + '\n' +
                         'image type: ' + dst.type() + '\n');
-
             //输出图片的各通道信息
             if (dst.isContinuous()) {
                 let RGB = dst.data[row * dst.cols * dst.channels() + col * dst.channels()];
                 console.log(RGB+' '+RGB+' '+RGB+' '+255);//图片置灰时不管透明通道是否存在，统一变为255
             }
-
+            let s = new cv.Scalar(255, 0, 0, 255);
+            cv.copyMakeBorder(src, dst, 10, 10, 10, 10, cv.BORDER_CONSTANT, s);
             cv.imshow('output', dst);//显示图片
 
-
+            //ROI
             var $rect  = document.createElement('canvas');
             $rect.width = 100;
             $rect.height = 100;
@@ -74,8 +87,13 @@
             cv.imshow($rect, dst2);
             document.body.appendChild($rect);
 
+            //Don't forget to delete cv.Mat when you don't want to use it any more.
             src.delete();
             dst.delete();
+            dst2.delete();
+            dst3.delete();
+            rgbaPlanes.delete(); 
+            rChannel.delete();
         }
     </script>
 </body>
