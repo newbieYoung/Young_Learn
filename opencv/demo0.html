@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>getting start with images</title>
+    <title>Basic Operations on Images</title>
 </head>
 <body>
     <img id="input" src="../img/lena.jpg" alt="">
@@ -13,13 +13,66 @@
 
             var $input = document.querySelector('#input');
             var src = cv.imread($input);//读取图片
-
             //var src = cv.imread('input');
 
-            let dst = new cv.Mat();
+            //输出图片的基本信息
+            console.log('src properties ---');
+            console.log('image width: ' + src.cols + '\n' +
+                        'image height: ' + src.rows + '\n' +
+                        'image size: ' + src.size().width + '*'+ src.size().height + '\n' +
+                        'image depth: ' + src.depth() + '\n' +
+                        'image channels ' + src.channels() + '\n' +
+                        'image data length ' + src.data.length + '\n' +
+                        'image type: ' + src.type() + '\n');
+
+            //输出图片的各通道信息
+            let row = 0, col = 1;
+            if (src.isContinuous()) {
+                let R = src.data[row * src.cols * src.channels() + col * src.channels()];
+                let G = src.data[row * src.cols * src.channels() + col * src.channels() + 1];
+                let B = src.data[row * src.cols * src.channels() + col * src.channels() + 2];
+                let A = src.data[row * src.cols * src.channels() + col * src.channels() + 3];
+                console.log(R+' '+G+' '+B+' '+A);
+            }
+            //检测是否存在半透明
+            for(let i=0;i<src.data.length;i=i+4){
+                var itemA = src.data[i+3];
+                if(itemA<255){
+                    console.log(i+' '+itemA);
+                    break;
+                }
+            }
+
+            let dst = new cv.Mat();//Don't forget to delete cv.Mat when you don't want to use it any more.
+
             cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);//颜色空间转换，比如RGB<-->BGR、RGB<-->GRAY等
 
+            console.log('dst properties ---');
+            console.log('image width: ' + dst.cols + '\n' +
+                        'image height: ' + dst.rows + '\n' +
+                        'image size: ' + dst.size().width + '*'+ dst.size().height + '\n' +
+                        'image depth: ' + dst.depth() + '\n' +
+                        'image channels ' + dst.channels() + '\n' +
+                        'image data length ' + dst.data.length + '\n' +
+                        'image type: ' + dst.type() + '\n');
+
+            //输出图片的各通道信息
+            if (dst.isContinuous()) {
+                let RGB = dst.data[row * dst.cols * dst.channels() + col * dst.channels()];
+                console.log(RGB+' '+RGB+' '+RGB+' '+255);//图片置灰时不管透明通道是否存在，统一变为255
+            }
+
             cv.imshow('output', dst);//显示图片
+
+
+            var $rect  = document.createElement('canvas');
+            $rect.width = 100;
+            $rect.height = 100;
+            let dst2 = new cv.Mat();
+            let rect = new cv.Rect(100, 100, 200, 200);
+            dst2 = dst.roi(rect);//感兴趣区域（region of interest）
+            cv.imshow($rect, dst2);
+            document.body.appendChild($rect);
 
             src.delete();
             dst.delete();
