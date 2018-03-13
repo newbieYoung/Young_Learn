@@ -136,7 +136,7 @@
 				var dx = factor * (x - lastX);
 				var dy = factor * (y - lastY);
 				// 沿Y轴旋转角度控制在-90到90度之间
-				currentAngle[0] = Math.max(Math.min(currentAngle[0] + dy, 90.0), -90.0);
+				currentAngle[0] = currentAngle[0] + dy;
 				currentAngle[1] = currentAngle[1] + dx;
 			}
 			lastX = x, lastY = y;
