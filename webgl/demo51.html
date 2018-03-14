@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebGL 鼠标点击选中物体</title>
+    <script type="text/javascript" src="./sim-tools.js"></script>
+</head>
+<body onload="main()">
+<canvas id="webgl" width="400" height="400"></canvas>
+<script src="../lib/matrix4.js"></script>
+
+<!-- 片段着色器程序 -->
+<script id="shader-fs" type="x-shader/x-fragment">
+		precision mediump float;//不写会报错 No precision specified for (float)，缺少精度描述
+		varying vec4 v_color;
+	    void main() {
+	    	gl_FragColor = v_color;//从顶点着色器接收数据
+	    }
+	</script>
+<!-- 顶点着色器程序 -->
+<script id="shader-vs" type="x-shader/x-vertex">
+		attribute vec4 a_position;
+		attribute vec4 a_color;
+
+		varying vec4 v_color;
+
+		uniform mat4 u_ProjViewModelMatrix;//投影矩阵+视图矩阵+模型矩阵
+		uniform bool u_clicked;//鼠标是否按下
+
+	    void main() {
+	    	gl_Position = u_ProjViewModelMatrix*a_position;
+
+	    	if(u_clicked){//鼠标按下时用红色进行绘制
+	    		v_color = vec4(1.0,0.0,0.0,1.0);
+	    	}else{
+	    		v_color = a_color;
+	    	}
+	    }
+</script>
+<script type="text/javascript">
+
+    var EyePoint = {//视点以及默认位置
+        x:3.0,
+        y:3.0,
+        z:7.0
+    };
+    var PerspParams = {//透视投影参数
+        g_near:1.0,
+        g_far:100.0
+    };
+
+    var width,height;
+
+    function main(){
+        var canvas = document.querySelector('#webgl');
+
+        width = canvas.width;
+        height = canvas.height;
+
+        var gl = canvas.getContext('webgl');//获取canvas上下文
+        var shaderPorgram = initShaders(gl);//初始化着色器程序
+
+        var num = initVertexBuffers(gl,shaderPorgram);
+
+        gl.clearColor(0.0,0.0,1.0,1.0);//设置背景颜色
+        gl.enable(gl.DEPTH_TEST);//开启隐藏面消除
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);//清空颜色和深度缓冲区
+
+        var u_ProjViewModelMatrix = gl.getUniformLocation(shaderPorgram,'u_ProjViewModelMatrix');
+        var u_clicked = gl.getUniformLocation(shaderPorgram,'u_clicked');
+
+        draw(gl,num,u_ProjViewModelMatrix);
+
+        //监听鼠标按下事件
+        canvas.addEventListener('mousedown',function(ev){
+        	var x = ev.clientX;
+        	var y = ev.clientY;
+		    var rect = ev.target.getBoundingClientRect();
+		    if (rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom) {//canvas范围
+				var x_in_canvas = x - rect.left;
+				var y_in_canvas = rect.bottom - y;
+				if (check(gl, num, x_in_canvas, y_in_canvas, u_clicked, u_ProjViewModelMatrix)) {
+					alert('The cube was selected! ');
+				}
+		    }
+        },false);
+    }
+
+    //检测是否选中正方体
+	function check(gl, n, x, y, u_clicked, u_ProjViewModelMatrix) {
+		var picked = false;
+
+		gl.uniform1i(u_clicked, 1);//将正方体绘制为红色
+		draw(gl, n, u_ProjViewModelMatrix);
+
+		//读取点击位置的像素颜色值
+		var pixels = new Uint8Array(4); //存储像素的数组
+		gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+
+		if (pixels[0] == 255){//如果点击位置是红色即R通道为255则说明点击在正方体上
+			picked = true;
+		}
+
+		/**
+		 * 为了避免判断选取的中间状态显示出来，两次绘制之间不能有阻塞操作
+		 */
+
+		gl.uniform1i(u_clicked, 0);  //还原正方体为初始颜色
+		draw(gl, n, u_ProjViewModelMatrix);
+
+		return picked;
+	}
+
+	//绘制
+    function draw(gl,n,u_ProjViewModelMatrix){
+        var viewMatrix = new Matrix4();
+        viewMatrix.setLookAt(EyePoint.x,EyePoint.y,EyePoint.z,0, 0, 0, 0, 1, 0);
+
+        var modelMatrix = new Matrix4();
+        modelMatrix.setRotate(45,0,0,1);
+
+        var projMatrix = new Matrix4();
+        projMatrix.setPerspective(30,width/height,PerspParams.g_near,PerspParams.g_far);
+
+        var prjViewModel = projMatrix.multiply(viewMatrix).multiply(modelMatrix);
+
+        gl.uniformMatrix4fv(u_ProjViewModelMatrix,false,prjViewModel.elements);
+
+        //gl.clear(gl.COLOR_BUFFER_BIT);//开启隐藏面消除后，每次绘制除了还清空颜色缓冲区还要清空深度缓冲区
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);//清空canvas绘图区域
+        gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
+    }
+
+    //初始化顶点位置
+    function initVertexBuffers(gl,shaderPorgram){
+        // Create a cube
+        //    v6----- v5
+        //   /|      /|
+        //  v1------v0|
+        //  | |     | |
+        //  | |v7---|-|v4
+        //  |/      |/
+        //  v2------v3
+
+        //顶点坐标和颜色
+        var verticesColors = new Float32Array([
+            // Vertex coordinates and color
+            1.0,  1.0,  1.0,     1.0,  1.0,  1.0,  // v0 White
+            -1.0,  1.0,  1.0,     1.0,  0.0,  1.0,  // v1 Magenta
+            -1.0, -1.0,  1.0,     1.0,  0.0,  0.0,  // v2 Red
+            1.0, -1.0,  1.0,     1.0,  1.0,  0.0,  // v3 Yellow
+            1.0, -1.0, -1.0,     0.0,  1.0,  0.0,  // v4 Green
+            1.0,  1.0, -1.0,     0.0,  1.0,  1.0,  // v5 Cyan
+            -1.0,  1.0, -1.0,     0.0,  0.0,  1.0,  // v6 Blue
+            -1.0, -1.0, -1.0,     0.0,  0.0,  0.0   // v7 Black
+        ]);
+
+        // 顶点索引
+        var indices = new Uint8Array([
+            0, 1, 2,   0, 2, 3,    // front
+            0, 3, 4,   0, 4, 5,    // right
+            0, 5, 6,   0, 6, 1,    // up
+            1, 6, 7,   1, 7, 2,    // left
+            7, 4, 3,   7, 3, 2,    // down
+            4, 7, 6,   4, 6, 5     // back
+        ]);
+
+        var size = verticesColors.BYTES_PER_ELEMENT;//数组中的每个元素的大小（以字节为单位）
+        var num = indices.length;
+
+        //创建数据缓冲区对象
+        var vertexBuffer = gl.createBuffer();
+        if(!vertexBuffer){
+            console.log('Failed to create the buffer object!');
+            return -1;
+        }
+
+        //向缓冲区对象中写入数据
+        gl.bindBuffer(gl.ARRAY_BUFFER,vertexBuffer);//将缓冲区对象绑定到目标
+        gl.bufferData(gl.ARRAY_BUFFER,verticesColors,gl.STATIC_DRAW);
+
+
+        var a_position = gl.getAttribLocation(shaderPorgram,'a_position');//获取attribute变量的存储位置
+        //将缓冲区对象分配给a_position变量
+        gl.vertexAttribPointer(a_position,3,gl.FLOAT,false,size*6,0);
+        //连接a_position变量与分配给它的缓冲区对象
+        gl.enableVertexAttribArray(a_position);
+
+        var a_color = gl.getAttribLocation(shaderPorgram,'a_color');
+        gl.vertexAttribPointer(a_color,3,gl.FLOAT,false,size*6,size*3);
+        gl.enableVertexAttribArray(a_color);
+
+        //创建索引缓冲区对象
+        var indexBuffer = gl.createBuffer();
+        if(!indexBuffer){
+            console.log('Failed to create the buffer object!');
+            return -1;
+        }
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+
+        return num;
+    }
+</script>
+</body>
+</html>
