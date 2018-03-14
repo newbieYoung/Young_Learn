@@ -113,7 +113,7 @@
         normalMatrix.transpose();
         gl.uniformMatrix4fv(u_NormalMatrix, false, normalMatrix.elements);
 
-        gl.clear(gl.COLOR_BUFFER_BIT);//清空canvas绘图区域
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);//绘制完成之后可以解绑索引数据了
     }
