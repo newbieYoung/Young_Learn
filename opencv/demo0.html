@@ -74,7 +74,7 @@
                 console.log(RGB+' '+RGB+' '+RGB+' '+255);//图片置灰时不管透明通道是否存在，统一变为255
             }
             let s = new cv.Scalar(255, 0, 0, 255);
-            cv.copyMakeBorder(src, dst, 10, 10, 10, 10, cv.BORDER_CONSTANT, s);
+            cv.copyMakeBorder(src, dst, 10, 10, 10, 10, cv.BORDER_CONSTANT, s);//添加边界
             cv.imshow('output', dst);//显示图片
 
             //ROI
