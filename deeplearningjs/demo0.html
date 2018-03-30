@@ -9,7 +9,7 @@
 	<script>
 		window.onload = function(){
 
-			let shape = [2, 3]; // 2 rows, 3 columns
+			let shape = [2, 3];//2行3列
 			let a = dl.tensor2d([1.0, 2.0, 3.0, 10.0, 20.0, 30.0], shape);
 			console.log('a:', a.dataSync());
 			a = a.square();
@@ -19,13 +19,13 @@
 			let c = dl.tensor2d([[0.0, 2.0], [4.0, 6.0]]);
 			console.log('b.sub(c):',b.sub(c).dataSync());
 
-			a.dispose(); // Clean up GPU buffer
+			a.dispose();//清除GPU缓存
 			b.dispose();
 			c.dispose();
 
 			let d = dl.tensor2d([1.0, 2.0, 3.0, 4.0]);
 			let average = dl.tidy(() => {
-				// dl.tidy will clean up all the GPU memory used by tensors inside
+				//tidy会自动清除方法中所涉及的GPU缓存
 				return d.mean();
 			});
 			console.log('d.mean():',d.mean().dataSync());
