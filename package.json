@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "deeplearn": "^0.5.1",
     "jquery": "^2.2.3",
     "matter-js": "^0.12.0",
     "three.js": "^0.73.0"

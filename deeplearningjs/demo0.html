@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>基本单位以及运算</title>
+</head>
+<body>
+	<script src="../node_modules/deeplearn/dist/deeplearn.min.js"></script>
+	<script>
+		window.onload = function(){
+
+			let shape = [2, 3]; // 2 rows, 3 columns
+			let a = dl.tensor2d([1.0, 2.0, 3.0, 10.0, 20.0, 30.0], shape);
+			console.log('a:', a.dataSync());
+			a = a.square();
+			console.log('a.square():', a.dataSync());
+
+			let b = dl.tensor2d([[1.0, 2.0], [3.0, 4.0]]);
+			let c = dl.tensor2d([[0.0, 2.0], [4.0, 6.0]]);
+			console.log('b.sub(c):',b.sub(c).dataSync());
+
+			a.dispose(); // Clean up GPU buffer
+			b.dispose();
+			c.dispose();
+
+			let d = dl.tensor2d([1.0, 2.0, 3.0, 4.0]);
+			let average = dl.tidy(() => {
+				// dl.tidy will clean up all the GPU memory used by tensors inside
+				return d.mean();
+			});
+			console.log('d.mean():',d.mean().dataSync());
+		}
+	</script>
+</body>
+</html>
