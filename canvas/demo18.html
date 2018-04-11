@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Canvas被跨域资源污染</title>
+</head>
+<body>
+	<script>
+		window.onload = function(){
+			var canvas = document.createElement('canvas');
+			var context = canvas.getContext('2d');
+
+			var image = new Image();
+			image.src = 'https://newbieyoung.github.io/Html_learn/img/girl.png';
+			image.onload = function(){
+				canvas.width = image.width;
+				canvas.height = image.height;
+				context.drawImage(image,0,0,canvas.width,canvas.height);
+
+				document.body.appendChild(canvas);
+
+				//The canvas has been tainted by cross-origin data.
+				console.log(context.getImageData(0,0,canvas.width,canvas.height));
+			}
+		}
+	</script>
+</body>
+</html>
