@@ -21,11 +21,11 @@
 
 					/**
 					 * DNS查询时间
+					 * <meta http-equiv="x-dns-prefetch-control" content="on">
 					 * 开启浏览器的DNS预读取功能，DNS预读取是一项使浏览器主动去执行域名解析的功能，其范围包括文档的所有链接，无论是图片、CSS、JavaScript等；
 					 * DNS请求需要的带宽非常小，但是延迟却有点高，这点在手机网络上特别明显，预读取行为会在后台与页面实际内容并行执行，并不会卡住资源的加载；
 					 * 默认情况下通过HTTPS加载的页面内嵌链接的域名并不会执行预读取，某些浏览器支持改变这一默认行为；
-					 * 此外<link rel="dns-prefetch">也能达到类似的效果。
-					 * <meta http-equiv="x-dns-prefetch-control" content="on">
+					 * 此外HTML5 Prefetch 技术，比如<link rel="dns-prefetch">也能达到类似的效果。
 					 */
 					let dnsTime = Timing.domainLookupEnd - Timing.domainLookupStart;
 
