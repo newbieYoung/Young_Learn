@@ -5,18 +5,16 @@
 	<title>web performance api</title>
 </head>
 <body>
-	<p>web performance api</p>
-	<ul>
-		<li>1、timing.navigationStart 浏览器处理当前网页的启动时间</li>
-	</ul>
 	<script>
 			window.onload = function(){
 				const Timing = window.performance.timing;
+				console.log(Timing);
 
 				//加延迟是因为有些属性过早获取会为0
 				setTimeout(function(){
-
-					let pageReadyTime = Timing.fetchStart - Timing.navigationStart;
+					/**
+					 * 重定向时间
+					 */
 					let redirectTime = Timing.redirectEnd  - Timing.redirectStart;
 
 					/**
@@ -29,9 +27,22 @@
 					 */
 					let dnsTime = Timing.domainLookupEnd - Timing.domainLookupStart;
 
-					console.log('DNS查询时间',dnsTime);
+					/**
+					 * DOM解析完成时间
+					 */
+					let domReadyTime = Timing.domComplete - Timing.domLoading;
 
-				},2000)
+					/**
+					 * 读取页面第一个字节的时间
+					 */
+					let ttfb = Timing.responseStart - Timing.navigationStart;
+
+					console.log('DNS查询时间',dnsTime);
+					console.log('重定向时间',redirectTime);
+					console.log('DOM解析完成时间',domReadyTime);
+					console.log('读取页面第一个字节的时间',ttfb);
+
+				},1000)
 			}
 	</script>	
 </body>
