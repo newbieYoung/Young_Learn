@@ -41,7 +41,7 @@
             box-sizing: border-box;
         }
         ul li div{
-            background-image:url(../img/thumb-may-first.jpg);
+            background-color:rgba(12,34,56,1);
             position: absolute;
             top:0;
             left:0;
@@ -359,22 +359,43 @@
 	<script>
 		window.onload = function(){
 
+			alert(isPassiveSupported());
+
 			/**
 			 * 浏览器无法预先知道一个监听器会不会调用 preventDefault()，它需要等监听器执行完后，再去执行默认行为，而监听器执行是要耗时的，这样就会导致页面卡顿；
 			 * 没测试出有啥优化效果。
 			 */
 
 			document.addEventListener('touchstart', function(){
-				let start = window.performance.now();
+				var start = window.performance.now();
 
 				//执行一段耗时逻辑
-				for(let i=0;i<100000000;i++){
+				for(var i=0;i<100000000;i++){
 					Math.random()+Math.random();
 				}
 
-				let end = window.performance.now();
+				var end = window.performance.now();
 				console.log(end-start);
 			}, {passive: true});
+
+			//判断是否支持passive
+			function isPassiveSupported(){
+				var passiveSupported = false;
+
+				(function(){
+					try{
+						var options = Object.defineProperty({},'passive',{
+							get:function(){
+								passiveSupported = true;
+							}
+						});
+
+						window.addEventListener('test',null,options);
+					}catch(err){}
+				})()
+
+				return passiveSupported;
+			}			
 
 		}
 	</script>
