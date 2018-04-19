@@ -10,7 +10,7 @@
 	<!-- 
 		预渲染
 		为了防止过期数据以及资源浪费，chrome对prerender的页面设置有效期，当后台页面被创建出来后在一定有效期内没有被使用，则会丢弃这个页面；
-		有些场景prerender并不能被触发，比如：开发模式下、HTTPS页面等；
+		有些场景prerender并不能被触发，比如：开发模式下、HTTPS页面、不支持HTML5多媒体元素以及内存消耗超过限制的页面等；
 		触发时可以在Chrome的任务管理中，看到预渲染页面。
 	-->
 	<link rel='prerender' href='http://www.w3school.com.cn/'>
