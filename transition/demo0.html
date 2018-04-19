@@ -44,8 +44,9 @@
 					$test.style.backgroundColor = 'blue';
 				},false);
 
-				$test.addEventListener('transitionend',function(){
+				$test.addEventListener('transitionend',function(e){
 					console.log('transitionend');
+					console.log(e);
 				},false);
 				
 	        }, false);
