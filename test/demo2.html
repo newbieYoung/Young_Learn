@@ -23,8 +23,12 @@
             var parent = document.querySelector('#parent');
             var child = document.querySelector('#child');
 
-            //parent.addEventListener('click',func);
-            //parent.removeEventListener('click',func);
+            var func = function(){
+                console.log('click');
+            }
+
+            // parent.addEventListener('click',func);
+            // parent.removeEventListener('click',func);
 
             /**
              * 匿名函数的事件绑定是不能被removeEventListener接触绑定的，jQuery之所以能实现类似的功能是因为jQuery在原生的事件绑定的基础做了一层封装；
@@ -32,23 +36,20 @@
              * 只会把事件监听函数添加到函数数组中，调用off或者其它方式解除事件函数时，并不会调用removeEventListener只用把该事件监听函数从函数数组中删除即可，此事件监听函数就不会被执行了；
              * 整个流程也就有点类似实现了"匿名函数的事件解绑"了。
              */
-//            parent.addEventListener('click',function () {
-//                func();
-//            });
-//            parent.removeEventListener('click',function () {
-//                func();
-//            });
+           parent.addEventListener('click',function () {
+               func();
+           });
+           parent.removeEventListener('click',function () {
+               func();
+           });
 
 
             /**
              * bind会方法创建一个新的函数而且就算bind方法参数相同，返回的新函数也不会相同
              */
-            parent.addEventListener('click',func.bind(null));
-            parent.removeEventListener('click',func.bind(null));
-
-            var func = function(){
-                console.log('click');
-            }
+            //parent.addEventListener('click',func.bind(null));
+            //parent.removeEventListener('click',func.bind(null));
+        }
     </script>
 </body>
 </html>
