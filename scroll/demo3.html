@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>使用translate3d+touchevent实现滚动效果</title>
-    <style>
+	<meta charset="UTF-8">
+	<title>passive event listener</title>
+	<style>
         body{
             margin:0;
             padding:0;
@@ -15,7 +15,8 @@
             left:0;
             right:0;
             bottom:0;
-            overflow:hidden;
+            overflow-y:scroll;
+            overflow-x:hidden;
         }
         .container ul{
             width:100%;
@@ -51,8 +52,8 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <ul id="list" style="transform: translate3d(0px,-100px,0px);">
+	<div class="container">
+        <ul>
             <li>
                 <div></div>
             </li>
@@ -355,40 +356,27 @@
             </li>
         </ul>
     </div>
-    <script>
-        window.onload = function(){
-            var $list = document.querySelector('#list');
-            var reg = /[-\d.]{1,}px/g;
-            var startPoint;
+	<script>
+		window.onload = function(){
 
-            $list.addEventListener('touchstart',function(e){
-                var touch = e.touches[0];
-                startPoint = {
-                    x:touch.clientX,
-                    y:touch.clientY
-                };
-            });
+			/**
+			 * 浏览器无法预先知道一个监听器会不会调用 preventDefault()，它需要等监听器执行完后，再去执行默认行为，而监听器执行是要耗时的，这样就会导致页面卡顿；
+			 * 没测试出有啥优化效果。
+			 */
 
-            $list.addEventListener('touchmove',function(e){
-                var touch = e.touches[0];
-                var initTranslate = $list.style.transform;
-                var array = initTranslate.match(reg);
-                if(array){
-                    var ypx = array[1];
-                    var y = parseFloat(ypx.substring(0,ypx.length-2));
-                    var increase = touch.clientY - startPoint.y;
-                    var currentY = y+increase;
-                    startPoint = {
-                        x:touch.clientX,
-                        y:touch.clientY
-                    };
-                    $list.style.transform = 'translate3d(0px,'+currentY+'px,0px)';
-                }
-            });
-        };
-    </script>
-    <script>
-        (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})()
-    </script>
+			document.addEventListener('touchstart', function(){
+				let start = window.performance.now();
+
+				//执行一段耗时逻辑
+				for(let i=0;i<100000000;i++){
+					Math.random()+Math.random();
+				}
+
+				let end = window.performance.now();
+				console.log(end-start);
+			}, {passive: true});
+
+		}
+	</script>
 </body>
 </html>
