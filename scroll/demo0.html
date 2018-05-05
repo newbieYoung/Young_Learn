@@ -2,13 +2,19 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>在页面加载完成之后马上设置scrollTop不生效</title>
+	<title>在页面加载完成之后马上设置scrollTop或者调用window.scrollTo方法不生效</title>
 	<style>
 		body{
             margin:0;
             padding:0;
             -webkit-overflow-scrolling: touch;
         }
+		ul li:nth-child(2n){
+			background-color:lightgray;
+		}
+		ul li:nth-child(2n+1){
+			background-color:lightcyan;
+		}
 	</style>
 </head>
 <body>
@@ -67,10 +73,13 @@
 	<script type="text/javascript">
 		window.onload = function(){
 			var $body = document.querySelector('body');
-			$body.scrollTop = 50;//not work
+
+			//$body.scrollTop = 50;
+			//window.scrollTo(0,200);
 
 			setTimeout(function(){
-				$body.scrollTop = 50;//work
+				//$body.scrollTop = 50;
+				window.scrollTo(0,200);
 			});
 		};
 	</script>
