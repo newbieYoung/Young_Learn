@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>changing colorspaces</title>
+</head>
+<body>
+	<img id="input1" src="../img/fox.png" alt="">
+	<img id="input2" src="../img/star.png" alt="">
+	<canvas id="output1" width="68" height="68"></canvas>
+	<canvas id="output2" width="68" height="68"></canvas>
+	<script src="../lib/opencv.js" type="text/javascript"></script>
+	<script>
+		window.onload = function(){
+
+			let $input1 = document.querySelector('#input1');
+            let src1= cv.imread($input1);//读取图片
+
+            let $input2 = document.querySelector('#input2');
+            let src2= cv.imread($input2);
+
+            //RGBA->GRAY
+            let dst1 = new cv.Mat();
+            cv.cvtColor(src1,dst1,cv.COLOR_RGBA2GRAY, 0);
+            cv.imshow('output1', dst1);
+
+            //inRange
+            let dst2 = new cv.Mat();
+            let low = new cv.Mat(src2.rows, src2.cols, src2.type(), [200, 200, 200, 200]);
+			let high = new cv.Mat(src2.rows, src2.cols, src2.type(), [255, 255, 255, 255]);
+            cv.inRange(src2, low, high, dst2);
+			cv.imshow('output2', dst2);
+
+            src1.delete(); 
+            src2.delete(); 
+            dst1.delete(); 
+            dst2.delete();
+            low.delete(); 
+            high.delete();
+		}
+	</script>
+</body>
+</html>
