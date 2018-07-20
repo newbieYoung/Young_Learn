@@ -26,23 +26,25 @@
         var source = document.querySelector('#source');
         var scontext = source.getContext('2d');
 
-        //var img = new Image();
-        //img.src = '../img/sky.JPG';
-        //img.onload = function(){
-        //    scontext.filter = 'blur(7px)';
-        //    scontext.drawImage(img,0,0,width,height);
-        //}
-
-        scontext.globalAlpha = '0.4';
         scontext.fillStyle = "rgb(0,0,0)";
         scontext.filter = 'blur(20px)';
-
-        //scontext.fillRect(0, 0, width, height);
 
         scontext.moveTo(0,0);
         scontext.lineTo(width,0);
         scontext.lineTo(width,height);
         scontext.fill();
+
+        var img = new Image();
+        img.src = '../img/sky.JPG';
+        img.onload = function(){
+            //测试改变状态绘制
+            scontext.globalAlpha = '0.5';
+            scontext.filter = '10px';
+            scontext.drawImage(img,0,0,width,height);
+
+            scontext.filter = 'none';
+            scontext.drawImage(img,width/4,height/4,width/2,height/2,width/4,height/4,width/2,height/2);
+        }
 
         var data = scontext.getImageData(0,0,width,height);
 
