@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>canvas rotate</title>
+    <style>
+        canvas{
+            border:1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        window.onload = function(){
+            var $canvas = document.createElement('canvas');
+            $canvas.width = 200;
+            $canvas.height = 200;
+            var context = $canvas.getContext('2d');
+            context.save();
+
+            /**
+             * rotate默认以左上角为原点；
+             * 如果需要绕中心旋转则需要进行translate
+             */
+            context.translate($canvas.width/2,$canvas.height/2);
+            context.rotate(-10/180*Math.PI);
+            context.fillStyle = 'black';
+            context.fillRect(0,0,70,100);
+
+            context.restore();
+            context.fillStyle = 'red';
+            context.rotate(-10/180*Math.PI);
+            context.fillRect(0,0,70,100);
+
+            document.body.appendChild($canvas);
+        }
+    </script>
+</body>
+</html>
