@@ -2,37 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>canvas rotate</title>
+    <title>canvas transform</title>
     <style>
         canvas{
             border:1px solid #000;
+            margin:10px;
         }
     </style>
 </head>
 <body>
     <script>
+
+        /**
+         * 让canvas transform类似css3 transform
+         */
+        CanvasRenderingContext2D.prototype._setTransformOrigin = function(x,y){
+            this._transformOrigin = {x:x,y:y};
+        }
+        CanvasRenderingContext2D.prototype._scale = function(x,y){
+            if(this._transformOrigin==null){
+                this._transformOrigin = {x:0,y:0};
+            }
+            this.translate(this._transformOrigin.x,this._transformOrigin.y);
+            this.scale(x,y);
+            this.translate(-this._transformOrigin.x,-this._transformOrigin.y);
+        }
+        CanvasRenderingContext2D.prototype._rotate = function(deg){
+            if(this._transformOrigin==null){
+                this._transformOrigin = {x:0,y:0};
+            }
+            this.translate(this._transformOrigin.x,this._transformOrigin.y);
+            this.rotate(deg/180*Math.PI);
+            this.translate(-this._transformOrigin.x,-this._transformOrigin.y);
+        }
+        CanvasRenderingContext2D.prototype._skew = function(xDeg,yDeg){
+            if(this._transformOrigin==null){
+                this._transformOrigin = {x:0,y:0};
+            }
+            this.translate(this._transformOrigin.x,this._transformOrigin.y);
+            this.transform(1, xDeg/180*Math.PI, yDeg/180*Math.PI, 1, 0, 0);
+            this.translate(-this._transformOrigin.x,-this._transformOrigin.y);
+        }
+        CanvasRenderingContext2D.prototype._transform = function(a,b,c,d,e,f){
+            if(this._transformOrigin==null){
+                this._transformOrigin = {x:0,y:0};
+            }
+            this.translate(this._transformOrigin.x,this._transformOrigin.y);
+            this.transform(a,b,c,d,e,f);
+            this.translate(-this._transformOrigin.x,-this._transformOrigin.y);
+        }
+
         window.onload = function(){
+
             var $canvas = document.createElement('canvas');
+            var context = $canvas.getContext('2d');
             $canvas.width = 200;
             $canvas.height = 200;
-            var context = $canvas.getContext('2d');
-            context.save();
 
             /**
-             * rotate默认以左上角为原点；
-             * 如果需要绕中心旋转则需要进行translate
+             * css3中所有变换处理都是针对的DOM元素本身，但是canvas中则是针对的绘图环境；
+             * 可以简单理解为canvas中存在两种坐标系，一种是画布以及可视区域所在的世界坐标系，另一种是画布自身坐标系；
+             * canvas中调用transform函数改变的是画布在世界坐标系的位置，但是可视区域在世界坐标系中的位置并没有变化；
+             * 举例来说先绘制一个长宽均为50的黑色方块，但是从（-40,0）开始绘制，实际只可能看到右侧的宽为10的区域；
+             * 然后我们执行translate(40,0)，也就相当于把画布向右侧移动40，此时在可视区域就可以看到完整方块了。
              */
-            context.translate($canvas.width/2,$canvas.height/2);
-            context.rotate(-10/180*Math.PI);
             context.fillStyle = 'black';
-            context.fillRect(0,0,70,100);
+            context.fillRect(-40,0,50,50);
 
-            context.restore();
-            context.fillStyle = 'red';
-            context.rotate(-10/180*Math.PI);
-            context.fillRect(0,0,70,100);
-
+            context.translate(40,0);
+            context.fillStyle = 'pink';
+            context.fillRect(-40,50,50,50);
             document.body.appendChild($canvas);
+
+            /* 类css变换例子 */
+            var $demo11 = document.createElement('canvas');
+            var context11 = $demo11.getContext('2d');
+            $demo11.width = 200;
+            $demo11.height = 200;
+
+            context11.fillStyle = 'lightgreen';
+            context11._setTransformOrigin(100,100);//中心点
+            context11._scale(1.2,1.2);
+            context11._rotate(45);
+            //context11._skew(45,0);
+            context11._transform(1, 45/180*Math.PI, 0/180*Math.PI, 1, 0, 0);
+            context11.fillRect(50,50,100,100);
+            document.body.appendChild($demo11);
         }
     </script>
 </body>
