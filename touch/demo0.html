@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>use-capture</title>
+    <title>touchstart preventDefault()</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         .parent{
@@ -13,7 +13,7 @@
         .child{
             width:50px;
             height:50px;
-            background-color:lightgray;
+            background-color:gray;
         }
     </style>
 </head>
@@ -24,23 +24,24 @@
     <script>
         window.onload = function(){
 
-            /**
-             * use-capture
-             * true 捕获阶段 从上到下
-             * false 冒泡阶段 从下到上（默认）
-             */
-
             var $parent = document.querySelector('.parent');
             var $child = document.querySelector('.child');
 
             $parent.addEventListener('click',function(e){
-                console.log('parent');
+                console.log('click parent');
+            })
 
-            },false)
+            $parent.addEventListener('touchstart',function(e){
+                console.log('touchstart parent');
+            })
 
-            $child.addEventListener('click',function(e){
+            $child.addEventListener('touchstart',function(e){
+                /**
+                 * 在子元素touchstart事件中执行preventDefault方法会导致父元素监听的click事件没法触发，但是对父元素的touchstart事件没影响
+                 */
+                e.preventDefault();
                 console.log('child');
-            },false)
+            })
         }
     </script>
 </body>
