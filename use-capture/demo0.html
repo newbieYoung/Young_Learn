@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>use-capture</title>
+    <style>
+        .parent{
+            width:200px;
+            height:200px;
+            background-color:lightblue;
+        }
+        .child{
+            width:50px;
+            height:50px;
+            background-color:lightgray;
+        }
+    </style>
+</head>
+<body>
+    <div class="parent">
+        <div class="child"></div>
+    </div>
+    <script>
+        window.onload = function(){
+
+            /**
+             * use-capture
+             * true 捕获阶段 从上到下
+             * false 冒泡阶段 从下到上
+             */
+
+            var $parent = document.querySelector('.parent');
+            var $child = document.querySelector('.child');
+
+            $parent.addEventListener('click',function(e){
+                console.log('parent');
+
+            },false)
+
+            $child.addEventListener('click',function(e){
+                e.preventDefault();
+                console.log('child');
+            },false)
+        }
+    </script>
+</body>
+</html>
