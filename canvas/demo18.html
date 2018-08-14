@@ -11,7 +11,12 @@
 			var context = canvas.getContext('2d');
 
 			var image = new Image();
-			image.src = 'https://newbieyoung.github.io/Html_learn/img/girl.png';
+
+			//image.src = 'https://newbieyoung.github.io/Html_learn/img/girl.png';//服务器未设置跨域
+
+			image.src = 'https://raw.githubusercontent.com/newbieYoung/NewbieWebArticles/master/images/animation-optimize-0.png';//服务器设置了跨域
+			image.crossOrigin = '';
+
 			image.onload = function(){
 				canvas.width = image.width;
 				canvas.height = image.height;
