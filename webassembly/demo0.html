@@ -7,7 +7,7 @@
 <body>
     <script src="./loadWebAssembly.js"></script>
     <script>
-        //emcc demo0.c -Os -s WASM =1 -s SIDE_MODULE=1 -o demo0.wasm
+        //emcc demo0.c -Os -s WASM=1 -s SIDE_MODULE=1 -o demo0.wasm
         window.onload = function(){
             loadWebAssembly('./demo0.wasm')
             .then(instance => {
