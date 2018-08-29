@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>测试 WebAssembly.instantiate 以及asm.js</title>
+    <title>测试 WebAssembly.instantiate、asm.js、获取字符串返回、传入字符串</title>
 </head>
 <body>
 
 <!-- 测试 WebAssembly.instantiate -->
 <!--<script>-->
-    <!--//emcc demo2.c -s ONLY_MY_CODE=1 -s WASM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS='["UTF8ToString"]' -s EXPORTED_FUNCTIONS="['_bezier1','_hello']"  -o demo2.js-->
+    <!--//emcc demo2.c -s WASM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS='["UTF8ToString"]' -s EXPORTED_FUNCTIONS="['_bezier1','_hello','_sayHi']"  -o demo2.js-->
     <!--const memory = new WebAssembly.Memory({ initial: 256, maximum: 256 });-->
     <!--const importObj = {-->
         <!--env: {-->
@@ -32,9 +32,13 @@
     Module['onRuntimeInitialized'] = function() {
         console.log(Module._bezier1(0.5, 10, 20));
 
-        console.log(Module._hello())
+        var p0 = Module._hello();
+        console.log(Module.UTF8ToString(p0));
 
-        console.log(Module.UTF8ToString(Module._hello()))
+        var name = "newyoungli";
+        var ptr  = allocate(intArrayFromString(name), 'i8', ALLOC_NORMAL);
+        var p1 = Module._sayHi(ptr);
+        console.log(Module.UTF8ToString(p1))
     };
 </script>
 </body>
