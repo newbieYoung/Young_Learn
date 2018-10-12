@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>绕任意轴旋转矩阵</title>
+    <script type="text/javascript" src="../lib/three.js"></script>
+    <style type="text/css">
+        div#retina {
+            cursor: pointer;
+            width:100%;
+            height:100%;
+            background-color: #EEEEEE;
+        }
+    </style>
+</head>
+<body>
+<div id="retina"></div>
+<script>
+    //页面加载完成
+    window.onload = function(){
+        createWorld();
+    }
+    //模拟现实场景
+    function createWorld() {
+        initRender();//创建渲染器
+        initCamera();//创建相机
+        initLight();//创建光源
+        initObject();//创建物体
+        initScene();//创建场景
+        render();//渲染
+    }
+    var renderer;//渲染器
+    var width;
+    var height;
+    function initRender(){
+        width = window.innerWidth;
+        height = window.innerHeight;
+        renderer = new THREE.WebGLRenderer({
+            antialias : true//抗锯齿开启
+        });
+        renderer.setSize(width, height);//设置渲染器宽度和高度
+        renderer.setClearColor('#ffffff', 1.0);//设置背景颜色
+        document.getElementById('retina').appendChild(renderer.domElement);//把渲染器放置到页面中
+    }
+    var camera;
+    var origPoint = new THREE.Vector3(0, 0, 0);//原点
+    function initCamera(){
+        camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
+        camera.position.set(200, 400, 600);//设置相机位置
+        camera.up.set(0, 1, 0);//设置相机正方向
+        camera.lookAt(origPoint);//设置相机视点
+    }
+    var pointLight;
+    var ambientLight;
+    function initLight() {
+        //点光源
+        pointLight = new THREE.PointLight( 0xffffff, 1, 2000 );
+        pointLight.position.set(70, 112, 98);
+        //环境光
+        ambientLight = new THREE.AmbientLight( 0x333333 );
+    }
+    var originCube;
+    var transformCube;
+    var xline;
+    var yline;
+    var zline;
+    function initObject(){
+        //坐标轴
+        var xmat = new THREE.LineBasicMaterial({color: 0xff0000});
+        var xgeo = new THREE.Geometry();
+        xgeo.vertices.push(
+                new THREE.Vector3( 0, 0, 0 ),
+                new THREE.Vector3( 300, 0, 0 )
+        );
+        xline = new THREE.Line( xgeo, xmat );
+
+        var ymat = new THREE.LineBasicMaterial({color: 0x00ff00});
+        var ygeo = new THREE.Geometry();
+        ygeo.vertices.push(
+                new THREE.Vector3( 0, 0, 0 ),
+                new THREE.Vector3( 0, 300, 0 )
+        );
+        yline = new THREE.Line( ygeo, ymat );
+
+        var zmat = new THREE.LineBasicMaterial({color: 0x0000ff});
+        var zgeo = new THREE.Geometry();
+        zgeo.vertices.push(
+                new THREE.Vector3( 0, 0, 0 ),
+                new THREE.Vector3( 0, 0, 300 )
+        );
+        zline = new THREE.Line( zgeo, zmat );
+
+        var geometry1 = new THREE.BoxGeometry( 50, 50, 50);
+        var material1 = new THREE.MeshLambertMaterial( {color: 0xff0000} );
+        originCube = new THREE.Mesh( geometry1, material1 );
+        originCube.position.set(0,0,0);
+
+        var geometry2 = new THREE.BoxGeometry( 50, 50, 50);
+        var material2 = new THREE.MeshLambertMaterial( {color: 0xffff00} );
+        transformCube = new THREE.Mesh( geometry2, material2 );
+        transformCube.position.set(0,0,0);
+
+        var rad = 90/180*Math.PI;
+        var matrix = rotateAroundWorldAxis(new THREE.Vector3(100,0,0),new THREE.Vector3(0,1,0),rad);
+        transformCube.applyMatrix(matrix);
+    }
+    var scene;
+    function initScene(){
+        scene = new THREE.Scene();
+        scene.add(pointLight);
+        scene.add(ambientLight);
+        scene.add(originCube);
+        scene.add(transformCube);
+        scene.add( xline );
+        scene.add( yline );
+        scene.add( zline );
+    }
+    function render(){
+        renderer.clear();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+    }
+
+    /**
+     * 绕过点p的向量vector旋转一定角度
+     */
+    function rotateAroundWorldAxis(p, vector, rad){
+        vector.normalize();
+        var u = vector.x;
+        var v = vector.y;
+        var w = vector.z;
+
+        var a = p.x;
+        var b = p.y;
+        var c = p.z;
+
+        var matrix4 = new THREE.Matrix4();
+
+        matrix4.set(u * u + (v * v + w * w) * Math.cos(rad), u * v * (1 - Math.cos(rad)) - w * Math.sin(rad), u * w * (1 - Math.cos(rad)) + v * Math.sin(rad), (a * (v * v + w * w) - u * (b * v + c * w)) * (1 - Math.cos(rad)) + (b * w - c * v) * Math.sin(rad),
+                u * v * (1 - Math.cos(rad)) + w * Math.sin(rad), v * v + (u * u + w * w) * Math.cos(rad), v * w * (1 - Math.cos(rad)) - u * Math.sin(rad), (b * (u * u + w * w) - v * (a * u + c * w)) * (1 - Math.cos(rad)) + (c * u - a * w) * Math.sin(rad),
+                u * w * (1 - Math.cos(rad)) - v * Math.sin(rad), v * w * (1 - Math.cos(rad)) + u * Math.sin(rad), w * w + (u * u + v * v) * Math.cos(rad), (c * (u * u + v * v) - w * (a * u + b * v)) * (1 - Math.cos(rad)) + (a * v - b * u) * Math.sin(rad),
+                0, 0, 0, 1);
+
+        return matrix4;
+    }
+</script>
+</body>
+</html>
