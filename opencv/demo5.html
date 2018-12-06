@@ -21,7 +21,20 @@
             let dst = new cv.Mat();
             let mask = new cv.Mat();
 
+            /**
+             * opencv中模版匹配支持的比较方法有六种：
+             *
+             * cv.TM_SQDIFF 平方差匹配 匹配值越大，匹配越差；
+             * cv.TM_SQDIFF_NORMED 标准平方差匹配；
+             *
+             * cv.TM_CCORR 相关性匹配 该方法使用源图像与模版图像的卷积结果进行匹配，匹配值越小结果越差；
+             * cv.TM_CCORR_NORMED 归一化相关性匹配；
+             *
+             * cv.TM_CCOEFF 相关性系数匹配方法，该方法使用源图像与其均值的差、模版与其均值的差二者之间的相关性进行匹配，正值表示匹配的结果较好，负值表示匹配的结果较差；匹配值越大，匹配效果越好；
+             * cv.TM_CCOEFF_NORMED 归一化相关性系数匹配方法。
+             */
             cv.matchTemplate(src, templ, dst, cv.TM_CCOEFF, mask);
+
             let result = cv.minMaxLoc(dst, mask);
             let maxPoint = result.maxLoc;
             let color = new cv.Scalar(255, 0, 0, 255);
