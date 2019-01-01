@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>文字</title>
+    <style>
+    	canvas{
+    		display:block;
+    		border:1px solid #000;
+    		margin-bottom:10px;
+    	}
+    </style>
+</head>
+<body>
+	<canvas id="demo1" width="200" height="100"></canvas>
+	<canvas id="demo2" width="200" height="100"></canvas>
+    <script type="text/javascript">
+   		window.onload = function(){
+   			//水平居中
+   			var demo1 = document.querySelector('#demo1');
+   			var ctx1 = demo1.getContext('2d');
+   			ctx1.font = '20px Calibri';
+			ctx1.fillStyle = 'blue';
+			/**
+			 * The alignment is relative to the x value of the fillText() method. For example, if textAlign is "center", then the text's left edge will be at x - (textWidth / 2).
+			 */
+			ctx1.textAlign = 'center';
+			ctx1.fillText('水平居中', 100, 30);
+
+			//垂直居中
+			var demo2 = document.querySelector('#demo2');
+			var ctx2 = demo2.getContext('2d');
+			ctx2.font = '20px Calibri';
+			ctx2.fillStyle = 'blue';
+
+			ctx2.textBaseline = 'middle';
+			ctx2.fillText('垂直居中', 30, 50);
+   		}
+    </script>
+</body>
+
+</html>
