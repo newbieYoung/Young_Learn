@@ -13,8 +13,11 @@
     </style>
 </head>
 <body>
+	<div style="font-size:20px;color:blue;">示范文字</div>
 	<canvas id="demo1" width="200" height="100"></canvas>
 	<canvas id="demo2" width="200" height="100"></canvas>
+	<canvas id="demo3" width="200" height="100"></canvas>
+	<canvas id="demo4" width="400" height="200" style="width:200px;height:100px;"></canvas>
     <script type="text/javascript">
    		window.onload = function(){
    			//水平居中
@@ -26,16 +29,38 @@
 			 * The alignment is relative to the x value of the fillText() method. For example, if textAlign is "center", then the text's left edge will be at x - (textWidth / 2).
 			 */
 			ctx1.textAlign = 'center';
-			ctx1.fillText('水平居中', 100, 30);
+			ctx1.fillText('水平居中', demo1.width/2, 30);
 
 			//垂直居中
 			var demo2 = document.querySelector('#demo2');
 			var ctx2 = demo2.getContext('2d');
 			ctx2.font = '20px Calibri';
 			ctx2.fillStyle = 'blue';
-
 			ctx2.textBaseline = 'middle';
-			ctx2.fillText('垂直居中', 30, 50);
+			ctx2.fillText('垂直居中', 30, demo2.height/2);
+
+			//大的canvas绘制到小的canvas里边
+			var demo3 = document.querySelector('#demo3');
+			var ctx3 = demo3.getContext('2d');
+			var textCanvas = document.createElement('canvas');
+			textCanvas.width = demo3.width*2;
+			textCanvas.height = demo3.height*2;
+			var textContext = textCanvas.getContext('2d');
+			textContext.font = '40px Calibri';
+			textContext.fillStyle = 'blue';
+			textContext.textBaseline = 'middle';
+			textContext.textAlign = 'center';
+			textContext.fillText('高清垂直水平居中', textCanvas.width/2, textCanvas.height/2);
+			ctx3.drawImage(textCanvas,0,0,textCanvas.width,textCanvas.height,0,0,demo3.width,demo3.height);
+
+			//canvas本身缩放
+			var demo4 = document.querySelector('#demo4');
+			var ctx4 = demo4.getContext('2d');
+			ctx4.font = '40px Calibri';
+			ctx4.fillStyle = 'blue';
+			ctx4.textBaseline = 'middle';
+			ctx4.textAlign = 'center';
+			ctx4.fillText('高清垂直水平居中', demo4.width/2, demo4.height/2);
    		}
     </script>
 </body>
