@@ -46,12 +46,12 @@
 <script type="text/javascript">
 
     var EyePoint = {//视点以及默认位置
-        x:3.0,
-        y:3.0,
+        x:0.0,
+        y:0.0,
         z:7.0
     };
     var PerspParams = {//透视投影参数
-        fovy:30.0,
+        fovy:45.0,
         g_near:1.0,
         g_far:100.0
     };
@@ -98,8 +98,8 @@
 
         //模型矩阵
         var modelMatrix = new Matrix4();
-        modelMatrix.setTranslate(0,1,0);//沿着Y轴平移
-        modelMatrix.rotate(90,0,0,1);//绕着Z轴旋转
+        modelMatrix.rotate(45,0,1,0);
+        modelMatrix.rotate(25,1,0,1);
 
         //法向量变换矩阵是模型矩阵的逆转置矩阵
         var normalMatrix = new Matrix4();
