@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>WebGL通过缓冲区对象绘制三角形或矩形</title>
+	<title>WebGL通过缓冲区对象绘制三角形或矩形 以及 antialias 参数控制抗锯齿</title>
 	<script type="text/javascript" src="./sim-tools.js"></script>
 </head>
 <body onload="main()">
-	<canvas id="webgl" width="400" height="400"></canvas>
+	<canvas id="webgl" width="600" height="600"></canvas>
 	<!-- 片段着色器程序 -->
 	<script id="shader-fs" type="x-shader/x-fragment">
 		precision mediump float;//不写会报错 No precision specified for (float)，缺少精度描述
@@ -25,14 +25,17 @@
 	<script type="text/javascript">
 		function main(){
 			var canvas = document.querySelector('#webgl');
-			var gl = canvas.getContext('webgl');//获取canvas上下文
+			/**
+			 * 改变 antialias 参数的值可以观察到 开启 webgl 抗锯齿功能的效果
+			 */
+			var gl = canvas.getContext("experimental-webgl",{antialias:false});;//获取canvas上下文
 			var shaderPorgram = initShaders(gl);//初始化着色器程序
 
 			var num = initVertexBuffers(gl,shaderPorgram);
 
 			var u_fragColor = gl.getUniformLocation(shaderPorgram,'u_fragColor');//获取uniform变量的存储位置
 
-			gl.clearColor(0.0,0.0,1.0,1.0);//设置背景颜色
+			gl.clearColor(0.9,0.9,0.9,1.0);//设置背景颜色
 			gl.clear(gl.COLOR_BUFFER_BIT);//清空canvas绘图区域
 
 			gl.uniform4f(u_fragColor,1.0,0.0,0.0,1.0);
