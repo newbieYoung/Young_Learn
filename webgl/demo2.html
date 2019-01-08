@@ -28,7 +28,7 @@
 			/**
 			 * 改变 antialias 参数的值可以观察到 开启 webgl 抗锯齿功能的效果
 			 */
-			var gl = canvas.getContext("experimental-webgl",{antialias:false});;//获取canvas上下文
+			var gl = canvas.getContext("experimental-webgl",{antialias:false});//获取canvas上下文
 			var shaderPorgram = initShaders(gl);//初始化着色器程序
 
 			var num = initVertexBuffers(gl,shaderPorgram);
