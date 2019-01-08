@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>WebGL 每个面不同颜色立方体 + 平行光 + 环境光 + 漫反射</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no,viewport-fit=cover ">
     <script type="text/javascript" src="./sim-tools.js"></script>
+    <style>
+        body{
+            margin:0;
+            padding:0;
+        }
+        canvas{
+            width:100%;
+        }
+    </style>
 </head>
 <body onload="main()">
 <canvas id="webgl" width="400" height="400"></canvas>
@@ -48,7 +59,7 @@
     var EyePoint = {//视点以及默认位置
         x:0.0,
         y:0.0,
-        z:7.0
+        z:5.0
     };
     var PerspParams = {//透视投影参数
         fovy:45.0,
@@ -69,7 +80,7 @@
 
         var num = initVertexBuffers(gl,shaderPorgram);
 
-        gl.clearColor(0.0,0.0,0.0,1.0);//设置背景颜色
+        gl.clearColor(1.0,1.0,1.0,1.0);//设置背景颜色
         gl.enable(gl.DEPTH_TEST);//开启隐藏面消除
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);//清空颜色和深度缓冲区
 
