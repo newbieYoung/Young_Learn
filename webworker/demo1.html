@@ -8,28 +8,19 @@
     <script type="text/javascript">
         var worker = new Worker('demo1.js');
 
-        //var uInt8Array = new Uint8Array(1024*1024*191);
-        //for(var i=0;i<uInt8Array.length;i++){
-        //    uInt8Array[i] = i;
-        //}
-        //worker.postMessage(uInt8Array.buffer);
-        //worker.postMessage({data:uInt8Array.buffer},[uInt8Array.buffer]);
-
-        var imageBufferArray = [];
-        var imageDataArray = [];
-        for(var i=0;i<10;i++){
-            var init = document.createElement('canvas');
-            init.width = 1000;
-            init.height = 10000;
-            var initContext = init.getContext('2d');
-            var imageData = initContext.getImageData(0, 0, 1000, 10000).data;
-            imageBufferArray.push(imageData.buffer);
-            imageDataArray.push(imageData);
+        var uInt8Array = new Uint8Array(1024*1024*32);
+        for (var i = 0; i < uInt8Array .length; ++i) {
+            uInt8Array[i] = parseInt(Math.random()*10);
         }
 
-        //worker.postMessage(imageDataArray);
-        worker.postMessage({data:imageBufferArray,test:true,imageDatas:imageDataArray},imageBufferArray);
+        //worker.postMessage(uInt8Array.buffer);
 
+        /**
+         * 通过可转让对象来传递数据与传统的按引用传递不同，一旦对象转让，那么它在原来上下文的那个版本将不复存在；
+         * 比如当你将一个 ArrayBuffer 对象从主线程中转让到 Web Worker 中，原始的 ArrayBuffer 将被清除并且无法使用，它包含的内容会完整无差的传递给 Web Worker。
+         */
+        worker.postMessage(uInt8Array.buffer, [uInt8Array.buffer]);
+        console.log(uInt8Array);
     </script>
 </body>
 </html>
