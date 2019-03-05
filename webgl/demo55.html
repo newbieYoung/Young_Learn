@@ -17,7 +17,7 @@
     </style>
 </head>
 <body>
-<div id="retina"></div>
+<canvas id="retina"></canvas>
 <script type="text/javascript" src="../lib/three.js"></script>
 <script type="text/javascript" src="../lib/three-CopyShader.js"></script>
 <script type="text/javascript" src="../lib/three-EffectComposer.js"></script>
@@ -47,11 +47,15 @@
     function initRender(){
         width = window.innerWidth;
         height = window.innerHeight;
-        renderer = new THREE.WebGLRenderer();
+
+        var canvas = document.getElementById('retina');
+        renderer = new THREE.WebGLRenderer({
+            canvas:canvas
+        });
+
         renderer.setSize(width, height);//设置渲染器宽度和高度
         renderer.setClearColor('#ffffff', 1.0);//设置背景颜色
         renderer.setPixelRatio(window.devicePixelRatio);//设置设备像素比
-        document.getElementById('retina').appendChild(renderer.domElement);//把渲染器放置到页面中
     }
 
     var camera;
