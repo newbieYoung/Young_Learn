@@ -105,11 +105,11 @@
         composer.render();
     }
 
-    var composer,fxaaPass;
+    var composer;
     function fxaa(){
         var renderPass = new THREE.RenderPass( scene, camera );
 
-        fxaaPass = new THREE.ShaderPass( THREE.FXAAShader );
+        var fxaaPass = new THREE.ShaderPass( THREE.FXAAShader );
         fxaaPass.renderToScreen = true;
         var pixelRatio = renderer.getPixelRatio();
         fxaaPass.material.uniforms[ 'resolution' ].value.x = 1 / ( width * pixelRatio );
