@@ -5,6 +5,8 @@
     <title>测试 webgl-image-filter.js</title>
 </head>
 <body>
+    <img src="../img/motion-blur.png" alt="">
+
     <script src="../lib/webgl-image-filter.js"></script>
     <script>
         try {
@@ -12,7 +14,11 @@
         }catch( err ) {
             // Handle browsers that don't support WebGL
         }
-        filter.addFilter('blur', 10);
+
+        filter.addFilter('blur', 60, 30);//motion blur
+
+        //filter.addFilter('blur', 60);//triangleblur
+
         //filter.addFilter('contrast',100);
         //filter.addFilter('brightness',0.5);
         //filter.addFilter('invert');
