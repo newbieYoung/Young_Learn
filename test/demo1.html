@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>测试webgl-image-filter.js</title>
+    <title>测试 webgl-image-filter.js</title>
 </head>
 <body>
     <script src="../lib/webgl-image-filter.js"></script>
@@ -12,15 +12,15 @@
         }catch( err ) {
             // Handle browsers that don't support WebGL
         }
-        //filter.addFilter('blur', 10);
+        filter.addFilter('blur', 10);
         //filter.addFilter('contrast',100);
         //filter.addFilter('brightness',0.5);
         //filter.addFilter('invert');
-        filter.addFilter('hue',10);
+        //filter.addFilter('hue',10);
 
         var img = new Image();
-        img.src = '../img/sky.JPG';
-        //img.src = '../img/flower.jpg';
+        //img.src = '../img/sky.JPG';
+        img.src = '../img/lena.jpg';
         img.onload = function () {
             var filteredImage = filter.apply(img);
             document.body.appendChild(filteredImage);
