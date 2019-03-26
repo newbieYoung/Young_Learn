@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试 glfx.js</title>
+</head>
+<body>
+    <script src="../lib/glfx.js"></script>
+    <script>
+        window.onload = function(){
+            var img = new Image();
+            img.src = '../img/lena.jpg';
+            img.onload = function(){
+
+                var canvas = fx.canvas();
+                var texture = canvas.texture(img);
+                canvas.draw(texture).triangleBlur(10).update();
+
+                document.body.appendChild(canvas);
+            }
+        }
+    </script>
+</body>
+</html>
