@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试 gif.js</title>
+</head>
+<body>
+    <script src="../lib/gif.js"></script>
+    <script>
+        window.onload = function(){
+            var gif = new GIF({
+                workers: 2,
+                quality: 10
+            });
+
+            //图片资源路径
+            var paths  = ['../img/frame/0001.png','../img/frame/0002.png','../img/frame/0003.png','../img/frame/0004.png','../img/frame/0005.png'
+                         ,'../img/frame/0006.png','../img/frame/0006.png','../img/frame/0007.png','../img/frame/0008.png','../img/frame/0009.png','../img/frame/0010.png'];
+
+            //根据路径加载图片资源
+            var imgs = [];
+            var count = 0;
+            for(var i=0;i<paths.length;i++){
+                var img = new Image();
+                img.src = paths[i];
+                img.onload = function(){
+                    count++;
+                    if(count == imgs.length){
+                        ready();
+                    }
+                }
+                imgs.push(img);
+            }
+
+            //生成gif
+            function ready(){
+                var gif = new GIF({
+                    workers: 2,
+                    quality: 10
+                });
+
+                for(var i=0;i<imgs.length;i++){
+                    var canvas = document.createElement('canvas');
+                    canvas.width = imgs[i].width;
+                    canvas.height = imgs[i].height;
+                    var ctx = canvas.getContext('2d');
+                    ctx.fillStyle = "#eee";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);//白色背景
+                    ctx.drawImage(imgs[i],0,0,canvas.width,canvas.height);
+
+                    gif.addFrame(canvas,{delay:70});
+                }
+
+                gif.on('finished', function(blob) {
+                    var gImg = new Image();
+                    gImg.src = URL.createObjectURL(blob);
+                    document.body.appendChild(gImg);
+                });
+
+                gif.render();
+            }
+        }
+    </script>
+</body>
+</html>
