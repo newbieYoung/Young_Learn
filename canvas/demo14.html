@@ -203,28 +203,66 @@
         window.onload = function () {
             document.addEventListener('click', function (e) {
                 var $target = e.target;
+
+                //获取部分图片
+                function getPartOfCanvas(canvas, rect) {
+                    var part = document.createElement('canvas');
+                    part.width = rect.width;
+                    part.height = rect.height;
+                    var ctx = part.getContext('2d');
+                    ctx.drawImage(canvas, rect.left, rect.top, rect.width, rect.height, 0, 0, rect.width,
+                        rect.height);
+                    return part;
+                }
+
+                //截取整体然后裁剪
                 var rect = document.body.getBoundingClientRect();
                 domtoimage.toPng(document.body)
                     .then(function (dataUrl) {
-                        var $page = document.createElement('canvas');
-                        $page.width = rect.width;
-                        $page.height = rect.height;
-                        var context = $page.getContext('2d');
-                        var img = new Image();
-                        img.src = dataUrl;
-                        img.onload = function () {
-                            context.drawImage(img, 0, 0, $page.width, $page.height);
 
+                        //完整页面
+                        var $page1 = document.createElement('canvas');
+                        $page1.width = rect.width;
+                        $page1.height = rect.height;
+                        var context1 = $page1.getContext('2d');
+                        var img1 = new Image();
+                        img1.src = dataUrl;
+                        img1.onload = function () {
+                            context1.drawImage(img1, 0, 0, rect.width, rect.height);
+                            //目标元素
                             var pos = $target.getBoundingClientRect();
-                            var left = document.documentElement.scrollLeft + pos.left;
-                            var top = document.documentElement.scrollTop + pos.top;
-                            var target = document.createElement('canvas');
-                            target.width = pos.width;
-                            target.height = pos.height;
-                            var ctx = target.getContext('2d');
-                            ctx.drawImage($page, left, top, target.width, target.height, 0, 0,
-                                target.width, target.height);
-                            document.body.appendChild(target);
+                            var partRect = {
+                                left: document.documentElement.scrollLeft + pos.left,
+                                top: document.documentElement.scrollTop + pos.top,
+                                width: pos.width,
+                                height: pos.height
+                            };
+                            var part = getPartOfCanvas($page1, partRect)
+                            //document.body.appendChild(part);
+
+                            //得去掉裁剪得到图片的背景部分
+                            $target.style.visibility = 'hidden';
+                            domtoimage.toPng(document.body)
+                                .then(function (dataUrl) {
+                                    //隐藏目标元素的完整页面
+                                    var $page2 = document.createElement('canvas');
+                                    $page2.width = rect.width;
+                                    $page2.height = rect.height;
+                                    var context2 = $page2.getContext('2d');
+                                    var img2 = new Image();
+                                    img2.src = dataUrl;
+                                    img2.onload = function () {
+                                        context2.drawImage(img2, 0, 0, rect.width, rect
+                                            .height);
+
+                                        //目标元素背景
+                                        var background = getPartOfCanvas($page2, partRect)
+                                        document.body.appendChild(background);
+                                    }
+                                })
+                                .catch(function (error) {
+                                    console.error('oops, something went wrong!', error);
+                                });
                         }
                     })
                     .catch(function (error) {
