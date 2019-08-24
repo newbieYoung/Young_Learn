@@ -74,7 +74,7 @@
             var $demo1 = document.querySelector('.demo1');
             html2canvas($demo1, {
                 dpi: window.devicePixelRatio, //设置设备像素比，防止模糊
-                scrollX: window.scrollX,
+                scrollX: window.scrollX, //设置 scrollX 和 scrollY 防止页面滚动之后出现错位的情况
                 scrollY: window.screenY,
             }).then(function (canvas) {
                 document.body.appendChild(canvas);
