@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>移动端计算软键盘高度</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no,viewport-fit=cover ">
+    <style>
+        body{
+            width:100vw;
+            height:100vh;
+            background-color:gray;
+        }
+        *{
+            margin:0;
+            padding:0;
+        }
+        .ios-trigger,
+        .trigger{
+            position: absolute;
+            left:10px;
+            width:100px;
+            height:20px;
+            background-color:lightblue;
+            z-index:10;
+            border:0;
+        }
+        .trigger{
+            top:40px;
+        }
+        .ios-trigger{
+            bottom:40px;
+        }
+        .mark{
+            width:100vw;
+            height:20px;
+            font-size:16px;
+            line-height: 20px;
+            background-color:lightpink;
+            z-index:10;
+            position: absolute;
+            left:0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <input class="trigger" type="text">
+    <div class="mark"></div>
+    <input class="ios-trigger" type="text">
+    <script>
+        window.onload = function(){
+            /* 判断设备类型 */
+            var u = navigator.userAgent, app = navigator.appVersion;
+            var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+            var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+
+            //只考虑竖屏
+            var pageHeight = document.documentElement.clientHeight;
+            var $mark = document.querySelector('.mark');
+            var $trigger = document.querySelector('.trigger');
+            var $iosTrigger = document.querySelector('.ios-trigger');
+
+            //android 获取软键盘高度
+            if(isAndroid){
+                window.onresize=function(){
+                    var height = document.documentElement.clientHeight;
+                    var keyboardHeight = pageHeight - height;
+                    if(height<pageHeight){
+                        $mark.style.top = (pageHeight - keyboardHeight - 40)+'px';
+                        $mark.innerText = '软键盘高度：'+keyboardHeight+'px';
+                    }else{
+                        $mark.style.top = '0px';
+                        $mark.innerText = '';
+                    }
+                }
+            }
+
+            //ios 获取软键盘高度
+            if(isiOS){
+                console.log($iosTrigger.getBoundingClientRect());
+                $trigger.addEventListener('focus',function(){
+                    $trigger.blur();
+                    $iosTrigger.focus();
+
+                });
+                $iosTrigger.addEventListener('focus',function(){
+                    console.log($iosTrigger.getBoundingClientRect());
+                });
+
+            }
+        }
+    </script>
+</body>
+</html>

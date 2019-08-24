@@ -1,432 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>html2canvas.js demo</title>
-    <style>
-        body,p,button,ul{
-            margin:0;
-            padding:0;
-        }
-        #all{
-            display:none;
-        }
-        .body-content{
-            min-width: 1440px;
-        }
-        .header{
-            height:40px;
-            padding-top:64px;
-            padding-bottom:56px;
-            padding-left:135px;
-            background-color: #3F3968;
-            font-size:40px;
-            color:#fff;
-            letter-spacing: 0;
-            line-height: 40px;
-            font-weight: 100;
-        }
+    <title>首页</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no,viewport-fit=cover ">
+    <link rel="stylesheet" href="./demo14.css" />
+    <link rel="stylesheet" href="../css/reset.css">
+    <script>
+        (function (win, doc) {
+            var docEl = document.documentElement;
 
-        /* 图片区域 */
-        .img-content,
-        .img-container{
-            margin:65px auto 26px auto;
-            width:282px;
-            height:282px;
-            border:1px dashed rgba(137,137,168,0.30);
-            cursor:pointer;
-            overflow:hidden;
-        }
-        .img-content{
-            display:none;
-            border:none;
-            position: relative;
-        }
-        .img-content .blur-tangle,
-        .img-content .blur-bangle,
-        .img-content .blur-bcircle{
-            z-index:5;
-        }
-        .img-content .grid-cover{
-            position: absolute;
-            top:0;
-            left:0;
-            bottom:0;
-            right:0;
-            background-image:url(../img/grid-cover.png);
-            backround-size:cover;
-            background-position: 50% 50%;
-            z-index:20;
-            display:none;
-        }
-        .img-content .blur-bcircle{
-            background-color: #fff;
-        }
-        .img-content .img-target{
-            width:100%;
-            height:100%;
-            position: absolute;
-            z-index:10;
-        }
-        .img-container .img-default{
-            width:67px;
-            height:80px;
-            background-image:url(../img/img-default.png);
-            background-size:cover;
-            background-position: 50% 50%;
-            margin:81px auto 12px auto;
-        }
-        .img-container .title{
-            font-size:16px;
-            color:#20203A;
-            letter-spacing: 0;
-            line-height: 16px;
-            text-align: center;
-            margin-bottom:12px;
-        }
-        .img-container .desc{
-            font-size:12px;
-            color:#8989A8;
-            line-height: 20px;
-            letter-spacing: 0;
-            width:96px;
-            margin:auto;
-            text-align: center;
-            font-weight: 300;
-        }
-
-        /* 按钮区域 */
-        .btns-container{
-            width:280px;
-            height:48px;
-            margin:auto;
-            font-size:0;
-        }
-        .btns-container .refresh-btn{
-            display:inline-block;
-            height:100%;
-            cursor:pointer;
-        }
-        .btns-container .refresh-btn .icon{
-            display:inline-block;
-            width:48px;
-            height:48px;
-            background-image:url(../img/refresh-icon.png);
-            background-size:cover;
-            background-position: 50% 50%;
-        }
-        .btns-container .show-grid .name,
-        .btns-container .refresh-btn .name{
-            border:none;
-            vertical-align: top;
-            background-color:#fff;
-            font-size:14px;
-            color:#8989A8;
-            letter-spacing: 0;
-            font-weight: 300;
-            margin-top:17px;
-            margin-left:7px;
-            line-height: 14px;
-        }
-        .btns-container .show-grid{
-            display:inline-block;
-            vertical-align: top;
-            float:right;
-            cursor:pointer;
-        }
-        .btns-container .show-grid .icon{
-            display:inline-block;
-            width:22px;
-            height:22px;
-            background-image:url(../img/radio-icon.png);
-            background-size:cover;
-            background-position: 50% 50%;
-            margin-top:13px;
-        }
-        .btns-container .show-grid.active .icon{
-            background-image:url(../img/radio-icon-active.png);
-        }
-
-        /* 颜色选择区域 */
-        .colors-container{
-            width:840px;
-            margin:48px auto 80px auto;
-            position: relative;
-        }
-        .colors-container .name{
-            display:inline-block;
-            width:131px;
-            height:16px;
-            font-size: 16px;
-            color: #8989A8;
-            line-height: 16px;
-            font-weight:300;
-            position: absolute;
-            top:0;
-            bottom:0;
-            left:-131px;
-            margin:auto;
-        }
-        .colors-container .colors{
-            width:840px;
-            padding:17px 20px;
-            font-size:0;
-            box-shadow: 0 5px 16px 0 rgba(0,0,0,0.20);
-            border-radius: 8px;
-        }
-        .colors-container .colors li{
-            display:inline-block;
-            width:58px;
-            height:30px;
-            margin:5px;
-            border-radius:4px;
-            border: 1px solid rgba(221,221,221,0.79);
-            cursor:pointer;
-        }
-
-        /* 下载按钮 */
-        .download-btn{
-            display:block;
-            width:144px;
-            height:48px;
-            border:none;
-            border-radius: 171.43px;
-            background-image: linear-gradient(-151deg, #FFB636 0%, #FF1953 100%);
-            box-shadow: 0 8px 14px 0 rgba(255,77,73,0.20);
-            font-size:18px;
-            color:#fff;
-            line-height: 48px;
-            letter-spacing: 0;
-            margin:0 auto 80px auto;
-            cursor:pointer;
-            text-align: center;
-        }
-
-        /* 色值版 */
-
-        /* 1-12 */
-        .v1-1-1{
-            background-image: linear-gradient(-1deg, #FFE7E7 0%, #FCAAAA 100%);
-        }
-        .v1-1-2{
-            background-image: linear-gradient(-1deg, #FFF0DE 4%, #FFBF80 100%);
-        }
-        .v1-1-3{
-            background-image: linear-gradient(0deg, #FFFFDD 0%, #EFEF92 90%);
-        }
-        .v1-1-4{
-            background-image: linear-gradient(-1deg, #F4FFE5 0%, #C5EF9A 100%);
-        }
-        .v1-1-5{
-            background-image: linear-gradient(0deg, #D6FFD6 0%, #9AEF9A 100%);
-        }
-        .v1-1-6{
-            background-image: linear-gradient(-1deg, #D7FFEE 0%, #90EBBE 100%);
-        }
-        .v1-1-7{
-            background-image: linear-gradient(1deg, #A9FFFF 0%, #66D0D0 100%);
-        }
-        .v1-1-8{
-            background-image: linear-gradient(0deg, #DBEFFF 0%, #88BEF3 96%);
-        }
-        .v1-1-9{
-            background-image: linear-gradient(0deg, #DCDCFF 0%, #8B8BE8 100%);
-        }
-        .v1-1-10{
-            background-image: linear-gradient(-1deg, #E5CDF9 0%, #A15FE1 98%);
-        }
-        .v1-1-11{
-            background-image: linear-gradient(0deg, #FFDAFF 1%, #EB8FEB 100%);
-        }
-
-        /* 13-24 */
-        .v1-1-12{
-            background-image: linear-gradient(-2deg, #F8CAED 0%, #EE7BCC 100%);
-        }
-        .v1-1-13{
-            background-image: linear-gradient(-180deg, #FF5C5C 0%, #FFB9E3 99%);
-        }
-        .v1-1-14{
-            background-image: linear-gradient(-1deg, #FFE7C3 0%, #F5A04C 100%);
-        }
-        .v1-1-15{
-            background-image: linear-gradient(0deg, #F5F2D0 0%, #F3D959 98%);
-        }
-        .v1-1-16{
-            background-image: linear-gradient(-1deg, #EAF8A9 0%, #A3C735 100%);
-        }
-        .v1-1-17{
-            background-image: linear-gradient(-1deg, #BDFCBD 0%, #72C46A 97%);
-        }
-        .v1-1-18{
-            background-image: linear-gradient(0deg, #B0F5DB 0%, #5DCA94 100%);
-        }
-        .v1-1-19{
-            background-image: linear-gradient(0deg, #9AF0F0 0%, #3DBBC3 100%);
-        }
-        .v1-1-20{
-            background-image: linear-gradient(-1deg, #A6D8FF 0%, #3A7DD5 100%);
-        }
-        .v1-1-21{
-            background-image: linear-gradient(-1deg, #A4A4FF 0%, #5E5ED8 100%);
-        }
-        .v1-1-22{
-            background-image: linear-gradient(-1deg, #D7BCF2 0%, #8A54DD 100%);
-        }
-        .v1-1-23{
-            background-image: linear-gradient(-1deg, #FFAEFB 3%, #C751C7 98%);
-        }
-        .v1-1-24{
-            background-image: linear-gradient(-180deg, #DC398D 0%, #FFB0EC 100%);
-        }
-
-        /* 25-36 */
-        .v1-1-25{
-            background-image: linear-gradient(-1deg, #FF81C0 0%, #603737 100%);
-        }
-        .v1-1-26{
-            background-image: linear-gradient(0deg, #FFB65E 0%, #764312 100%);
-        }
-        .v1-1-27{
-            background-image: linear-gradient(-1deg, #FDE744 0%, #7D5C00 100%);
-        }
-        .v1-1-28{
-            background-image: linear-gradient(-1deg, #B1E446 0%, #334A07 100%);
-        }
-        .v1-1-29{
-            background-image: linear-gradient(0deg, #A6FFB5 0%, #0A450A 100%);
-        }
-        .v1-1-30{
-            background-image: linear-gradient(0deg, #65EBB3 0%, #1E4230 100%);
-        }
-        .v1-1-31{
-            background-image: linear-gradient(-1deg, #5EE0E0 0%, #044C4C 100%);
-        }
-        .v1-1-32{
-            background-image: linear-gradient(-1deg, #5CBBFF 0%, #183F66 94%);
-        }
-        .v1-1-33{
-            background-image: linear-gradient(0deg, #A5A5FF 0%, #2B2B7E 97%);
-        }
-        .v1-1-34{
-            background-image: linear-gradient(0deg, #C586F3 0%, #4E326A 99%);
-        }
-        .v1-1-35{
-            background-image: linear-gradient(-1deg, #F585F5 0%, #621662 100%);
-        }
-        .v1-1-36{
-            background-image: linear-gradient(0deg, #EF75B8 0%, #99397D 100%);
-        }
-    </style>
+            function setFont() {
+                var cliWidth = docEl.clientWidth;
+                if (cliWidth > 750) {
+                    cliWidth = 750;
+                }
+                docEl.style.fontSize = 100 * (cliWidth / 750) + 'px';
+            }
+            win.addEventListener('resize', setFont, false);
+            setFont();
+        })(window, document);
+    </script>
 </head>
+
 <body>
-    <article class="body-content">
-        <header class="header">空间商城预览图生成工具</header>
-        <section>
-            <div class="img-container">
-                <div class="img-default"></div>
-                <p class="title">上传设计稿</p>
-                <p class="desc">拖动图片至区域内支持格式png</p>
-            </div>
-            <div class="img-content js-img-content"><img class="img-target js-img-target">
-                <div class="blur-bangle js-blur-bangle"></div>
-                <div class="blur-bcircle js-blur-bcircle"></div>
-                <div class="blur-tangle js-blur-tangle"></div>
-                <div class="grid-cover js-grid-cover"></div>
-            </div>
-            <div class="btns-container">
-                <div class="refresh-btn js-refresh-btn"><span class="icon"></span>
-                    <button class="name">刷新背景</button>
+    <div class="main-page">
+        <div class="mp-head"></div>
+        <div class="mp-title"></div>
+
+        <!-- 选项 -->
+        <div class="mp-options">
+
+
+            <!-- 状态一 -->
+            <!--<div class="mo-card mo-other">-->
+            <!--<div class="mc-content">-->
+            <!--<p class="mc-name">1个月豪华黄钻+1次抽奖</p>-->
+            <!--<p class="mc-price">15</p>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--<div class="mo-card">-->
+            <!--<div class="mc-content">-->
+            <!--<p class="mc-name">2个月豪华黄钻+2次抽奖</p>-->
+            <!--<p class="mc-price">30</p>-->
+            <!--</div>-->
+            <!--</div>-->
+
+            <!-- 状态二 -->
+            <div class="mo-card">
+                <div class="mc-content">
+                    <p class="mc-name">1个月豪华黄钻+1次抽奖</p>
+                    <p class="mc-price">15</p>
                 </div>
-                <div class="show-grid js-show-grid"><span class="icon"></span>
-                    <button class="name">显示网格</button>
+            </div>
+            <div class="mo-card mo-other">
+                <div class="mc-content">
+                    <p class="mc-name">2个月豪华黄钻+2次抽奖</p>
+                    <p class="mc-price">30</p>
                 </div>
             </div>
-            <div class="colors-container"><span class="name">背景颜色选择</span>
-                <ul class="colors js-colors">
-                    <li class="v1-1-1"></li>
-                    <li class="v1-1-2"></li>
-                    <li class="v1-1-3"></li>
-                    <li class="v1-1-4"></li>
-                    <li class="v1-1-5"></li>
-                    <li class="v1-1-6"></li>
-                    <li class="v1-1-7"></li>
-                    <li class="v1-1-8"></li>
-                    <li class="v1-1-9"></li>
-                    <li class="v1-1-10"></li>
-                    <li class="v1-1-11"></li>
-                    <li class="v1-1-12"></li>
-                    <li class="v1-1-13"></li>
-                    <li class="v1-1-14"></li>
-                    <li class="v1-1-15"></li>
-                    <li class="v1-1-16"></li>
-                    <li class="v1-1-17"></li>
-                    <li class="v1-1-18"></li>
-                    <li class="v1-1-19"></li>
-                    <li class="v1-1-20"></li>
-                    <li class="v1-1-21"></li>
-                    <li class="v1-1-22"></li>
-                    <li class="v1-1-23"></li>
-                    <li class="v1-1-24"></li>
-                    <li class="v1-1-25"></li>
-                    <li class="v1-1-26"></li>
-                    <li class="v1-1-27"></li>
-                    <li class="v1-1-28"></li>
-                    <li class="v1-1-29"></li>
-                    <li class="v1-1-30"></li>
-                    <li class="v1-1-31"></li>
-                    <li class="v1-1-32"></li>
-                    <li class="v1-1-33"></li>
-                    <li class="v1-1-34"></li>
-                    <li class="v1-1-35"></li>
-                    <li class="v1-1-36"></li>
+
+            <!-- 状态三 -->
+            <!--<div class="mo-card mo-other">-->
+            <!--<div class="mc-content">-->
+            <!--<p class="mc-name">1个月豪华黄钻+1次抽奖</p>-->
+            <!--<p class="mc-price">15</p>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--<div class="mo-card mo-card-2">-->
+            <!--<div class="mc-content">-->
+            <!--<p class="mc-name">2个月豪华黄钻+2次抽奖</p>-->
+            <!--<p class="mc-price">22.5</p>-->
+            <!--<p class="mc-desc">（原价30元）</p>-->
+            <!--</div>-->
+            <!--</div>-->
+
+            <!-- 状态四 -->
+            <!--<div class="mo-card">-->
+            <!--<div class="mc-content">-->
+            <!--<p class="mc-name">1个月豪华黄钻+1次抽奖</p>-->
+            <!--<p class="mc-price">15</p>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--<div class="mo-card mo-card-2 mo-other">-->
+            <!--<div class="mc-content">-->
+            <!--<p class="mc-name">2个月豪华黄钻+2次抽奖</p>-->
+            <!--<p class="mc-price">22.5</p>-->
+            <!--<p class="mc-desc">（原价30元）</p>-->
+            <!--</div>-->
+            <!--</div>-->
+
+            <div class="mo-btn"></div>
+        </div>
+
+        <!-- 抽奖 -->
+        <div class="mp-prize">
+            <div class="me-content">
+                <div class="me-btn"></div>
+                <p class="me-num">剩余抽奖次数：<span>2</span>次</p>
+                <ul class="me-list">
+                    <li class="vip-year-1">
+                        <div class="ml-icon"></div>
+                        <p class="ml-name">1年豪华黄钻</p>
+                    </li>
+                    <li class="vip-month-3">
+                        <div class="ml-icon"></div>
+                        <p class="ml-name">3个月豪华黄钻</p>
+                    </li>
+                    <li class="vip-month-1">
+                        <div class="ml-icon"></div>
+                        <p class="ml-name">1个月豪华黄钻</p>
+                    </li>
+                    <li class="vip-day-15">
+                        <div class="ml-icon"></div>
+                        <p class="ml-name">15天豪华黄钻</p>
+                    </li>
+                    <li class="vip-year-10">
+                        <div class="ml-icon"></div>
+                        <p class="ml-name">十周年钻</p>
+                    </li>
+                    <li class="vip-day-7">
+                        <div class="ml-icon"></div>
+                        <p class="ml-name">7天豪华黄钻</p>
+                    </li>
+                    <li class="score-100">
+                        <div class="ml-icon"></div>
+                        <p class="ml-name">100成长值</p>
+                    </li>
+                    <li class="score-200">
+                        <div class="ml-icon"></div>
+                        <p class="ml-name">200成长值</p>
+                    </li>
+                    <li>
+                        <p class="ml-end">谢谢参与</p>
+                    </li>
                 </ul>
-            </div><a class="download-btn js-download-btn">下载</a>
-        </section>
-    </article>
+                <div class="me-links">
+                    <button>收获地址</button>
+                    <button>获奖记录</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 规则 -->
+        <div class="mp-rule">
+            <p class="mr-title"></p>
+            <ul class="mr-list">
+                <li>
+                    <div class="mr-no">1</div>
+                    <p>本活动截止到期时间为2019年8月31号。</p>
+                </li>
+                <li>
+                    <div class="mr-no">2</div>
+                    <p>本页面活动，剩余时长≤3个月的豪华黄钻用户购买豪华黄钻，享第2个月半价优惠，一个用户只能参与一次。</p>
+                </li>
+                <li>
+                    <div class="mr-no">3</div>
+                    <p>剩余时长＞3个月的豪华黄钻用户，可原价购买。</p>
+                </li>
+                <li>
+                    <div class="mr-no">4</div>
+                    <p>每购买1个月豪华黄钻，即送1次抽奖机会。</p>
+                </li>
+                <li>
+                    <div class="mr-no">5</div>
+                    <p>虚拟奖品发放：用户抽奖所得的豪华黄钻天数、成长值、翻倍卡等虚拟奖品将实时发放至用户账户。</p>
+                </li>
+                <li>
+                    <div class="mr-no">6</div>
+                    <p>实体奖品发放：实体奖品包括十周年钻（奖品数量有限，先到先得），腾讯可随时调整奖品种类，具体奖品以实际发放为准。</p>
+                </li>
+                <li>
+                    <div class="mr-no">7</div>
+                    <p>若用户抽中实物奖品，应在中奖后7日内在本页面填写真实且正确的个人信息（身份证号码、联系地址、电话号码、QQ号等），黄钻团队会在本次活动结束2个月后统一发货，由于用户未及时提供相应信息或信息不真实、不完整导致的资格取消、奖品无法发放或者发放错误等一切后果，由用户自行承担。
+                    </p>
+                </li>
+                <li>
+                    <div class="mr-no">8</div>
+                    <p>由于不可抗拒因素、网络问题、作弊等非腾讯公司原因导致活动出现异常情况，腾讯公司有权采取调整、暂停等措施。</p>
+                </li>
+                <li>
+                    <div class="mr-no">9</div>
+                    <p>黄钻、豪华黄钻手机话费用户暂时不能参与该活动；IOS用户暂不能参与本活动。</p>
+                </li>
+                <li>
+                    <div class="mr-no">10</div>
+                    <p>在法律允许范围内腾讯公司对上述内容拥有解释权。</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="mp-dialog" style="display:none;">
+        <div class="md-content">
+            <div class="md-close"></div>
+            <p class="md-message">一个用户仅能优惠购买一次哦~</p>
+        </div>
+    </div>
     <script src="../lib/html2canvas.js"></script>
     <script>
-        window.onload = function(){
-            /**
-             * 在retina屏上直接转换部分会因为缩放的原因导致位置不对，可以先转换整体，然后裁切；
-             * 在非retina屏上直接转换部分也有问题，只会显示窗口内可视部分，暂时不知道原因。
-             * @type {Element}
-             */
+        window.onload = function () {
+            document.addEventListener('click', function (e) {
+                var $target = e.target;
+                /**
+                 * 截取部分的dom图片时有可能出现没有内容的情况，暂时不知道啥原因；
+                 * 解决方案是先获取整体，然后通过定位获取部分
+                 */
+                html2canvas(document.body, {
+                    dpi: window.devicePixelRatio, //设置设备像素比，防止模糊
+                    scrollX: window.scrollX,
+                    scrollY: window.screenY,
+                }).then(function (canvas) {
+                    var rect = $target.getBoundingClientRect();
+                    var dpi = window.devicePixelRatio;
+                    var target = document.createElement('canvas');
+                    target.width = rect.width * dpi;
+                    target.height = rect.height * dpi;
 
-            //转换整体然后裁切
-            var dom = document.querySelector('body');
-            var $target = document.querySelector('.btns-container');
+                    var left = (window.scrollX + rect.left) * dpi;
+                    var top = (window.scrollY + rect.top) * dpi;
+                    var ctx = target.getContext('2d');
+                    ctx.drawImage(canvas, left, top, target.width, target.height, 0, 0, target
+                        .width,
+                        target.height);
 
-            var scrollX = window.scrollX;
-            var scrollY = window.scrollY;
-
-            var option = {};
-            var ratio = window.devicePixelRatio;
-            if(ratio==1){//非retina屏强制使用缩放
-                ratio = 2;
-                option.scale = 2;
-            }
-            $target.style.transform = 'scale('+ratio+')';//为了防止模糊强制缩放
-
-            html2canvas(dom,option).then(function(canvas) {
-                var imgRect = $target.getBoundingClientRect();
-                $target.style.transform = 'none';//还原
-
-                //获取出现缩放后真正的内容区域
-                var $content = document.createElement('canvas');
-                $content.width = document.body.scrollWidth;
-                $content.height = document.body.scrollHeight;
-                var $contentContext = $content.getContext('2d');
-                $contentContext.drawImage(canvas,scrollX*2,scrollY*2,$content.width,$content.height,0,0,$content.width,$content.height);
-
-                var tempCanvas = document.createElement('canvas');
-                tempCanvas.width = imgRect.width;
-                tempCanvas.height = imgRect.height;
-                var tempContext = tempCanvas.getContext('2d');
-                tempContext.drawImage($content, imgRect.left+scrollX, imgRect.top+scrollY, imgRect.width, imgRect.height, 0, 0, tempCanvas.width, tempCanvas.height);
-                document.body.appendChild(tempCanvas);
+                    document.body.appendChild(target);
+                });
             });
         }
     </script>
 </body>
+
 </html>
