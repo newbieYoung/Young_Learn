@@ -29,6 +29,7 @@
     <canvas id="canvas" width="200" height="200"></canvas>
     <div class="demo1">demo1</div>
     <div class="demo2"></div>
+    <script src="../lib/html2canvas.js"></script>
     <script>
         window.onload = function () {
             var canvas = document.getElementById('canvas');
@@ -71,6 +72,18 @@
             }
 
             img.src = url;
+
+            /**
+             * html2canvs 有 bug，截取图片的文字部分有偏移
+             */
+            var $demo1 = document.querySelector('.demo1');
+            html2canvas($demo1, {
+                dpi: window.devicePixelRatio, //设置设备像素比，防止模糊
+                scrollX: window.scrollX,
+                scrollY: window.screenY,
+            }).then(function (canvas) {
+                document.body.appendChild(canvas);
+            });
         }
     </script>
 </body>
