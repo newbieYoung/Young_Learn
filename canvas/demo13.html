@@ -58,15 +58,18 @@
                 '</foreignObject>' +
                 '</svg>';
 
-            var DOMURL = window.URL || window.webkitURL || window;
-            var img = new Image();
+
             var svg = new Blob([data], {
                 type: 'image/svg+xml;charset=utf-8'
             });
-            var url = DOMURL.createObjectURL(svg);
+            var url = URL.createObjectURL(svg);
+            var img = new Image();
+            img.crossOrigin = 'anonymous';
             img.onload = function () {
                 ctx.drawImage(img, 0, 0);
-                DOMURL.revokeObjectURL(url);
+                //这种方式得到图片存在跨域问题，即使设置了 crossOrigin 也不好使，暂时不知道啥原因。
+                console.log(canvas.toDataURL('image/png'));
+                URL.revokeObjectURL(url);
             }
             img.src = url;
 
