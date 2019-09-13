@@ -52,8 +52,9 @@
                 //'<div xmlns="http://www.w3.org/1999/xhtml" style="width:200px;height:200px;background-color:#ffcc00;filter:blur(20px);"></div>' +
 
                 //demo1 使用 transform scale 解决 foreignObject 截图的模糊问题
+                //foreignObject 支持 -webkit-background-clip: text; 和 -webkit-text-fill-color: transparent; 实现文字颜色渐变
                 '<div xmlns="http://www.w3.org/1999/xhtml" style=" transform:scale(' + ratio +
-                '); transform-origin:0 0; width: 200px; height: 200px;background-image: linear-gradient(270deg, #FA3883 9%, #FFB647 85%);font-size: 36px;line-height: 200px; text-align:center; color: #fff; border:none;">demo1</div>' +
+                '); transform-origin:0 0; width: 200px; height: 200px;background-image: linear-gradient(270deg, #FA3883 9%, #FFB647 85%);font-size: 36px; -webkit-background-clip: text; -webkit-text-fill-color: transparent;line-height: 200px; text-align:center; color: #fff; border:none;">demo1</div>' +
 
                 '</foreignObject>' +
                 '</svg>';
