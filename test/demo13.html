@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>测试 exif 获取图片元数据、方向角对canvas绘制的影响</title>
+  <style>
+    canvas{
+      width:40%;
+    }
+    img{
+      width:40%;
+    }
+  </style>
+</head>
+<body>
+  <input id="upload" type="file" accept="image/png,image/jpeg" style="display:block;">
+  <img id="img" src="" alt="">
+  <canvas id="canvas"></canvas>
+  <p id="exif"></p>
+  <script src="../lib/exif.js"></script>
+  <script>
+    window.onload = function(){
+      var $exif = document.querySelector("#exif");
+      var $img = document.querySelector("#img");
+      var $canvas = document.querySelector("#canvas");
+      var ctx = $canvas.getContext('2d');
+      var $upload = document.querySelector("#upload");
+      $upload.addEventListener('change',function(evt){
+            var files = evt.target.files;
+            if(files.length>0){
+              var reader = new FileReader();
+              reader.onload = function (e) {
+                $img.src = e.target.result;
+                $img.onload = function(){
+                  //绘制到canvas中
+                  $canvas.width = $img.width;
+                  $canvas.height = $img.height;
+                  ctx.drawImage($img,0,0,$canvas.width,$canvas.height);
+
+                  //方向角
+                  EXIF.getData($img, function() {
+                          $exif.innerText = 'Orientation:'+EXIF.getTag(this, 'Orientation')
+                      });
+                }
+              }
+              reader.readAsDataURL(files[0])
+            }
+            $upload.value = '';
+        });
+    }
+  </script>
+</body>
+</html>
