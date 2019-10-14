@@ -31,7 +31,7 @@
           if (files.length > 0) {
             var reader = new FileReader()
             reader.onload = function(e) {
-              var $img = new Image() //使用使用 new Image() 的方式，否则获取图片的尺寸和元数据时会有问题
+              var $img = new Image() //使用使用 new Image() 的方式，否则获取图片的尺寸和图片元数据时会有问题
               $img.src = e.target.result
               $img.onload = function() {
                 //方向角
@@ -48,7 +48,6 @@
                     $canvas.width = height
                     $canvas.height = width
                   }
-                  ctx.save()
                   switch (orientation) {
                     case 2:
                       // horizontal flip
@@ -88,7 +87,6 @@
                       break
                   }
                   ctx.drawImage($img, 0, 0, width, height)
-                  ctx.restore()
                 })
               }
             }
