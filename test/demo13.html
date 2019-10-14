@@ -1,53 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>测试 exif 获取图片元数据、方向角对canvas绘制的影响</title>
   <style>
-    canvas{
-      width:40%;
-    }
-    img{
-      width:40%;
+    canvas {
+      width: 40%;
     }
   </style>
 </head>
+
 <body>
   <input id="upload" type="file" accept="image/png,image/jpeg" style="display:block;">
-  <img id="img" src="" alt="">
   <canvas id="canvas"></canvas>
   <p id="exif"></p>
   <script src="../lib/exif.js"></script>
   <script>
-    window.onload = function(){
+    window.onload = function () {
       var $exif = document.querySelector("#exif");
-      var $img = document.querySelector("#img");
       var $canvas = document.querySelector("#canvas");
       var ctx = $canvas.getContext('2d');
       var $upload = document.querySelector("#upload");
-      $upload.addEventListener('change',function(evt){
-            var files = evt.target.files;
-            if(files.length>0){
-              var reader = new FileReader();
-              reader.onload = function (e) {
-                $img.src = e.target.result;
-                $img.onload = function(){
-                  //绘制到canvas中
-                  $canvas.width = $img.width;
-                  $canvas.height = $img.height;
-                  ctx.drawImage($img,0,0,$canvas.width,$canvas.height);
+      $upload.addEventListener('change', function (evt) {
+        var files = evt.target.files;
+        if (files.length > 0) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            var $img = new Image();
+            $img.src = e.target.result;
+            $img.onload = function () {
+              //方向角
+              EXIF.getData($img, function () {
+                var orientation = EXIF.getTag(this, 'Orientation');
+                //绘制到canvas中
+                $exif.innerText = 'Orientation:' + orientation;
 
-                  //方向角
-                  EXIF.getData($img, function() {
-                          $exif.innerText = 'Orientation:'+EXIF.getTag(this, 'Orientation')
-                      });
+                var width = $img.width;
+                var height = $img.height;
+                $canvas.width = width;
+                $canvas.height = height;
+                if (orientation > 4) {
+                  $canvas.width = height;
+                  $canvas.height = width;
                 }
-              }
-              reader.readAsDataURL(files[0])
+                ctx.save();
+                switch (orientation) {
+                  case 2:
+                    // horizontal flip
+                    ctx.translate(width, 0);
+                    ctx.scale(-1, 1);
+                    break;
+                  case 3:
+                    // 180° rotate left
+                    ctx.translate(width, height);
+                    ctx.rotate(Math.PI);
+                    break;
+                  case 4:
+                    // vertical flip
+                    ctx.translate(0, height);
+                    ctx.scale(1, -1);
+                    break;
+                  case 5:
+                    // vertical flip + 90 rotate right
+                    ctx.rotate(0.5 * Math.PI);
+                    ctx.scale(1, -1);
+                    break;
+                  case 6:
+                    // 90° rotate right
+                    ctx.rotate(0.5 * Math.PI);
+                    ctx.translate(0, -height);
+                    break;
+                  case 7:
+                    // horizontal flip + 90 rotate right
+                    ctx.rotate(0.5 * Math.PI);
+                    ctx.translate(width, -height);
+                    ctx.scale(-1, 1);
+                    break;
+                  case 8:
+                    // 90° rotate left
+                    ctx.rotate(-0.5 * Math.PI);
+                    ctx.translate(-width, 0);
+                    break;
+                }
+                ctx.drawImage($img, 0, 0, width, height);
+                ctx.restore();
+              });
             }
-            $upload.value = '';
-        });
+          }
+          reader.readAsDataURL(files[0])
+        }
+        $upload.value = '';
+      });
     }
   </script>
 </body>
+
 </html>
