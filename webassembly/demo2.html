@@ -1,44 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>测试 WebAssembly.instantiate、asm.js、获取字符串返回、传入字符串</title>
 </head>
+
 <body>
+    <script type="text/javascript" src="demo2.js"></script>
+    <script>
+        Module['onRuntimeInitialized'] = function () {
+            console.log(Module._bezier1(0.5, 10, 20));
 
-<!-- 测试 WebAssembly.instantiate -->
-<!--<script>-->
-    <!--//emcc demo2.c -s WASM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS='["UTF8ToString"]' -s EXPORTED_FUNCTIONS="['_bezier1','_hello','_sayHi']"  -o demo2.js-->
-    <!--const memory = new WebAssembly.Memory({ initial: 256, maximum: 256 });-->
-    <!--const importObj = {-->
-        <!--env: {-->
-            <!--abortStackOverflow: () => { throw new Error('overflow'); },-->
-            <!--table: new WebAssembly.Table({ initial: 0, maximum: 0, element: 'anyfunc' }),-->
-            <!--tableBase: 0,-->
-            <!--memory: memory,-->
-            <!--memoryBase: 1024,-->
-            <!--STACKTOP: 0,-->
-            <!--STACK_MAX: memory.buffer.byteLength,-->
-        <!--}-->
-    <!--};-->
-    <!--fetch('demo2.wasm').then((response) => response.arrayBuffer())-->
-            <!--.then((bytes) => WebAssembly.instantiate(bytes, importObj))-->
-            <!--.then((wa) => alert(wa.instance.exports._bezier1(0.5, 10, 20)));-->
-<!--</script>-->
+            var p0 = Module._hello();
+            console.log(Module.UTF8ToString(p0));
 
-<script type="text/javascript" src="demo2.js"></script>
-<script>
-    Module['onRuntimeInitialized'] = function() {
-        console.log(Module._bezier1(0.5, 10, 20));
-
-        var p0 = Module._hello();
-        console.log(Module.UTF8ToString(p0));
-
-        var name = "newyoungli";
-        var ptr  = allocate(intArrayFromString(name), 'i8', ALLOC_NORMAL);
-        var p1 = Module._sayHi(ptr);
-        console.log(Module.UTF8ToString(p1))
-    };
-</script>
+            var name = "newyoungli";
+            var ptr = allocate(intArrayFromString(name), 'i8', ALLOC_NORMAL);
+            var p1 = Module._sayHi(ptr);
+            console.log(Module.UTF8ToString(p1))
+        };
+    </script>
 </body>
+
 </html>
