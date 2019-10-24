@@ -1,21 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>测试多个文件编译的wasm是否正常</title>
 </head>
-<body>
-<script src="./loadWebAssembly.js"></script>
-<script>
-    //emcc demo1.cpp head.cpp -Os -s WASM=1 -s SIDE_MODULE=1 -o demo1.wasm
-    window.onload = function(){
-        loadWebAssembly('./demo1.wasm')
-                .then(instance => {
-            const mixed = instance.exports.__Z5mixedii;
 
-            console.log('result =', mixed(3,2));
-        })
-    }
-</script>
+<body>
+    <script src="./loadWebAssembly.js"></script>
+    <script>
+        //emcc demo1.cpp head.cpp -Os -s WASM=1 -s SIDE_MODULE=1 -o demo1.wasm
+        window.onload = function () {
+            loadWebAssembly('./demo1.wasm')
+                .then(instance => {
+                    console.log(instance.exports);
+
+                    const mixed = instance.exports._Z5mixedii;
+                    console.log('result =', mixed(3, 2));
+                })
+        }
+    </script>
 </body>
+
 </html>

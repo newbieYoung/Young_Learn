@@ -13,6 +13,8 @@
         window.onload = function () {
             loadWebAssembly('./demo0.wasm')
                 .then(instance => {
+                    console.log(instance.exports);
+
                     const add = instance.exports.add
                     const minus = instance.exports.minus
 
