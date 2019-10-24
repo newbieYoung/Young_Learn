@@ -7,9 +7,10 @@
 </head>
 
 <body>
+    <script src="tool.js"></script>
     <script type="text/javascript" src="demo2.js"></script>
     <script>
-        //emcc demo2.c -s WASM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS='["UTF8ToString"]' -s EXPORTED_FUNCTIONS="['_bezier1','_hello','_sayHi','_fib']" -o demo2.js
+        //emcc demo2.c -O3 -s WASM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS='["UTF8ToString"]' -s EXPORTED_FUNCTIONS="['_bezier1','_hello','_sayHi','_fib']" -o demo2.js
         Module['onRuntimeInitialized'] = function () {
             console.log(Module);
 
@@ -18,8 +19,9 @@
             var p0 = Module._hello();
             console.log(Module.UTF8ToString(p0));
 
+            //有些胶水方法在使用编译优化参数之后会被去掉，可以先不使用编译优化获得含有胶水方法的代码，然后复制到 tool.js
             var name = "newyoungli";
-            var ptr = allocate(intArrayFromString(name), 'i8', ALLOC_NORMAL);
+            var ptr = allocate(intArrayFromString(name), 'i8', ALLOC_NONE);
             var p1 = Module._sayHi(ptr);
             console.log(Module.UTF8ToString(p1))
 

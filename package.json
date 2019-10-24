@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/newbieYoung/h5_learn/issues"
   },
-  "homepage": "https://github.com/newbieYoung/h5_learn#readme"
+  "homepage": "https://github.com/newbieYoung/h5_learn#readme",
+  "devDependencies": {
+    "eslint": "^6.5.1"
+  }
 }

@@ -9,7 +9,7 @@
 <body>
     <script src="./loadWebAssembly.js"></script>
     <script>
-        //emcc demo1.cpp head.cpp -Os -s WASM=1 -s SIDE_MODULE=1 -o demo1.wasm
+        //emcc demo1.cpp head.cpp -O3 -s WASM=1 -s SIDE_MODULE=1 -o demo1.wasm
         window.onload = function () {
             loadWebAssembly('./demo1.wasm')
                 .then(instance => {
