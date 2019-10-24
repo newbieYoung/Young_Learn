@@ -24,7 +24,7 @@
                     //计算斐波那契数列
                     const fib = instance.exports.fib
                     var c0 = window.performance.now();
-                    console.log(fib(42))
+                    fib(42)
                     var c1 = window.performance.now();
                     console.log('c webassembly ' + (c1 - c0) + ' ms');
                 })

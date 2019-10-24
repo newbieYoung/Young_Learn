@@ -1996,6 +1996,13 @@ asm["sayHi"] = function() {
   return real__sayHi.apply(null, arguments);
 };
 
+var real__fib = asm["fib"];
+asm["fib"] = function() {
+  assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
+  assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
+  return real__fib.apply(null, arguments);
+};
+
 var real____errno_location = asm["__errno_location"];
 asm["__errno_location"] = function() {
   assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
@@ -2082,6 +2089,12 @@ var _sayHi = Module["_sayHi"] = function() {
   assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
   assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
   return Module["asm"]["sayHi"].apply(null, arguments)
+};
+
+var _fib = Module["_fib"] = function() {
+  assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
+  assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
+  return Module["asm"]["fib"].apply(null, arguments)
 };
 
 var ___errno_location = Module["___errno_location"] = function() {
