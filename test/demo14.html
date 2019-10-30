@@ -6,17 +6,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>测试 apng-js</title>
+  <style>
+    #fireworks {
+      width: 300px;
+      height: 300px;
+    }
+  </style>
 </head>
 
 <body>
-  <canvas id="fireworks" width="300" height="300"></canvas>
+  <canvas id="fireworks" width="600" height="600"></canvas>
   <script src="../lib/apng-js.js"></script>
   <script>
     window.onload = function () {
+      var apngJS = window['apng-js'];
+      var parseAPNG = apngJS.default;
 
       //加载 apng
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', 'https://newbieyoung.github.io/Html_learn/img/apng-fireworks.png');
+      xhr.open('GET', '../img/apng-fireworks.png');
       xhr.responseType = 'blob';
       xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
       xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET');
@@ -31,6 +39,7 @@
           var ctx = canvas.getContext('2d');
           apng.getPlayer(ctx).then(function (p) {
             var control = p;
+            control.play(); //播放
             control.addListener('frame', function () {
               if (control._currentFrameNumber == apng.frames.length - 1) { //最后一帧暂停
                 control.pause();
