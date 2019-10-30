@@ -1,6 +1,4 @@
-node_modules
+node_modules/*
 .idea
-bower_components
-#webassembly/*.html
-#webassembly/*.js
-#webassembly/*.wasm
+bower_components/*
+package-lock.json
