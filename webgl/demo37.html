@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>CSSRender 全景图</title>
+    <title>CSS3DRender 全景图</title>
     <script src="../lib/three.js"></script>
     <script src="../lib/three-CSS3DRenderer.js"></script>
     <style type="text/css">
-        body{
-            padding:0;
-            margin:0;
+        body {
+            padding: 0;
+            margin: 0;
         }
+
         div#canvas-frame {
             cursor: pointer;
-            width:100%;
-            height:100%;
+            width: 100%;
+            height: 100%;
             background-color: #EEEEEE;
+            font-size: 0;
         }
     </style>
 </head>
+
 <body onload="threeStart();">
     <div id="canvas-frame"></div>
     <script>
@@ -26,12 +30,12 @@
         var height;
         var target = new THREE.Vector3();
 
-        window.requestAnimFrame = (function() {//如果有变化则可能还需要requestAnimationFrame刷新
+        window.requestAnimFrame = (function () { //如果有变化则可能还需要requestAnimationFrame刷新
             return window.requestAnimationFrame ||
-                    window.mozRequestAnimationFrame ||
-                    window.webkitRequestAnimationFrame ||
-                    window.msRequestAnimationFrame ||
-                    window.webkitRequestAnimationFrame;
+                window.mozRequestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                window.webkitRequestAnimationFrame;
         })();
 
         function initThree() {
@@ -45,61 +49,61 @@
         }
 
         var camera;
+
         function initCamera() {
             //创建相机
-            camera = new THREE.PerspectiveCamera( 60, width / height, 1, 2000 );
+            camera = new THREE.PerspectiveCamera(60, width / height, 1, 2000);
         }
 
         var scene;
+
         function initScene() {
             //创建场景
             scene = new THREE.Scene();
         }
 
         var light;
+
         function initLight() {
             //创建光线
         }
 
-        var sides = [
-            {
+        var sides = [{
                 url: 'textures/park-panorama-cube-nx.jpg',
-                position: [ -512, 0, 0 ],
-                rotation: [ 0, Math.PI / 2, 0 ]
+                position: [-512, 0, 0],
+                rotation: [0, Math.PI / 2, 0]
             },
             {
                 url: 'textures/park-panorama-cube-x.jpg',
-                position: [ 512, 0, 0 ],
-                rotation: [ 0, -Math.PI / 2, 0 ]
+                position: [512, 0, 0],
+                rotation: [0, -Math.PI / 2, 0]
             },
             {
                 url: 'textures/park-panorama-cube-y.jpg',
-                position: [ 0,  512, 0 ],
-                rotation: [ Math.PI / 2, 0, Math.PI ]
+                position: [0, 512, 0],
+                rotation: [Math.PI / 2, 0, Math.PI]
             },
             {
                 url: 'textures/park-panorama-cube-ny.jpg',
-                position: [ 0, -512, 0 ],
-                rotation: [ - Math.PI / 2, 0, Math.PI ]
+                position: [0, -512, 0],
+                rotation: [-Math.PI / 2, 0, Math.PI]
             },
             {
                 url: 'textures/park-panorama-cube-z.jpg',
-                position: [ 0, 0,  512 ],
-                rotation: [ 0, Math.PI, 0 ]
+                position: [0, 0, 512],
+                rotation: [0, Math.PI, 0]
             },
             {
                 url: 'textures/park-panorama-cube-nz.jpg',
-                position: [ 0, 0, -512 ],
-                rotation: [ 0, 0, 0 ]
+                position: [0, 0, -512],
+                rotation: [0, 0, 0]
             }
         ];
 
         function initObject() {
-            for ( var i = 0; i < sides.length; i ++ ) {
-
-                var side = sides[ i ];
-
-                var element = document.createElement( 'img' );
+            for (var i = 0; i < sides.length; i++) {
+                var side = sides[i];
+                var element = document.createElement('img');
                 /**
                  * 图片宽度1024，但是这里需要设置为1026，如果不这么做则会出现场景中各个面连接的地方会出现白色的细线；
                  * 至于为什么多设置2像素就能避免这个问题，暂时不是很清楚。
@@ -107,17 +111,17 @@
                 element.width = 1026;
                 element.src = side.url;
 
-                var object = new THREE.CSS3DObject( element );
-                object.position.fromArray( side.position );
-                object.rotation.fromArray( side.rotation );
-                scene.add( object );
+                var object = new THREE.CSS3DObject(element);
+                object.position.fromArray(side.position);
+                object.rotation.fromArray(side.rotation);
+                scene.add(object);
             }
         }
 
-        function render(){
+        function render() {
             //渲染
-            updateTarget(lat,lon);
-            camera.lookAt( target );
+            updateTarget(lat, lon);
+            camera.lookAt(target);
             renderer.render(scene, camera);
             window.requestAnimFrame(render);
         }
@@ -131,11 +135,11 @@
             render();
 
             //鼠标操作
-            document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+            document.addEventListener('mousedown', onDocumentMouseDown, false);
 
             //触摸操作
-            document.addEventListener( 'touchstart', onDocumentTouchStart, false );
-            document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+            document.addEventListener('touchstart', onDocumentTouchStart, false);
+            document.addEventListener('touchmove', onDocumentTouchMove, false);
         }
 
         /**
@@ -143,36 +147,36 @@
          * @param lat
          * @param lon
          */
-        function updateTarget(lat,lon){
-            lat = Math.max( - 85, Math.min( 85, lat ) );//控制垂直方向的移动角度
-            var phi = THREE.Math.degToRad( lat );
-            var theta = THREE.Math.degToRad( lon );
+        function updateTarget(lat, lon) {
+            lat = Math.max(-85, Math.min(85, lat)); //控制垂直方向的移动角度
+            var phi = THREE.Math.degToRad(lat);
+            var theta = THREE.Math.degToRad(lon);
 
             /**
              * 计算原理请参考《聊一聊全景图》；
-             * https://newbieweb.lione.me/2017/10/15/%E8%81%8A%E4%B8%80%E8%81%8A%E5%85%A8%E6%99%AF%E5%9B%BE/
+             * https://newbieweb.lione.me/2017/10/12/sphere-to-cube-panorama/
              */
-            target.x = Math.cos( phi ) * Math.sin( theta );
-            target.y = Math.sin( phi );
-            target.z = Math.cos( phi ) * Math.cos( theta );
+            target.x = Math.cos(phi) * Math.sin(theta);
+            target.y = Math.sin(phi);
+            target.z = Math.cos(phi) * Math.cos(theta);
 
-            camera.lookAt( target );
+            camera.lookAt(target);
         }
 
         //事件相关
         var lon = 0;
         var lat = 0;
-        var touchX,touchY;
+        var touchX, touchY;
 
         //鼠标事件相关
-        function onDocumentMouseDown(event){
+        function onDocumentMouseDown(event) {
             event.preventDefault();
 
-            document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-            document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+            document.addEventListener('mousemove', onDocumentMouseMove, false);
+            document.addEventListener('mouseup', onDocumentMouseUp, false);
         }
 
-        function onDocumentMouseMove(event){
+        function onDocumentMouseMove(event) {
             var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
             var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
@@ -180,28 +184,30 @@
             lat += movementY * 0.1;
         }
 
-        function onDocumentMouseUp( event ) {
-            document.removeEventListener( 'mousemove', onDocumentMouseMove );
-            document.removeEventListener( 'mouseup', onDocumentMouseUp );
+        function onDocumentMouseUp(event) {
+            document.removeEventListener('mousemove', onDocumentMouseMove);
+            document.removeEventListener('mouseup', onDocumentMouseUp);
         }
 
         //触摸操作
-        function onDocumentTouchStart(event){
+        function onDocumentTouchStart(event) {
             //event.preventDefault();
-            var touch = event.touches[ 0 ];
+            var touch = event.touches[0];
             touchX = touch.screenX;
             touchY = touch.screenY;
         }
-        function onDocumentTouchMove(event){
-            //event.preventDefault();
-            var touch = event.touches[ 0 ];
 
-            lon += ( touch.screenX - touchX ) * 0.1;
-            lat += ( touch.screenY - touchY ) * 0.1;
+        function onDocumentTouchMove(event) {
+            //event.preventDefault();
+            var touch = event.touches[0];
+
+            lon += (touch.screenX - touchX) * 0.1;
+            lat += (touch.screenY - touchY) * 0.1;
 
             touchX = touch.screenX;
             touchY = touch.screenY;
         }
     </script>
 </body>
+
 </html>
