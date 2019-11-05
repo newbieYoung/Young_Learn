@@ -26,9 +26,6 @@
         var renderer;
         var width;
         var height;
-        var camera;
-        var scene;
-        var light;
 
         function initThree() {
             width = window.innerWidth;
@@ -43,6 +40,8 @@
             document.getElementById('canvas-frame').appendChild(renderer.domElement);
         }
 
+        var camera;
+
         function initCamera() {
             //创建相机
             camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
@@ -55,10 +54,14 @@
             camera.lookAt(new THREE.Vector3(0, 0, 0));
         }
 
+        var scene;
+
         function initScene() {
             //创建场景
             scene = new THREE.Scene();
         }
+
+        var light;
 
         function initLight() {
             //创建光线
