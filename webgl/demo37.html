@@ -170,8 +170,6 @@
 
         //鼠标事件相关
         function onDocumentMouseDown(event) {
-            event.preventDefault();
-
             document.addEventListener('mousemove', onDocumentMouseMove, false);
             document.addEventListener('mouseup', onDocumentMouseUp, false);
         }
@@ -191,14 +189,12 @@
 
         //触摸操作
         function onDocumentTouchStart(event) {
-            //event.preventDefault();
             var touch = event.touches[0];
             touchX = touch.screenX;
             touchY = touch.screenY;
         }
 
         function onDocumentTouchMove(event) {
-            //event.preventDefault();
             var touch = event.touches[0];
 
             lon += (touch.screenX - touchX) * 0.1;
