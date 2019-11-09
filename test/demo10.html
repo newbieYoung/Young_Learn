@@ -1,30 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>xlsx.js导出excel</title>
 </head>
+
 <body>
     <button id="exportExcel">导出Excel</button>
-    <script src="http://oss.sheetjs.com/js-xlsx/xlsx.full.min.js"></script>
+    <script src="../lib/xlsx.full.min.js"></script>
     <script>
-        window.onload = function(){
+        window.onload = function () {
             //数据
             var name = "demo10";
             var data = [
-                ['创意提交人','创意标题','创意描述','团队成员','是否招募成员','产品分类','点赞数','大众评分'],//标题
-                ['l1-c0','l1-c1','l1-c2','l1-c3','l1-c4','l1-c5','l1-c6','l1-c7'],
-                ['l2-c0','l2-c1','l2-c2','l2-c3','l2-c4','l2-c5','l2-c6','l2-c7']
+                ['创意提交人', '创意标题', '创意描述', '团队成员', '是否招募成员', '产品分类', '点赞数', '大众评分'], //标题
+                ['l1-c0', 'l1-c1', 'l1-c2', 'l1-c3', 'l1-c4', 'l1-c5', 'l1-c6', 'l1-c7'],
+                ['l2-c0', 'l2-c1', 'l2-c2', 'l2-c3', 'l2-c4', 'l2-c5', 'l2-c6', 'l2-c7']
             ];
 
             //导出Excel
             var $exportExcel = document.querySelector('#exportExcel');
-            $exportExcel.addEventListener('click',function(){
-                downloadExl(name,data);
-            },false);
+            $exportExcel.addEventListener('click', function () {
+                downloadExl(name, data);
+            }, false);
 
-            function downloadExl(name,data) {
-                var wopts = { bookType:'xlsx', type:'binary' };
+            function downloadExl(name, data) {
+                var wopts = {
+                    bookType: 'xlsx',
+                    type: 'binary'
+                };
                 var ws = XLSX.utils.aoa_to_sheet(data);
                 var wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
@@ -32,28 +37,29 @@
                 var wbout = XLSX.write(wb, wopts);
                 var blob = new Blob([s2ab(wbout)]);
 
-                autoDownload(name,blob,'.xlsx');
+                autoDownload(name, blob, '.xlsx');
             }
 
             //字符串转字符流
             function s2ab(s) {
                 var buf = new ArrayBuffer(s.length);
                 var view = new Uint8Array(buf);
-                for (var i = 0; i!== s.length; ++i) {
+                for (var i = 0; i !== s.length; ++i) {
                     view[i] = s.charCodeAt(i) & 0xFF;
                 };
                 return buf;
             }
 
             //自动下载
-            function autoDownload(name,blob,type){
-                var aLink = document.createElement('a');//生出a标签
-                aLink.download = name+'.'+type;
+            function autoDownload(name, blob, type) {
+                var aLink = document.createElement('a'); //生出a标签
+                aLink.download = name + '.' + type;
                 aLink.href = URL.createObjectURL(blob);
-                var evt = new MouseEvent('click');//生出鼠标事件
-                aLink.dispatchEvent(evt);//触发鼠标事件
+                var evt = new MouseEvent('click'); //生出鼠标事件
+                aLink.dispatchEvent(evt); //触发鼠标事件
             }
         }
     </script>
 </body>
+
 </html>
