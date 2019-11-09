@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>基于鼠标移动实现环绕场景</title>
@@ -7,148 +8,154 @@
     <style type="text/css">
         div#canvas-frame {
             cursor: pointer;
-            width:100%;
-            height:100%;
+            width: 100%;
+            height: 100%;
             background-color: #EEEEEE;
         }
     </style>
 </head>
-<body onload="threeStart();">
-<div id="canvas-frame"></div>
-<script>
-    var renderer;//渲染器
-    var width;//页面宽度
-    var height;//页面高度
-    var center = {x:0,y:0,alpha:0,beta:90};//屏幕中心点
-    var canNext = true;//是否能进行下一次渲染，防止mousemove事件触发频率过快导致性能问题
 
-    window.requestAnimFrame = (function() {//如果有变化则可能还需要requestAnimationFrame刷新
-        return window.requestAnimationFrame ||
+<body onload="threeStart();">
+    <div id="canvas-frame"></div>
+    <script>
+        var renderer; //渲染器
+        var width; //页面宽度
+        var height; //页面高度
+        var center = {
+            x: 0,
+            y: 0,
+            alpha: 0,
+            beta: 90
+        }; //屏幕中心点
+
+        window.requestAnimFrame = (function () { //如果有变化则可能还需要requestAnimationFrame刷新
+            return window.requestAnimationFrame ||
                 window.mozRequestAnimationFrame ||
                 window.webkitRequestAnimationFrame ||
                 window.msRequestAnimationFrame ||
                 window.webkitRequestAnimationFrame;
-    })();
+        })();
 
-    //获得鼠标当前坐标
-    function _mousePosition(e){
-        var xPos, yPos;
-        e = e || window.event;
-        if (e.pageX) {
-            xPos = e.pageX;
-            yPos = e.pageY;
-        } else {
-            xPos = e.clientX + document.body.scrollLeft - document.body.clientLeft;
-            yPos = e.clientY + document.body.scrollTop - document.body.clientTop;
+        //获得鼠标当前坐标
+        function _mousePosition(e) {
+            var xPos, yPos;
+            e = e || window.event;
+            if (e.pageX) {
+                xPos = e.pageX;
+                yPos = e.pageY;
+            } else {
+                xPos = e.clientX + document.body.scrollLeft - document.body.clientLeft;
+                yPos = e.clientY + document.body.scrollTop - document.body.clientTop;
+            }
+            return {
+                x: xPos,
+                y: yPos
+            }
         }
-        return {
-            x: xPos,
-            y: yPos
+
+        //根据页面宽度和高度创建渲染器，并添加容器中
+        function initThree() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            center.x = width / 2;
+            center.y = height / 2;
+            renderer = new THREE.WebGLRenderer({
+                antialias: true
+            });
+            renderer.setSize(width, height);
+            renderer.setClearColor(0xFFFFFF, 1.0);
+            document.getElementById('canvas-frame').appendChild(renderer.domElement);
         }
-    }
 
-    //根据页面宽度和高度创建渲染器，并添加容器中
-    function initThree() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        center.x = width/2;
-        center.y = height/2;
-        renderer = new THREE.WebGLRenderer({
-            antialias : true
-        });
-        renderer.setSize(width, height);
-        renderer.setClearColor(0xFFFFFF, 1.0);
-        document.getElementById('canvas-frame').appendChild(renderer.domElement);
-    }
+        //创建相机，并设置正方向和中心点
+        var camera;
 
-    //创建相机，并设置正方向和中心点
-    var camera;
-    function initCamera() {
-        //创建相机
-        camera = new THREE.PerspectiveCamera(45, width / height, 1, 2000);
-        camera.position.x = 0;
-        camera.position.y = 0;
-        camera.position.z = 0;
-        camera.up.x = 0;//正方向
-        camera.up.y = 1;
-        camera.up.z = 0;
-        camera.lookAt({
-            x : 0,
-            y : 0,
-            z : -500
-        });
-    }
-
-    //创建场景，后续元素需要加入到场景中才会显示出来
-    var scene;
-    function initScene() {
-        scene = new THREE.Scene();
-    }
-
-    //创建光线
-    var light;
-    function initLight() {
-        light = new THREE.AmbientLight(0xfefefe);
-        scene.add(light);
-    }
-
-    //创建展示场景所需的各种元素
-    var cubes;
-    var bottomLineGrid;
-    var topLineGrid;
-    function initObject() {
-        //网格
-        var size = 1000, step = 50;
-        var geometry = new THREE.Geometry();
-        for ( var i = - size; i <= size; i += step ) {
-            geometry.vertices.push( new THREE.Vector3( - size, -250, i ) );
-            geometry.vertices.push( new THREE.Vector3(   size, -250, i ) );
-            geometry.vertices.push( new THREE.Vector3( i, -250, - size ) );
-            geometry.vertices.push( new THREE.Vector3( i, -250,   size ) );
+        function initCamera() {
+            //创建相机
+            camera = new THREE.PerspectiveCamera(45, width / height, 1, 2000);
+            camera.position.x = 0;
+            camera.position.y = 0;
+            camera.position.z = 0;
+            camera.up.x = 0; //正方向
+            camera.up.y = 1;
+            camera.up.z = 0;
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
         }
-        var material = new THREE.LineBasicMaterial( { color: 0x000000, opacity: 0.2 } );
-        bottomLineGrid = new THREE.LineSegments( geometry, material );
-        scene.add( bottomLineGrid );
 
-        topLineGrid = bottomLineGrid.clone(true);
-        topLineGrid.translateY(500);
-        scene.add( topLineGrid );
-    }
+        //创建场景，后续元素需要加入到场景中才会显示出来
+        var scene;
 
-    //渲染
-    function render(){
-        renderer.clear();
-        renderer.render(scene, camera);
-        canNext = true;
-    }
+        function initScene() {
+            scene = new THREE.Scene();
+        }
 
-    //开始
-    function threeStart() {
-        initThree();
-        initCamera();
-        initScene();
-        initLight();
-        initObject();
-        render();
+        //创建光线
+        var light;
 
-        document.addEventListener('mousemove',onMouseMove,false);
-    }
+        function initLight() {
+            light = new THREE.AmbientLight(0xfefefe);
+            scene.add(light);
+        }
 
-    //鼠标移动
-    function onMouseMove(e){
-        if(canNext){
-            canNext = false;
-            var mouse = _mousePosition(e);
-            var alpha = (height/2 - mouse.y)/(height/2)*(Math.PI/2);
-            var beta = (mouse.x - width/2)/(width/2)*Math.PI;
-            var ex = 10 * Math.cos(alpha) * Math.sin(beta);
-            var ey = 10 *  Math.sin(alpha);
-            var ez = - 10 * Math.cos(alpha) * Math.cos(beta);
-            var e = new THREE.Vector3(camera.position.x + ex , camera.position.y + ey , camera.position.z + ez);
-            camera.lookAt(e);
+        //创建展示场景所需的各种元素
+        var cubes;
+        var bottomLineGrid;
+        var topLineGrid;
+
+        function initObject() {
+            //网格
+            var size = 1000,
+                step = 50;
+            var geometry = new THREE.Geometry();
+            for (var i = -size; i <= size; i += step) {
+                geometry.vertices.push(new THREE.Vector3(-size, -250, i));
+                geometry.vertices.push(new THREE.Vector3(size, -250, i));
+                geometry.vertices.push(new THREE.Vector3(i, -250, -size));
+                geometry.vertices.push(new THREE.Vector3(i, -250, size));
+            }
+            var material = new THREE.LineBasicMaterial({
+                color: 0x000000,
+                opacity: 0.2
+            });
+            bottomLineGrid = new THREE.LineSegments(geometry, material);
+            scene.add(bottomLineGrid);
+
+            topLineGrid = bottomLineGrid.clone(true);
+            topLineGrid.translateY(500);
+            scene.add(topLineGrid);
+        }
+
+        //渲染
+        function render() {
+            renderer.clear();
+            renderer.render(scene, camera);
             window.requestAnimFrame(render);
         }
-    }
-</script>
+
+        //开始
+        function threeStart() {
+            initThree();
+            initCamera();
+            initScene();
+            initLight();
+            initObject();
+            render();
+
+            document.addEventListener('mousemove', onMouseMove, false);
+        }
+
+        //鼠标移动
+        function onMouseMove(e) {
+            var mouse = _mousePosition(e);
+            var alpha = (height / 2 - mouse.y) / (height / 2) * (Math.PI / 2);
+            var beta = (mouse.x - width / 2) / (width / 2) * Math.PI;
+            var ex = 10 * Math.cos(alpha) * Math.sin(beta);
+            var ey = 10 * Math.sin(alpha);
+            var ez = -10 * Math.cos(alpha) * Math.cos(beta);
+            var e = new THREE.Vector3(camera.position.x + ex, camera.position.y + ey, camera.position.z + ez);
+            camera.lookAt(e);
+        }
+    </script>
 </body>
+
 </html>
