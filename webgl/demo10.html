@@ -85,11 +85,7 @@
                 camera.up.x = 0;//正方向
                 camera.up.y = 1;
                 camera.up.z = 0;
-                camera.lookAt({
-                    x : 0,
-                    y : 0,
-                    z : 0
-                });
+                camera.lookAt(new THREE.Vector3(0, 0, 0));
             }
 
             var scene;
