@@ -1,28 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-	<meta charset="UTF-8">
-	<title>ThreeJS 正交投影相机、相机移动、线段集合、线条纹理以及环境光</title>
-	<script src="../lib/three.js"></script>
-	<style type="text/css">
+    <meta charset="UTF-8">
+    <title>ThreeJS 正交投影相机、相机移动、线段集合、线条纹理以及环境光</title>
+    <script src="../lib/three.js"></script>
+    <style type="text/css">
         div#canvas-frame {
             cursor: pointer;
-            width:100%;
-            height:100%;
+            width: 100%;
+            height: 100%;
             background-color: #EEEEEE;
         }
     </style>
 </head>
+
 <body onload="threeStart();">
     <div id="canvas-frame"></div>
     <script>
         var renderer;
+
         function initThree() {
             width = window.innerWidth;
             height = window.innerHeight;
             //创建渲染器
             renderer = new THREE.WebGLRenderer({
-                antialias : true
+                antialias: true
             });
             renderer.setSize(width, height);
             renderer.setClearColor(0xFFFFFF, 1.0);
@@ -31,113 +34,125 @@
         }
 
         var camera;
+
         function initCamera() {
-        	//创建相机
-            camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, - 500, 1000 );
+            //创建相机
+            camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, -500, 1000);
             camera.position.x = 200;
-			camera.position.y = 100;
-			camera.position.z = 200;
-            camera.up.x = 0;//正方向
+            camera.position.y = 100;
+            camera.position.z = 200;
+            camera.up.x = 0; //正方向
             camera.up.y = 1;
             camera.up.z = 0;
-            camera.lookAt({
-                x : 0,
-                y : 0,
-                z : 0
-            });
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
         }
 
         var scene;
+
         function initScene() {
-        	//创建场景
+            //创建场景
             scene = new THREE.Scene();
         }
 
         var light;
+
         function initLight() {
-        	//创建光线
-			var ambientLight = new THREE.AmbientLight( Math.random() * 0x10 );
-			scene.add( ambientLight );
+            //创建光线
+            var ambientLight = new THREE.AmbientLight(Math.random() * 0x10);
+            scene.add(ambientLight);
 
-			var directionalLight = new THREE.DirectionalLight( Math.random() * 0xffffff );
-			directionalLight.position.x = Math.random() - 0.5;
-			directionalLight.position.y = Math.random() - 0.5;
-			directionalLight.position.z = Math.random() - 0.5;
-			directionalLight.position.normalize();
-			scene.add( directionalLight );
+            var directionalLight = new THREE.DirectionalLight(Math.random() * 0xffffff);
+            directionalLight.position.x = Math.random() - 0.5;
+            directionalLight.position.y = Math.random() - 0.5;
+            directionalLight.position.z = Math.random() - 0.5;
+            directionalLight.position.normalize();
+            scene.add(directionalLight);
 
-			var directionalLight = new THREE.DirectionalLight( Math.random() * 0xffffff );
-			directionalLight.position.x = Math.random() - 0.5;
-			directionalLight.position.y = Math.random() - 0.5;
-			directionalLight.position.z = Math.random() - 0.5;
-			directionalLight.position.normalize();
-			scene.add( directionalLight );
+            var directionalLight = new THREE.DirectionalLight(Math.random() * 0xffffff);
+            directionalLight.position.x = Math.random() - 0.5;
+            directionalLight.position.y = Math.random() - 0.5;
+            directionalLight.position.z = Math.random() - 0.5;
+            directionalLight.position.normalize();
+            scene.add(directionalLight);
         }
 
         function initObject() {
             //坐标轴
-            var xmat = new THREE.LineBasicMaterial({color: 0xff0000});
+            var xmat = new THREE.LineBasicMaterial({
+                color: 0xff0000
+            });
             var xgeo = new THREE.Geometry();
             xgeo.vertices.push(
-                new THREE.Vector3( 0, 0, 0 ),
-                new THREE.Vector3( 900, 0, 0 )
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(900, 0, 0)
             );
-            var xline = new THREE.Line( xgeo, xmat );
-            scene.add( xline );
+            var xline = new THREE.Line(xgeo, xmat);
+            scene.add(xline);
 
-            var ymat = new THREE.LineBasicMaterial({color: 0x00ff00});
+            var ymat = new THREE.LineBasicMaterial({
+                color: 0x00ff00
+            });
             var ygeo = new THREE.Geometry();
             ygeo.vertices.push(
-                new THREE.Vector3( 0, 0, 0 ),
-                new THREE.Vector3( 0, 900, 0 )
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0, 900, 0)
             );
-            var yline = new THREE.Line( ygeo, ymat );
-            scene.add( yline );
+            var yline = new THREE.Line(ygeo, ymat);
+            scene.add(yline);
 
-            var zmat = new THREE.LineBasicMaterial({color: 0x0000ff});
+            var zmat = new THREE.LineBasicMaterial({
+                color: 0x0000ff
+            });
             var zgeo = new THREE.Geometry();
             zgeo.vertices.push(
-                new THREE.Vector3( 0, 0, 0 ),
-                new THREE.Vector3( 0, 0, 900 )
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0, 0, 900)
             );
-            var zline = new THREE.Line( zgeo, zmat );
-            scene.add( zline );
+            var zline = new THREE.Line(zgeo, zmat);
+            scene.add(zline);
 
             //网格
-			var size = 500, step = 50;
-			var geometry = new THREE.Geometry();
-			for ( var i = - size; i <= size; i += step ) {
-				geometry.vertices.push( new THREE.Vector3( - size, 0, i ) );
-				geometry.vertices.push( new THREE.Vector3(   size, 0, i ) );
-				geometry.vertices.push( new THREE.Vector3( i, 0, - size ) );
-				geometry.vertices.push( new THREE.Vector3( i, 0,   size ) );
-			}
-			var material = new THREE.LineBasicMaterial( { color: 0x000000, opacity: 0.2 } );
-			var lineGrid = new THREE.LineSegments( geometry, material );
-			scene.add( lineGrid );
+            var size = 500,
+                step = 50;
+            var geometry = new THREE.Geometry();
+            for (var i = -size; i <= size; i += step) {
+                geometry.vertices.push(new THREE.Vector3(-size, 0, i));
+                geometry.vertices.push(new THREE.Vector3(size, 0, i));
+                geometry.vertices.push(new THREE.Vector3(i, 0, -size));
+                geometry.vertices.push(new THREE.Vector3(i, 0, size));
+            }
+            var material = new THREE.LineBasicMaterial({
+                color: 0x000000,
+                opacity: 0.2
+            });
+            var lineGrid = new THREE.LineSegments(geometry, material);
+            scene.add(lineGrid);
 
-			//正方体
-			var geometry = new THREE.BoxGeometry( 50, 50, 50 );
-			var material = new THREE.MeshLambertMaterial( { color: 0xffffff, overdraw: 0.5 } );
-			for ( var i = 0; i < 100; i ++ ) {
-				var cube = new THREE.Mesh( geometry, material );
-				cube.scale.y = Math.floor( Math.random() * 2 + 1 );
-				cube.position.x = Math.floor( ( Math.random() * 1000 - 500 ) / 50 ) * 50 + 25;
-				cube.position.y = ( cube.scale.y * 50 ) / 2;
-				cube.position.z = Math.floor( ( Math.random() * 1000 - 500 ) / 50 ) * 50 + 25;
-				scene.add( cube );
-			}
+            //正方体
+            var geometry = new THREE.BoxGeometry(50, 50, 50);
+            var material = new THREE.MeshLambertMaterial({
+                color: 0xffffff,
+                overdraw: 0.5
+            });
+            for (var i = 0; i < 100; i++) {
+                var cube = new THREE.Mesh(geometry, material);
+                cube.scale.y = Math.floor(Math.random() * 2 + 1);
+                cube.position.x = Math.floor((Math.random() * 1000 - 500) / 50) * 50 + 25;
+                cube.position.y = (cube.scale.y * 50) / 2;
+                cube.position.z = Math.floor((Math.random() * 1000 - 500) / 50) * 50 + 25;
+                scene.add(cube);
+            }
         }
 
-        function render(timestamp){
-        	//渲染
+        function render(timestamp) {
+            //渲染
             renderer.clear();
 
-			var timer = Date.now() * 0.0001;
-			camera.position.x = Math.cos( timer ) * 200;
-			camera.position.z = Math.sin( timer ) * 200;
+            var timer = Date.now() * 0.0001;
+            camera.position.x = Math.cos(timer) * 200;
+            camera.position.z = Math.sin(timer) * 200;
 
-			camera.lookAt( scene.position );
+            camera.lookAt(scene.position);
 
             renderer.render(scene, camera);
             requestAnimationFrame(render);
@@ -153,4 +168,5 @@
         }
     </script>
 </body>
+
 </html>

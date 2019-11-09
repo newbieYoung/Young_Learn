@@ -1,153 +1,170 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>纹理加载器、球体</title>
-        <script src="../lib/three.js"></script>
-        <style type="text/css">
-            div#canvas-frame {
-                cursor: pointer;
-                width:100%;
-                height:100%;
-                background-color: #EEEEEE;
-            }
-        </style>
-    </head>
-    <body onload="threeStart();">
-        <div id="canvas-frame"></div>
-        <script>
-            var renderer;
-            var width;
-            var height;
-            function initThree() {
-                width = window.innerWidth;
-                height = window.innerHeight;
-                //创建渲染器
-                renderer = new THREE.WebGLRenderer({
-                    antialias : true
+
+<head>
+    <meta charset="UTF-8">
+    <title>纹理加载器、球体</title>
+    <script src="../lib/three.js"></script>
+    <style type="text/css">
+        div#canvas-frame {
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            background-color: #EEEEEE;
+        }
+    </style>
+</head>
+
+<body onload="threeStart();">
+    <div id="canvas-frame"></div>
+    <script>
+        var renderer;
+        var width;
+        var height;
+
+        function initThree() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            //创建渲染器
+            renderer = new THREE.WebGLRenderer({
+                antialias: true
+            });
+            renderer.setSize(width, height);
+            renderer.setClearColor(0xFFFFFF, 1.0);
+            //并添加容器中
+            document.getElementById('canvas-frame').appendChild(renderer.domElement);
+        }
+
+        var camera;
+
+        function initCamera() {
+            //创建相机
+            camera = new THREE.PerspectiveCamera(60, width / height, 1, 2000);
+            camera.position.x = 300;
+            camera.position.y = 600;
+            camera.position.z = 600;
+            camera.up.x = 0; //正方向
+            camera.up.y = 1;
+            camera.up.z = 0;
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
+        }
+
+        var scene;
+
+        function initScene() {
+            //创建场景
+            scene = new THREE.Scene();
+        }
+
+        var light;
+
+        function initLight() {
+            //创建光线
+        }
+
+        var group;
+
+        function initObject() {
+            //坐标轴
+            var xmat = new THREE.LineBasicMaterial({
+                color: 0xff0000
+            });
+            var xgeo = new THREE.Geometry();
+            xgeo.vertices.push(
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(300, 0, 0)
+            );
+            var xline = new THREE.Line(xgeo, xmat);
+            scene.add(xline);
+
+            var ymat = new THREE.LineBasicMaterial({
+                color: 0x00ff00
+            });
+            var ygeo = new THREE.Geometry();
+            ygeo.vertices.push(
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0, 300, 0)
+            );
+            var yline = new THREE.Line(ygeo, ymat);
+            scene.add(yline);
+
+            var zmat = new THREE.LineBasicMaterial({
+                color: 0x0000ff
+            });
+            var zgeo = new THREE.Geometry();
+            zgeo.vertices.push(
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0, 0, 300)
+            );
+            var zline = new THREE.Line(zgeo, zmat);
+            scene.add(zline);
+
+            group = new THREE.Group();
+            scene.add(group);
+            //球体
+            var loader = new THREE.TextureLoader();
+            loader.load('textures/land_ocean_ice_cloud_2048.jpg', function (texture) {
+                var geometry = new THREE.SphereGeometry(100, 20, 20);
+                var material = new THREE.MeshBasicMaterial({
+                    map: texture,
+                    overdraw: 0.5
                 });
-                renderer.setSize(width, height);
-                renderer.setClearColor(0xFFFFFF, 1.0);
-                //并添加容器中
-                document.getElementById('canvas-frame').appendChild(renderer.domElement);
-            }
+                var mesh = new THREE.Mesh(geometry, material);
+                group.add(mesh);
+            }, function (xhr) {
+                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+            }, function (xhr) {
+                console.log('An error happened');
+            });
+        }
 
-            var camera;
-            function initCamera() {
-            	//创建相机
-                camera = new THREE.PerspectiveCamera( 60, width / height, 1, 2000 );
-				camera.position.x = 300;
-                camera.position.y = 600;
-                camera.position.z = 600;
-                camera.up.x = 0;//正方向
-                camera.up.y = 1;
-                camera.up.z = 0;
-                camera.lookAt({
-                    x : 0,
-                    y : 0,
-                    z : 0
-                });
-            }
+        function render() {
+            //渲染
+            renderer.clear();
+            group.rotation.y += moveX / 1000; //绕y轴旋转
+            renderer.render(scene, camera);
+            requestAnimationFrame(render);
+        }
 
-            var scene;
-            function initScene() {
-            	//创建场景
-                scene = new THREE.Scene();
-            }
+        function threeStart() {
+            initThree();
+            initCamera();
+            initScene();
+            initLight();
+            initObject();
+            render();
 
-            var light;
-            function initLight() {
-            	//创建光线
-            }
+            document.addEventListener('mousedown', onDocumentMouseDown, false);
+        }
 
-            var group;
-            function initObject() {
-                //坐标轴
-                var xmat = new THREE.LineBasicMaterial({color: 0xff0000});
-                var xgeo = new THREE.Geometry();
-                xgeo.vertices.push(
-                    new THREE.Vector3( 0, 0, 0 ),
-                    new THREE.Vector3( 300, 0, 0 )
-                );
-                var xline = new THREE.Line( xgeo, xmat );
-                scene.add( xline );
+        var startX;
+        var moveX = 0;
 
-                var ymat = new THREE.LineBasicMaterial({color: 0x00ff00});
-                var ygeo = new THREE.Geometry();
-                ygeo.vertices.push(
-                    new THREE.Vector3( 0, 0, 0 ),
-                    new THREE.Vector3( 0, 300, 0 )
-                );
-                var yline = new THREE.Line( ygeo, ymat );
-                scene.add( yline );
+        function onDocumentMouseDown(event) {
+            startX = event.clientX;
+            moveX = 0;
+            document.addEventListener('mousemove', onDocumentMouseMove, false);
+            document.addEventListener('mouseup', onDocumentMouseUp, false);
+            document.addEventListener('mouseout', onDocumentMouseOut, false);
+        }
 
-                var zmat = new THREE.LineBasicMaterial({color: 0x0000ff});
-                var zgeo = new THREE.Geometry();
-                zgeo.vertices.push(
-                    new THREE.Vector3( 0, 0, 0 ),
-                    new THREE.Vector3( 0, 0, 300 )
-                );
-                var zline = new THREE.Line( zgeo, zmat );
-                scene.add( zline );
+        function onDocumentMouseMove(event) {
+            moveX = event.clientX - startX - moveX;
+        }
 
-                group = new THREE.Group();
-				scene.add( group );
-				//球体
-				var loader = new THREE.TextureLoader();
-				loader.load( 'textures/land_ocean_ice_cloud_2048.jpg', function ( texture ) {
-					var geometry = new THREE.SphereGeometry( 100, 20, 20 );
-					var material = new THREE.MeshBasicMaterial( { map: texture, overdraw: 0.5 } );
-					var mesh = new THREE.Mesh( geometry, material );
-					group.add( mesh );
-					render();//再次渲染
-				},function ( xhr ) {
-					console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
-				},function ( xhr ) {
-					console.log( 'An error happened' );
-				});
-            }
+        function onDocumentMouseUp(event) {
+            document.removeEventListener('mousemove', onDocumentMouseMove, false);
+            document.removeEventListener('mouseup', onDocumentMouseUp, false);
+            document.removeEventListener('mouseout', onDocumentMouseOut, false);
 
-            function render(){
-            	//渲染
-                renderer.clear();
-                group.rotation.y += moveX/1000;//绕y轴旋转
-                renderer.render(scene, camera);
-                requestAnimationFrame(render);
-            }
+        }
 
-            function threeStart() {
-                initThree();
-                initCamera();
-                initScene();
-                initLight();
-                initObject();
+        function onDocumentMouseOut(event) {
+            document.removeEventListener('mousemove', onDocumentMouseMove, false);
+            document.removeEventListener('mouseup', onDocumentMouseUp, false);
+            document.removeEventListener('mouseout', onDocumentMouseOut, false);
+        }
+    </script>
+</body>
 
-                document.addEventListener( 'mousedown', onDocumentMouseDown, false );
-            }
-
-            var startX;
-            var moveX = 0;
-            function onDocumentMouseDown(event){
-                startX = event.clientX;
-                moveX = 0;
-                document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-                document.addEventListener( 'mouseup', onDocumentMouseUp, false );
-                document.addEventListener( 'mouseout', onDocumentMouseOut, false );
-            }
-            function onDocumentMouseMove(event){
-                moveX = event.clientX-startX-moveX;
-            }
-            function onDocumentMouseUp( event ) {
-                document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
-                document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
-                document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
-
-            }
-            function onDocumentMouseOut( event ) {
-                document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
-                document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
-                document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
-            }
-        </script>
-    </body>
 </html>
