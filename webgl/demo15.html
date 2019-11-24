@@ -1,40 +1,43 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>简易太阳系</title>
     <script src="../lib/three.js"></script>
     <script src="../lib/three-orbit-controls.js"></script>
     <style type="text/css">
-        body{
-            margin:0;
-            padding:0;
-            overflow:hidden;
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
         }
+
         div#canvas-frame {
             cursor: pointer;
-            width:100%;
-            height:100%;
+            width: 100%;
+            height: 100%;
             background-color: #EEEEEE;
         }
     </style>
 </head>
+
 <body onload="threeStart();">
     <div id="canvas-frame"></div>
     <script>
-        var renderer;//渲染器
-        var width;//页面宽度
-        var height;//页面高度
+        var renderer; //渲染器
+        var width; //页面宽度
+        var height; //页面高度
         var mouse = new THREE.Vector2();
         var raycaster = new THREE.Raycaster();
-        var displayName;//当前显示名字
+        var displayName; //当前显示名字
 
-        window.requestAnimFrame = (function() {//如果有变化则可能还需要requestAnimationFrame刷新
+        window.requestAnimFrame = (function () { //如果有变化则可能还需要requestAnimationFrame刷新
             return window.requestAnimationFrame ||
-                    window.mozRequestAnimationFrame ||
-                    window.webkitRequestAnimationFrame ||
-                    window.msRequestAnimationFrame ||
-                    window.webkitRequestAnimationFrame;
+                window.mozRequestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                window.webkitRequestAnimationFrame;
         })();
 
         //开始
@@ -46,20 +49,18 @@
             initObject();
             render();
 
-            window.addEventListener('mousemove', onMousemove, false );
-            //window.addEventListener('mousedown', onMousedown, false );
-            //window.addEventListener('mouseup', onMouseup, false );
+            window.addEventListener('mousemove', onMousemove, false);
         }
 
         //获取鼠标坐标
         function onMousemove(event) {
-            if(event.touches){
+            if (event.touches) {
                 var touch = event.touches[0];
-                mouse.x = (touch.clientX / width)*2 - 1;
-                mouse.y = -(touch.clientY / height)*2 + 1;
-            }else{
-                mouse.x = (event.clientX / width)*2 - 1;
-                mouse.y = -(event.clientY / height)*2 + 1;
+                mouse.x = (touch.clientX / width) * 2 - 1;
+                mouse.y = -(touch.clientY / height) * 2 + 1;
+            } else {
+                mouse.x = (event.clientX / width) * 2 - 1;
+                mouse.y = -(event.clientY / height) * 2 + 1;
             }
         }
 
@@ -68,7 +69,7 @@
             width = window.innerWidth;
             height = window.innerHeight;
             renderer = new THREE.WebGLRenderer({
-                antialias : true
+                antialias: true
             });
             renderer.setSize(width, height);
             renderer.setClearColor(0xffffff, 0);
@@ -78,27 +79,25 @@
         //创建相机，并设置正方向和中心点
         var camera;
         var control;
+
         function initCamera() {
             camera = new THREE.PerspectiveCamera(45, width / height, 1, 3000);
             camera.position.x = 0;
             camera.position.y = 0;
             camera.position.z = 100;
-            camera.up.x = 0;//正方向
+            camera.up.x = 0; //正方向
             camera.up.y = 1;
             camera.up.z = 0;
-            camera.lookAt({
-                x : 0,
-                y : 0,
-                z : 0
-            });
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
 
             //视角控制
             controller = new THREE.OrbitControls(camera, renderer.domElement);
-            controller.target = new THREE.Vector3(0, 0, 0);//设置控制点
+            controller.target = new THREE.Vector3(0, 0, 0); //设置控制点
         }
 
         //创建场景，后续元素需要加入到场景中才会显示出来
         var scene;
+
         function initScene() {
             scene = new THREE.Scene();
         }
@@ -106,13 +105,14 @@
         //创建光线
         var ambient;
         var point;
+
         function initLight() {
             //环境光
             ambient = new THREE.AmbientLight(0x999999);
             scene.add(ambient);
 
             //点光源，默认在坐标原点
-            point = new THREE.PointLight(0xddddaa,1.5,500);
+            point = new THREE.PointLight(0xddddaa, 1.5, 500);
             scene.add(point);
         }
 
@@ -120,65 +120,75 @@
         var sun;
         var earth;
         var mars;
-        var mercury;  //水星
-        var venus;  //金星
+        var mercury; //水星
+        var venus; //金星
         var jupiter; //木星
         var saturn; //土星
         var uranus; //天王
         var neptune; //海王
-        var starNames = {};//各星球名字
+        var starNames = {}; //各星球名字
         function initObject() {
-            var sunSkinPic = THREE.ImageUtils.loadTexture('/Html_learn/webgl/textures/sunCore.jpg', {}, function(){
-                renderer.render(scene, camera);
-            });//太阳自转为25天
-            sun = new THREE.Mesh(new THREE.SphereGeometry(12,16,16),new THREE.MeshLambertMaterial({
-                emissive:0xdd4422,
-                map:sunSkinPic
+            var sunSkinPic = new THREE.TextureLoader().load('./textures/sunCore.jpg'); //太阳自转为25天
+            sun = new THREE.Mesh(new THREE.SphereGeometry(12, 16, 16), new THREE.MeshLambertMaterial({
+                emissive: 0xdd4422,
+                map: sunSkinPic
             }))
             sun.volume = 12;
             sun.name = 'Sun';
-            sun.selfRotateSpeed = Math.PI/10/25;
-            scene.add( sun );
+            sun.selfRotateSpeed = Math.PI / 10 / 25;
+            scene.add(sun);
 
             //太阳系其它行星
-            earth = initPlanet('Earth','rgb(46,69,119)',40,5,Math.PI/10/365,Math.PI/10/1,'/Html_learn/webgl/textures/land_ocean_ice_cloud_2048.jpg');//Math.PI*2/365
-            mars = initPlanet('Mars','rgb(210,81,16)',50,4,Math.PI/10/365/1.88,Math.PI/10/1);//火星公转为1.88地球年，自转与地球相似
-            mercury = initPlanet('Mercury','rgb(124,131,203)',20,2,Math.PI/10/88,Math.PI/10/59);//水星公转为88天，自转为59天
-            venus = initPlanet('Venus','rgb(190,138,44)',30,4,Math.PI/10/225,-Math.PI/10/243);//金星公转为225天，自转为243天，且自转方向和地球相反
-            jupiter = initPlanet('Jupiter','rgb(254,208,101)',70,9,Math.PI/10/4333,Math.PI/10/0.41);//木星公转为4333天，自转为0.41天
-            saturn = initPlanet('Saturn','rgb(210,140,39)',100,7,Math.PI/10/10760,Math.PI/10/0.426);//土星公转为10760天，自转为0.426天
-            uranus = initPlanet('Uranus','rgb(49,168,218)',120,4,Math.PI/10/30685,Math.PI/10/0.426);//天王星公转为30685天，自转为0.426天
-            neptune = initPlanet('Neptune','rgb(84,125,204)',150,3,Math.PI/10/165,Math.PI/10/18/24);//海王星公转为165天，自转为18小时
+            earth = initPlanet('Earth', 'rgb(46,69,119)', 40, 5, Math.PI / 10 / 365, Math.PI / 10 / 1,
+                './textures/land_ocean_ice_cloud_2048.jpg'); //Math.PI*2/365
+            mars = initPlanet('Mars', 'rgb(210,81,16)', 50, 4, Math.PI / 10 / 365 / 1.88, Math.PI / 10 /
+                1); //火星公转为1.88地球年，自转与地球相似
+            mercury = initPlanet('Mercury', 'rgb(124,131,203)', 20, 2, Math.PI / 10 / 88, Math.PI / 10 /
+                59); //水星公转为88天，自转为59天
+            venus = initPlanet('Venus', 'rgb(190,138,44)', 30, 4, Math.PI / 10 / 225, -Math.PI / 10 /
+                243); //金星公转为225天，自转为243天，且自转方向和地球相反
+            jupiter = initPlanet('Jupiter', 'rgb(254,208,101)', 70, 9, Math.PI / 10 / 4333, Math.PI / 10 /
+                0.41); //木星公转为4333天，自转为0.41天
+            saturn = initPlanet('Saturn', 'rgb(210,140,39)', 100, 7, Math.PI / 10 / 10760, Math.PI / 10 /
+                0.426); //土星公转为10760天，自转为0.426天
+            uranus = initPlanet('Uranus', 'rgb(49,168,218)', 120, 4, Math.PI / 10 / 30685, Math.PI / 10 /
+                0.426); //天王星公转为30685天，自转为0.426天
+            neptune = initPlanet('Neptune', 'rgb(84,125,204)', 150, 3, Math.PI / 10 / 165, Math.PI / 10 / 18 /
+                24); //海王星公转为165天，自转为18小时
 
             initStarsName();
             initStarBackground();
         }
 
         //初始化星球名字
-        function initStarsName(){
+        function initStarsName() {
             var loader = new THREE.FontLoader();
-            loader.load( '../lib/helvetiker_regular.typeface.json', function ( font ) {
-                nameConstructor(sun.name,sun.volume,font);
-                nameConstructor(earth.name,earth.volume,font);
-                nameConstructor(mars.name,mars.volume,font);
-                nameConstructor(mercury.name,mercury.volume,font);
-                nameConstructor(venus.name,venus.volume,font);
-                nameConstructor(jupiter.name,jupiter.volume,font);
-                nameConstructor(saturn.name,saturn.volume,font);
-                nameConstructor(uranus.name,uranus.volume,font);
-                nameConstructor(neptune.name,neptune.volume,font);
+            loader.load('./fonts/helvetiker_regular.typeface.json', function (font) {
+                nameConstructor(sun.name, sun.volume, font);
+                nameConstructor(earth.name, earth.volume, font);
+                nameConstructor(mars.name, mars.volume, font);
+                nameConstructor(mercury.name, mercury.volume, font);
+                nameConstructor(venus.name, venus.volume, font);
+                nameConstructor(jupiter.name, jupiter.volume, font);
+                nameConstructor(saturn.name, saturn.volume, font);
+                nameConstructor(uranus.name, uranus.volume, font);
+                nameConstructor(neptune.name, neptune.volume, font);
             });
+
         }
 
         //根据行星名字和体积构造显示名字
-        function nameConstructor(name,volume,font){
+        function nameConstructor(name, volume, font) {
             var planetName = new THREE.Mesh(
-                    new THREE.TextGeometry( name, {
-                        font:font,
-                        size: 4,
-                        height: 4
-                    }),
-                    new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.DoubleSide} )
+                new THREE.TextGeometry(name, {
+                    font: font,
+                    size: 4,
+                    height: 4
+                }),
+                new THREE.MeshBasicMaterial({
+                    color: 0xffffff,
+                    side: THREE.DoubleSide
+                })
             );
             planetName.volume = volume;
             planetName.visible = false;
@@ -187,68 +197,75 @@
         }
 
         //星空背景
-        function initStarBackground(){
-            var particles = 20000;  //星星数量
+        function initStarBackground() {
+            var particles = 20000; //星星数量
             var bufferGeometry = new THREE.BufferGeometry();
-            var positions = new Float32Array( particles * 3 );
-            var colors = new Float32Array( particles * 3 );
+            var positions = new Float32Array(particles * 3);
+            var colors = new Float32Array(particles * 3);
             var color = new THREE.Color();
-            var gap = 1000;//定义星星的最近出现位置
+            var gap = 1000; //定义星星的最近出现位置
 
-            for(var i=0;i<positions.length;i=i+3){
+            for (var i = 0; i < positions.length; i = i + 3) {
                 //所有星星都出现在正负2000以内
                 /*-2gap < x < 2gap */
-                var x = ( Math.random() * gap *2 )* (Math.random()<.5? -1 : 1);
-                var y = ( Math.random() * gap *2 )* (Math.random()<.5? -1 : 1);
-                var z = ( Math.random() * gap *2 )* (Math.random()<.5? -1 : 1);
+                var x = (Math.random() * gap * 2) * (Math.random() < .5 ? -1 : 1);
+                var y = (Math.random() * gap * 2) * (Math.random() < .5 ? -1 : 1);
+                var z = (Math.random() * gap * 2) * (Math.random() < .5 ? -1 : 1);
 
                 /*找出x,y,z中绝对值最大的一个数*/
-                var biggest = Math.abs(x) > Math.abs(y) ? Math.abs(x) > Math.abs(z) ?　'x' : 'z' :
-                        Math.abs(y) > Math.abs(z) ? 'y' : 'z';
+                var biggest = Math.abs(x) > Math.abs(y) ? Math.abs(x) > Math.abs(z) ? 'x' : 'z' :
+                    Math.abs(y) > Math.abs(z) ? 'y' : 'z';
 
-                var pos = {'x':x,'y':y,'z':z};
+                var pos = {
+                    'x': x,
+                    'y': y,
+                    'z': z
+                };
 
                 //所有星星都出现在正负1000以外
                 /*如果最大值比n要小（因为要在一个距离之外才出现星星）则赋值为n（-n）*/
-                if(Math.abs(pos[biggest]) < gap) pos[biggest] = pos[biggest] < 0 ? -gap : gap;
+                if (Math.abs(pos[biggest]) < gap) pos[biggest] = pos[biggest] < 0 ? -gap : gap;
 
                 x = pos['x'];
                 y = pos['y'];
                 z = pos['z'];
 
-                positions[ i ]     = x;
-                positions[ i + 1 ] = y;
-                positions[ i + 2 ] = z;
+                positions[i] = x;
+                positions[i + 1] = y;
+                positions[i + 2] = z;
 
                 /*70%星星有颜色*/
                 var hasColor = Math.random() > 0.3;
                 var vx, vy, vz;
 
-                if(hasColor){
-                    vx = (Math.random()+1) / 2 ;
-                    vy = (Math.random()+1) / 2 ;
-                    vz = (Math.random()+1) / 2 ;
-                }else{
-                    vx = 1 ;
-                    vy = 1 ;
-                    vz = 1 ;
+                if (hasColor) {
+                    vx = (Math.random() + 1) / 2;
+                    vy = (Math.random() + 1) / 2;
+                    vz = (Math.random() + 1) / 2;
+                } else {
+                    vx = 1;
+                    vy = 1;
+                    vz = 1;
                 }
 
-                color.setRGB( vx, vy, vz );
+                color.setRGB(vx, vy, vz);
 
-                colors[ i ]     = color.r;
-                colors[ i + 1 ] = color.g;
-                colors[ i + 2 ] = color.b;
+                colors[i] = color.r;
+                colors[i + 1] = color.g;
+                colors[i + 2] = color.b;
             }
 
-            bufferGeometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
-            bufferGeometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3 ) );
+            bufferGeometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+            bufferGeometry.addAttribute('color', new THREE.BufferAttribute(colors, 3));
             bufferGeometry.computeBoundingSphere();
 
             /*星星的material*/
-            var material = new THREE.PointsMaterial( { size: 6, vertexColors: THREE.VertexColors } );
-            particleSystem = new THREE.Points( bufferGeometry, material );
-            scene.add( particleSystem );
+            var material = new THREE.PointsMaterial({
+                size: 6,
+                vertexColors: THREE.VertexColors
+            });
+            particleSystem = new THREE.Points(bufferGeometry, material);
+            scene.add(particleSystem);
         }
 
         /**
@@ -260,18 +277,20 @@
          * @param speed 公转角速度
          * @param textureUrl 纹理路径
          */
-        function initPlanet(name,color,distance,volume,speed,selfSpeed,textureUrl){
-            var mesh = new THREE.Mesh(new THREE.SphereGeometry(volume,16,16),new THREE.MeshLambertMaterial( { color:color } ));
-            if(textureUrl){
-                var texture = THREE.ImageUtils.loadTexture(textureUrl, {}, function(){
-                    renderer.render(scene, camera);
-                });
-                mesh = new THREE.Mesh(new THREE.SphereGeometry(volume,16,16),new THREE.MeshLambertMaterial( { map:texture } ));
+        function initPlanet(name, color, distance, volume, speed, selfSpeed, textureUrl) {
+            var mesh = new THREE.Mesh(new THREE.SphereGeometry(volume, 16, 16), new THREE.MeshLambertMaterial({
+                color: color
+            }));
+            if (textureUrl) {
+                var texture = new THREE.TextureLoader().load(textureUrl)
+                mesh = new THREE.Mesh(new THREE.SphereGeometry(volume, 16, 16), new THREE.MeshLambertMaterial({
+                    map: texture
+                }));
             }
             mesh.volume = volume;
             mesh.position.z = -distance;
-            mesh.castShadow = true;//辅助线
-            mesh.receiveShadow = true;//柔和阴影
+            mesh.castShadow = true; //辅助线
+            mesh.receiveShadow = true; //柔和阴影
             mesh.name = name;
             mesh.aroundSunSpeed = speed;
             mesh.selfRotateSpeed = selfSpeed;
@@ -279,17 +298,20 @@
             scene.add(mesh);
 
             //轨道
-            var track = new THREE.Mesh( new THREE.RingGeometry (distance-0.2, distance+0.2, 64,1),
-                    new THREE.MeshBasicMaterial( { color: 0x888888, side: THREE.DoubleSide } )
+            var track = new THREE.Mesh(new THREE.RingGeometry(distance - 0.2, distance + 0.2, 64, 1),
+                new THREE.MeshBasicMaterial({
+                    color: 0x888888,
+                    side: THREE.DoubleSide
+                })
             );
-            track.rotation.x = - Math.PI / 2;
+            track.rotation.x = -Math.PI / 2;
             scene.add(track);
 
             return mesh;
         }
 
         //绕世界坐标系Y轴旋转
-        function rotateAroundWorldY(obj,rad){
+        function rotateAroundWorldY(obj, rad) {
             var x0 = obj.position.x;
             var z0 = obj.position.z;
             /**
@@ -298,38 +320,38 @@
              * 多次调用后就会出问题，先改为Quaternion实现。
              */
             var q = new THREE.Quaternion();
-            q.setFromAxisAngle( new THREE.Vector3( 0, 1, 0 ), rad );
-            obj.quaternion.premultiply( q );
+            q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), rad);
+            obj.quaternion.premultiply(q);
             //obj.rotateY(rad);
-            obj.position.x = Math.cos(rad)*x0+Math.sin(rad)*z0;
-            obj.position.z = Math.cos(rad)*z0-Math.sin(rad)*x0;
+            obj.position.x = Math.cos(rad) * x0 + Math.sin(rad) * z0;
+            obj.position.z = Math.cos(rad) * z0 - Math.sin(rad) * x0;
         }
 
         //矩阵方式实现绕世界坐标系Y轴旋转，但是不清楚为啥不能在render方法里边调用，不知道是不是OrbitControls控制器的原因
-//        function rotateAroundWorldY(obj,rad){
-//            var rad = 45*Math.PI/180;
-//            var ry = new THREE.Matrix4();
-//            ry.set(Math.cos(-rad),0,-Math.sin(-rad),0,
-//                    0,1,0,0,
-//                    Math.sin(-rad),0,Math.cos(-rad),0,
-//                    0,0,0,1);
-//            obj.applyMatrix(ry);
-//        }
+        //        function rotateAroundWorldY(obj,rad){
+        //            var rad = 45*Math.PI/180;
+        //            var ry = new THREE.Matrix4();
+        //            ry.set(Math.cos(-rad),0,-Math.sin(-rad),0,
+        //                    0,1,0,0,
+        //                    Math.sin(-rad),0,Math.cos(-rad),0,
+        //                    0,0,0,1);
+        //            obj.applyMatrix(ry);
+        //        }
 
         //行星绕太阳公转
-        function rotateAroundSun(){
-            rotateAroundWorldY(earth,earth.aroundSunSpeed);
-            rotateAroundWorldY(mars,mars.aroundSunSpeed);
-            rotateAroundWorldY(mercury,mercury.aroundSunSpeed);
-            rotateAroundWorldY(venus,venus.aroundSunSpeed);
-            rotateAroundWorldY(jupiter,jupiter.aroundSunSpeed);
-            rotateAroundWorldY(saturn,saturn.aroundSunSpeed);
-            rotateAroundWorldY(uranus,uranus.aroundSunSpeed);
-            rotateAroundWorldY(neptune,neptune.aroundSunSpeed);
+        function rotateAroundSun() {
+            rotateAroundWorldY(earth, earth.aroundSunSpeed);
+            rotateAroundWorldY(mars, mars.aroundSunSpeed);
+            rotateAroundWorldY(mercury, mercury.aroundSunSpeed);
+            rotateAroundWorldY(venus, venus.aroundSunSpeed);
+            rotateAroundWorldY(jupiter, jupiter.aroundSunSpeed);
+            rotateAroundWorldY(saturn, saturn.aroundSunSpeed);
+            rotateAroundWorldY(uranus, uranus.aroundSunSpeed);
+            rotateAroundWorldY(neptune, neptune.aroundSunSpeed);
         }
 
         //行星自转
-        function rotateSelf(){
+        function rotateSelf() {
             sun.rotateY(sun.selfRotateSpeed);
             earth.rotateY(earth.selfRotateSpeed);
             mars.rotateY(mars.selfRotateSpeed);
@@ -342,19 +364,19 @@
         }
 
         //保证星空背景不出现异常显示情况
-        function checkCamera(){
-            if(!controller.enabled){
+        function checkCamera() {
+            if (!controller.enabled) {
                 controller.enabled = true;
             }
             var x = camera.position.x;
             var y = camera.position.y;
             var z = camera.position.z;
-            if(Math.sqrt(x*x+y*y+z*z)>1000){
+            if (Math.sqrt(x * x + y * y + z * z) > 1000) {
                 controller.enabled = false;
-                while(Math.sqrt(x*x+y*y+z*z)>1000){
-                    camera.position.x = x*0.999;
-                    camera.position.y = y*0.999;
-                    camera.position.z = z*0.999;
+                while (Math.sqrt(x * x + y * y + z * z) > 1000) {
+                    camera.position.x = x * 0.999;
+                    camera.position.y = y * 0.999;
+                    camera.position.z = z * 0.999;
                     x = camera.position.x;
                     y = camera.position.y;
                     z = camera.position.z;
@@ -363,18 +385,18 @@
         }
 
         //如果鼠标焦点在某个星球上则显示该星球的名称
-        function showStarName(){
-            raycaster.setFromCamera( mouse, camera );
-            var intersects = raycaster.intersectObjects( scene.children );
-            if( intersects.length > 0 ){
+        function showStarName() {
+            raycaster.setFromCamera(mouse, camera);
+            var intersects = raycaster.intersectObjects(scene.children);
+            if (intersects.length > 0) {
                 //取第一个交汇对像（最接近相机）
-                var obj = intersects[ 0 ].object;
+                var obj = intersects[0].object;
                 var name = obj.name;
                 //把上一个显示隐藏
                 displayName && (displayName.visible = false);
 
                 /*如果是有设定名字的东西*/
-                if( starNames[name] ){
+                if (starNames[name]) {
                     starNames[name].visible = true;
                     displayName = starNames[name];
                     //复制行星位置
@@ -386,13 +408,13 @@
                     //面向相机
                     displayName.lookAt(camera.position);
                 }
-            }else{
-                displayName && displayName.visible && ( displayName.visible = false )
+            } else {
+                displayName && displayName.visible && (displayName.visible = false)
             }
         }
 
         //渲染
-        function render(){
+        function render() {
             renderer.clear();
             rotateAroundSun();
             rotateSelf();
@@ -401,7 +423,7 @@
             renderer.render(scene, camera);
             window.requestAnimFrame(render);
         }
-
     </script>
 </body>
+
 </html>
