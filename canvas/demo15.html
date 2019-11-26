@@ -1,55 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Canvas 滤镜</title>
     <style type="text/css">
-        body{
+        body {
             margin: 0;
             padding: 0;
         }
-        #source{
-            width:282px;
-            height:282px;
+
+        #source {
+            width: 282px;
+            height: 282px;
         }
     </style>
 </head>
+
 <body>
-<canvas id="source" width="282" height="282"></canvas>
-<img id="dist">
-<script type="text/javascript">
-    window.onload = function(){
+    <canvas id="source" width="282" height="282"></canvas>
+    <img id="dist">
+    <script type="text/javascript">
+        window.onload = function () {
 
-        var width = 282;
-        var height = 282;
+            var width = 282;
+            var height = 282;
 
-        var source = document.querySelector('#source');
-        var scontext = source.getContext('2d');
+            var source = document.querySelector('#source');
+            var scontext = source.getContext('2d');
 
-        scontext.fillStyle = "rgb(0,0,0)";
-        scontext.filter = 'blur(20px)';
+            scontext.fillStyle = "rgb(0,0,0)";
+            //scontext.filter = 'blur(20px)';
+            scontext.filter = 'grayscale(100%)';
 
-        scontext.moveTo(0,0);
-        scontext.lineTo(width,0);
-        scontext.lineTo(width,height);
-        scontext.fill();
+            scontext.moveTo(0, 0);
+            scontext.lineTo(width, 0);
+            scontext.lineTo(width, height);
+            scontext.fill();
 
-        var img = new Image();
-        img.src = '../img/sky.JPG';
-        img.onload = function(){
-            //测试改变状态绘制
-            scontext.globalAlpha = '0.5';
-            scontext.filter = '10px';
-            scontext.drawImage(img,0,0,width,height);
+            var img = new Image();
+            img.src = '../img/sky.JPG';
+            img.onload = function () {
+                //测试改变状态绘制
+                scontext.globalAlpha = '0.5';
+                scontext.drawImage(img, 0, 0, width, height);
 
-            scontext.filter = 'none';
-            scontext.drawImage(img,width/4,height/4,width/2,height/2,width/4,height/4,width/2,height/2);
-        }
+                scontext.filter = 'none';
+                scontext.drawImage(img, width / 4, height / 4, width / 2, height / 2, width / 4, height / 4,
+                    width / 2, height / 2);
+            }
 
-        var data = scontext.getImageData(0,0,width,height);
+            var data = scontext.getImageData(0, 0, width, height);
 
-        console.log(data);
-    };
-</script>
+            console.log(data);
+        };
+    </script>
 </body>
+
 </html>
