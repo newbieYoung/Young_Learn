@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>WebGL简单实现blur高斯模糊滤镜</title>
     <script type="text/javascript" src="./sim-tools.js"></script>
 </head>
+
 <body onload="main()">
-<canvas id="webgl" width="256" height="256"></canvas>
-<!-- 片段着色器程序 -->
-<script id="shader-fs" type="x-shader/x-fragment">
+    <canvas id="webgl" width="256" height="256"></canvas>
+    <!-- 片段着色器程序 -->
+    <script id="shader-fs" type="x-shader/x-fragment">
         precision highp float;
         varying vec2 v_TexCoord;
         uniform sampler2D u_Sampler;//纹理取样器
@@ -67,9 +69,9 @@
             gl_FragColor = iterationColor(gl_FragColor,7,v_Blur,0.0044299121055113265);
         }
 </script>
-<!-- 顶点着色器程序 -->
-<script id="shader-vs" type="x-shader/x-vertex">
-		attribute vec4 a_Position;//顶点坐标
+    <!-- 顶点着色器程序 -->
+    <script id="shader-vs" type="x-shader/x-vertex">
+        attribute vec4 a_Position;//顶点坐标
 		attribute vec2 a_TexCoord;//纹理坐标
 		varying vec2 v_TexCoord;
 	    void main() {
@@ -77,142 +79,150 @@
             v_TexCoord = a_TexCoord;
 	    }
 </script>
-<script>
-    var blur;
-    var v_Blur;
-    var canvas;
+    <script>
+        var blur;
+        var v_Blur;
+        var canvas;
 
-    function main(){
-        canvas = document.querySelector('#webgl');
-        var gl = canvas.getContext('webgl');//获取canvas上下文
-        var shaderPorgram = initShaders(gl);//初始化着色器程序
-        blur = {x:10/7/canvas.width,y:10/7/canvas.height};
+        function main() {
+            canvas = document.querySelector('#webgl');
+            var gl = canvas.getContext('webgl'); //获取canvas上下文
+            var shaderPorgram = initShaders(gl); //初始化着色器程序
+            blur = {
+                x: 10 / 7 / canvas.width,
+                y: 10 / 7 / canvas.height
+            };
 
-        v_Blur = gl.getUniformLocation(shaderPorgram, 'v_Blur');
+            v_Blur = gl.getUniformLocation(shaderPorgram, 'v_Blur');
 
-        var num = initVertexBuffers(gl,shaderPorgram);
+            var num = initVertexBuffers(gl, shaderPorgram);
 
-        //gl.clearColor(1.0,1.0,1.0,1.0);//白色背景色
-        gl.clearColor(0.0,0.0,0.0,1.0);//黑色背景色
+            //gl.clearColor(1.0,1.0,1.0,1.0);//白色背景色
+            gl.clearColor(0.0, 0.0, 0.0, 1.0); //黑色背景色
 
-        // Set texture
-        if (!initTextures(gl,shaderPorgram, num)) {
-            console.log('Failed to intialize the texture.');
-            return;
-        }
-    }
-
-    var _createFramebufferTexture = function(gl) {
-        var fbo = gl.createFramebuffer();
-        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-
-        var renderbuffer = gl.createRenderbuffer();
-        gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
-
-        var texture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-
-        gl.bindTexture(gl.TEXTURE_2D, null);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-        return {fbo: fbo, texture: texture};
-    };
-
-    //初始化纹理
-    function initTextures(gl,shaderPorgram,n){
-        var texture = gl.createTexture();//创建纹理对象
-
-        if(!texture){
-            console.log('Failed to create the texture object!');
-            return false;
+            // Set texture
+            if (!initTextures(gl, shaderPorgram, num)) {
+                console.log('Failed to intialize the texture.');
+                return;
+            }
         }
 
-        var u_Sampler = gl.getUniformLocation(shaderPorgram,'u_Sampler');
-        var image = new Image();
-        image.src = '../img/sky.JPG';
-        //image.src = '../img/pure.png';
-        image.onload = function(){
-            loadTextures(gl,n,texture,u_Sampler,image);
-        }
-        return true;
-    }
+        var _createFramebufferTexture = function (gl) {
+            var fbo = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 
-    //加载纹理图片
-    function loadTextures(gl,n,texture,u_Sampler,image){
-        gl.clear(gl.COLOR_BUFFER_BIT);   // Clear <canvas>
+            var renderbuffer = gl.createRenderbuffer();
+            gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
 
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);//对纹理图像进行y轴反转
-        gl.bindTexture(gl.TEXTURE_2D, texture);//绑定纹理对象
+            var texture = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+                null);
 
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);//配置纹理对象的参数
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        /**
-         * 使用NEAREST过滤器的纹理始终会返回最接近样本点的马赛克（texel）中心点的颜色，
-         * 使用LINEAR过滤器返回以样本点为中心四个方向上像素的平均值，这会形成一个逐渐过渡的颜色，这效果通常也是更理想的，但是这也意味着显卡需要消耗四倍的工作量。
-         */
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);//将纹理图像分配给纹理对象
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
 
-        // Vertical
-        gl.uniform2f(v_Blur, 0, blur.y);
-        var fbt = _createFramebufferTexture(gl);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, fbt.fbo);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-        // Horizontal
-        gl.uniform2f(v_Blur, blur.x, 0);
-        gl.bindTexture(gl.TEXTURE_2D, fbt.texture);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
-    }
+            return {
+                fbo: fbo,
+                texture: texture
+            };
+        };
 
-    //初始化顶点位置
-    function initVertexBuffers(gl,shaderPorgram){
-        //顶点坐标和纹理坐标映射关系
-        var datas = new Float32Array([
-            //顶点坐标、纹理坐标
-            -1.0,1.0,0.0,1.0,
-            -1.0,-1.0,0.0,0.0,
-            1.0,1.0,1.0,1.0,
-            1.0,-1.0,1.0,0.0,
-        ]);
+        //初始化纹理
+        function initTextures(gl, shaderPorgram, n) {
+            var texture = gl.createTexture(); //创建纹理对象
 
-        var num = 4;//顶点数目
-        var vertexBuffer = gl.createBuffer();//创建缓冲区对象
+            if (!texture) {
+                console.log('Failed to create the texture object!');
+                return false;
+            }
 
-        if(!vertexBuffer){
-            console.log('Failed to create the buffer object!');
-            return -1;
+            var u_Sampler = gl.getUniformLocation(shaderPorgram, 'u_Sampler');
+            var image = new Image();
+            image.src = '../img/sky.JPG';
+            //image.src = '../img/pure.png';
+            image.onload = function () {
+                loadTextures(gl, n, texture, u_Sampler, image);
+            }
+            return true;
         }
 
-        //将缓冲区对象绑定到目标并写入数据
-        gl.bindBuffer(gl.ARRAY_BUFFER,vertexBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER,datas,gl.STATIC_DRAW);
+        //加载纹理图片
+        function loadTextures(gl, n, texture, u_Sampler, image) {
+            gl.clear(gl.COLOR_BUFFER_BIT); // Clear <canvas>
 
-        var size = datas.BYTES_PER_ELEMENT;//数组中的每个元素的大小（以字节为单位）
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); //对纹理图像进行y轴反转
+            gl.bindTexture(gl.TEXTURE_2D, texture); //绑定纹理对象
 
-        //顶点着色器接受顶点坐标和纹理坐标映射关系
-        var a_Position = gl.getAttribLocation(shaderPorgram,'a_Position');
-        gl.vertexAttribPointer(a_Position,2,gl.FLOAT,false,size*4,0);
-        gl.enableVertexAttribArray(a_Position);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); //配置纹理对象的参数
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            /**
+             * 使用NEAREST过滤器的纹理始终会返回最接近样本点的马赛克（texel）中心点的颜色，
+             * 使用LINEAR过滤器返回以样本点为中心四个方向上像素的平均值，这会形成一个逐渐过渡的颜色，这效果通常也是更理想的，但是这也意味着显卡需要消耗四倍的工作量。
+             */
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-        var a_TexCoord = gl.getAttribLocation(shaderPorgram,'a_TexCoord');
-        gl.vertexAttribPointer(a_TexCoord,2,gl.FLOAT,false,size*4,size*2);
-        gl.enableVertexAttribArray(a_TexCoord);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image); //将纹理图像分配给纹理对象
 
-        return num;
-    }
-</script>
+            // Vertical
+            gl.uniform2f(v_Blur, 0, blur.y);
+            var fbt = _createFramebufferTexture(gl);
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fbt.fbo);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
+
+            // Horizontal
+            gl.uniform2f(v_Blur, blur.x, 0);
+            gl.bindTexture(gl.TEXTURE_2D, fbt.texture);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
+        }
+
+        //初始化顶点位置
+        function initVertexBuffers(gl, shaderPorgram) {
+            //顶点坐标和纹理坐标映射关系
+            var datas = new Float32Array([
+                //顶点坐标、纹理坐标
+                -1.0, 1.0, 0.0, 1.0,
+                -1.0, -1.0, 0.0, 0.0,
+                1.0, 1.0, 1.0, 1.0,
+                1.0, -1.0, 1.0, 0.0,
+            ]);
+
+            var num = 4; //顶点数目
+            var vertexBuffer = gl.createBuffer(); //创建缓冲区对象
+
+            if (!vertexBuffer) {
+                console.log('Failed to create the buffer object!');
+                return -1;
+            }
+
+            //将缓冲区对象绑定到目标并写入数据
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, datas, gl.STATIC_DRAW);
+
+            var size = datas.BYTES_PER_ELEMENT; //数组中的每个元素的大小（以字节为单位）
+
+            //顶点着色器接受顶点坐标和纹理坐标映射关系
+            var a_Position = gl.getAttribLocation(shaderPorgram, 'a_Position');
+            gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, size * 4, 0);
+            gl.enableVertexAttribArray(a_Position);
+
+            var a_TexCoord = gl.getAttribLocation(shaderPorgram, 'a_TexCoord');
+            gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, size * 4, size * 2);
+            gl.enableVertexAttribArray(a_TexCoord);
+
+            return num;
+        }
+    </script>
 </body>
+
 </html>
