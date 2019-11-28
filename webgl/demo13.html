@@ -99,6 +99,7 @@
             renderer = new THREE.WebGLRenderer({
                 antialias: true
             });
+            renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(width, height);
             renderer.setClearColor(0xFFFFFF, 1.0);
             document.getElementById('canvas-frame').appendChild(renderer.domElement);

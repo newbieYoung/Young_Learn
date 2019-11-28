@@ -29,6 +29,7 @@
             renderer = new THREE.WebGLRenderer({
                 antialias: true
             });
+            renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(width, height);
             renderer.setClearColor(0xFFFFFF, 1.0);
             //并添加容器中

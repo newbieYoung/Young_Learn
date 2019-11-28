@@ -63,6 +63,7 @@
                 antialias: true,
                 alpha: true //背景区域渲染是否透明
             });
+            renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(width, height);
             //如果设置了clearColor则会存在背景色遮挡页面的其他元素
             //renderer.setClearColor(0xFFFFFF, 1.0);
