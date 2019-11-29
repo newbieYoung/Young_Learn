@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>ArrayCamera</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    div#canvas-frame {
+      width: 100%;
+      height: 100%;
+      background-color: #EEEEEE;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="canvas-frame"></div>
+  <script src="../lib/three.js"></script>
+  <script>
+    window.onload = function () {
+      threeStart();
+    }
+
+    window.requestAnimFrame = (function () { //如果有变化则可能还需要requestAnimationFrame刷新
+      return window.requestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame;
+    })();
+
+    function threeStart() {
+      initThree();
+      initCamera();
+      initScene();
+      initLight();
+      initObject();
+      render();
+    }
+
+    var renderer;
+    var width;
+    var height;
+    var AMOUNT = 6;
+
+    function initThree() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      renderer = new THREE.WebGLRenderer({
+        antialias: true
+      });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(width, height);
+      renderer.setClearColor(0x000000, 1);
+      document.getElementById('canvas-frame').appendChild(renderer.domElement);
+    }
+
+    var cameras = [];
+    var camera;
+
+    function initCamera() {
+      var itemWidth = width / AMOUNT * window.devicePixelRatio;
+      var itemHeight = height / AMOUNT * window.devicePixelRatio;
+      for (var x = 0; x < AMOUNT; x++) {
+        for (var y = 0; y < AMOUNT; y++) {
+          var subcamera = new THREE.PerspectiveCamera(40, width / height, 0.1, 10);
+          subcamera.viewport = new THREE.Vector4(Math.floor(x * itemWidth), Math.floor(y * itemHeight), Math.ceil(
+              itemWidth), Math
+            .ceil(itemHeight));
+          subcamera.position.x = (x / AMOUNT) - 0.5;
+          subcamera.position.y = 0.5 - (y / AMOUNT);
+          subcamera.position.z = 1.5;
+          subcamera.position.multiplyScalar(2); //相机位置缩放两倍
+          subcamera.lookAt(0, 0, 0);
+          subcamera.updateMatrixWorld(); //？
+          cameras.push(subcamera);
+        }
+      }
+
+      camera = new THREE.ArrayCamera(cameras);
+      camera.position.z = 3;
+    }
+
+    var scene;
+
+    function initScene() {
+      scene = new THREE.Scene();
+    }
+
+    function initLight() {
+      scene.add(new THREE.AmbientLight(0x222244));
+
+      var light = new THREE.DirectionalLight();
+      light.position.set(0.5, 0.5, 1);
+      light.castShadow = true;
+      light.shadow.camera.zoom = 4; // tighter shadow map
+      scene.add(light);
+    }
+
+    var mesh;
+
+    function initObject() {
+      var geometry = new THREE.PlaneBufferGeometry(100, 100);
+      var material = new THREE.MeshPhongMaterial({
+        color: 0x000066
+      });
+
+      var background = new THREE.Mesh(geometry, material);
+      background.receiveShadow = true;
+      background.position.set(0, 0, -1);
+      scene.add(background);
+
+      var geometry = new THREE.CylinderBufferGeometry(0.5, 0.5, 1, 32);
+      var material = new THREE.MeshPhongMaterial({
+        color: 0xff0000
+      });
+
+      mesh = new THREE.Mesh(geometry, material);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      scene.add(mesh);
+    }
+
+    function render() {
+      mesh.rotation.x += 0.005;
+      mesh.rotation.z += 0.01;
+      renderer.render(scene, camera);
+      requestAnimationFrame(render);
+    }
+  </script>
+</body>
+
+</html>
