@@ -47,18 +47,17 @@
     }
 
     var renderer;
-    var width;
-    var height;
+    var ASPECT_RATIO = window.innerWidth / window.innerHeight;
     var AMOUNT = 6;
+    var WIDTH = (window.innerWidth / AMOUNT) * window.devicePixelRatio;
+    var HEIGHT = (window.innerHeight / AMOUNT) * window.devicePixelRatio;
 
     function initThree() {
-      width = window.innerWidth;
-      height = window.innerHeight;
       renderer = new THREE.WebGLRenderer({
         antialias: true
       });
       renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(width, height);
+      renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setClearColor(0x000000, 1);
       document.getElementById('canvas-frame').appendChild(renderer.domElement);
     }
@@ -67,14 +66,12 @@
     var camera;
 
     function initCamera() {
-      var itemWidth = width / AMOUNT * window.devicePixelRatio;
-      var itemHeight = height / AMOUNT * window.devicePixelRatio;
-      for (var x = 0; x < AMOUNT; x++) {
-        for (var y = 0; y < AMOUNT; y++) {
-          var subcamera = new THREE.PerspectiveCamera(40, width / height, 0.1, 10);
-          subcamera.viewport = new THREE.Vector4(Math.floor(x * itemWidth), Math.floor(y * itemHeight), Math.ceil(
-              itemWidth), Math
-            .ceil(itemHeight));
+      for (var y = 0; y < AMOUNT; y++) {
+        for (var x = 0; x < AMOUNT; x++) {
+          var subcamera = new THREE.PerspectiveCamera(40, ASPECT_RATIO, 0.1, 10);
+          subcamera.viewport = new THREE.Vector4(Math.floor(x * WIDTH), Math.floor(y * HEIGHT), Math.ceil(
+              WIDTH), Math
+            .ceil(HEIGHT));
           subcamera.position.x = (x / AMOUNT) - 0.5;
           subcamera.position.y = 0.5 - (y / AMOUNT);
           subcamera.position.z = 1.5;
@@ -108,12 +105,9 @@
     var mesh;
 
     function initObject() {
-      var geometry = new THREE.PlaneBufferGeometry(100, 100);
-      var material = new THREE.MeshPhongMaterial({
+      var background = new THREE.Mesh(new THREE.PlaneBufferGeometry(100, 100), new THREE.MeshPhongMaterial({
         color: 0x000066
-      });
-
-      var background = new THREE.Mesh(geometry, material);
+      }));
       background.receiveShadow = true;
       background.position.set(0, 0, -1);
       scene.add(background);
@@ -122,7 +116,6 @@
       var material = new THREE.MeshPhongMaterial({
         color: 0xff0000
       });
-
       mesh = new THREE.Mesh(geometry, material);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
