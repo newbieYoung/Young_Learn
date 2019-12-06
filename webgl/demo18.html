@@ -80,7 +80,7 @@
           subcamera.position.z = 1.5;
           subcamera.position.multiplyScalar(2); //相机位置缩放两倍
           subcamera.lookAt(0, 0, 0);
-          subcamera.updateMatrixWorld(); //？
+          subcamera.updateMatrixWorld(); // 子相机设置位置时是基于局部世界坐标系，最终渲染时还得转换为全局世界坐标系
           cameras.push(subcamera);
         }
       }
