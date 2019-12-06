@@ -59,6 +59,7 @@
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setClearColor(0x000000, 1);
+      renderer.shadowMap.enabled = true; //打开渲染器的阴影地图
       document.getElementById('canvas-frame').appendChild(renderer.domElement);
     }
 
