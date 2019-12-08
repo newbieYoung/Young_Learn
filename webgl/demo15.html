@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>简易太阳系</title>
     <script src="../lib/three.js"></script>
-    <script src="../lib/three-orbit-controls.js"></script>
+    <script src="../lib/three-OrbitControls.js"></script>
     <style type="text/css">
         body {
             margin: 0;
@@ -82,12 +82,8 @@
 
         function initCamera() {
             camera = new THREE.PerspectiveCamera(45, width / height, 1, 3000);
-            camera.position.x = 0;
-            camera.position.y = 0;
-            camera.position.z = 100;
-            camera.up.x = 0; //正方向
-            camera.up.y = 1;
-            camera.up.z = 0;
+            camera.position.set(0, 0, 100);
+            camera.up.set(0, 1, 0);
             camera.lookAt(new THREE.Vector3(0, 0, 0));
 
             //视角控制
@@ -255,8 +251,8 @@
                 colors[i + 2] = color.b;
             }
 
-            bufferGeometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-            bufferGeometry.addAttribute('color', new THREE.BufferAttribute(colors, 3));
+            bufferGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            bufferGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
             bufferGeometry.computeBoundingSphere();
 
             /*星星的material*/
