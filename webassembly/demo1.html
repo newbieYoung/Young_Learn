@@ -16,7 +16,10 @@
                     console.log(instance.exports);
 
                     const mixed = instance.exports._Z5mixedii;
-                    console.log('result =', mixed(3, 2));
+                    console.log(mixed(3, 2));
+
+                    const add1 = instance.exports._Z4add1fi;
+                    console.log(add1(1.2,3));
                 })
         }
     </script>
