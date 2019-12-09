@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>卷积和数组操作测试</title>
 </head>
+
 <body>
   <img id="img1" src="../img/lena-part.jpg" alt="">
   <script type="text/javascript" src="demo4.js"></script>
@@ -24,6 +26,15 @@
       let dataImage = ctx.getImageData(0, 0, width, height);
 
       return dataImage;
+    }
+
+    function getCvDst(width, height) {
+      let canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      let ctx = canvas.getContext('2d');
+      let imageData = ctx.getImageData(0, 0, width, height);
+      return imageData;
     }
 
     function putCvData(conv, width, height) {
@@ -49,20 +60,26 @@
         -1, -1, -1, 255, 1, 1, 1, 255, 1, 1, 1, 255,
         0, 0, 0, 255, 1, 1, 1, 255, 2, 2, 2, 255
       ];
-
-      let ker = Module['_malloc'](kerRelievo.length * Float32Array.BYTES_PER_ELEMENT);
-      HEAPF32.set(kerRelievo, ker/Float32Array.BYTES_PER_ELEMENT);
-
       let imgData = getCvMat('img1');
       let matData = imgData.data;
-      let mat = Module['_malloc'](matData.length * Int32Array.BYTES_PER_ELEMENT);
-      HEAP32.set(matData, mat/Int32Array.BYTES_PER_ELEMENT);
+      let dstData = getCvDst(imgData.width, imgData.height).data;
 
-      Module['_convolution'](ker,3,3,mat,imgData.width,imgData.height);
-      let result = HEAP32.subarray(mat/Int32Array.BYTES_PER_ELEMENT, mat/Int32Array.BYTES_PER_ELEMENT+matData.length);
-      console.log(result);
-      putCvData(result,imgData.width,imgData.height);
+      let t0 = window.performance.now();
+      let ker = Module['_malloc'](kerRelievo.length * Float32Array.BYTES_PER_ELEMENT);
+      HEAPF32.set(kerRelievo, ker / Float32Array.BYTES_PER_ELEMENT);
+      let mat = Module['_malloc'](matData.length * Uint8Array.BYTES_PER_ELEMENT);
+      HEAPU8.set(matData, mat / Uint8Array.BYTES_PER_ELEMENT);
+      let dst = Module['_malloc'](dstData.length * Float32Array.BYTES_PER_ELEMENT);
+      HEAPF32.set(dstData, dst / Float32Array.BYTES_PER_ELEMENT);
+      Module['_convolution'](dst, ker, 3, 3, mat, imgData.width, imgData.height);
+      let result = HEAPF32.subarray(dst / Float32Array.BYTES_PER_ELEMENT, dst / Float32Array.BYTES_PER_ELEMENT +
+        matData
+        .length);
+      let t1 = window.performance.now();
+      console.log(t1 - t0 + ' ms');
+      putCvData(result, imgData.width, imgData.height)
     };
   </script>
 </body>
+
 </html>
