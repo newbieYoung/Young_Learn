@@ -96,22 +96,16 @@
             var zline = new THREE.Line(zgeo, zmat);
             scene.add(zline);
 
-            group = new THREE.Group();
             //球体
-            var loader = new THREE.TextureLoader();
-            loader.load('textures/land_ocean_ice_cloud_2048.jpg', function (texture) {
-                var geometry = new THREE.SphereGeometry(100, 20, 20);
-                var material = new THREE.MeshBasicMaterial({
-                    map: texture,
-                });
-                var mesh = new THREE.Mesh(geometry, material);
-                group.add(mesh);
-                scene.add(group);
-            }, function (xhr) {
-                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-            }, function (xhr) {
-                console.log('An error happened');
+            group = new THREE.Group();
+            var texture = new THREE.TextureLoader().load('textures/land_ocean_ice_cloud_2048.jpg');
+            var geometry = new THREE.SphereGeometry(100, 20, 20);
+            var material = new THREE.MeshBasicMaterial({
+                map: texture,
             });
+            var mesh = new THREE.Mesh(geometry, material);
+            group.add(mesh);
+            scene.add(group);
         }
 
         function render() {
