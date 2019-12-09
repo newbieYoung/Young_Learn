@@ -41,12 +41,8 @@
         function initCamera() {
             //创建相机
             camera = new THREE.PerspectiveCamera(60, width / height, 1, 2000);
-            camera.position.x = 300;
-            camera.position.y = 600;
-            camera.position.z = 600;
-            camera.up.x = 0; //正方向
-            camera.up.y = 1;
-            camera.up.z = 0;
+            camera.position.set(300, 600, 600);
+            camera.up.set(0, 1, 0); //正方向
             camera.lookAt(new THREE.Vector3(0, 0, 0));
         }
 
@@ -101,17 +97,16 @@
             scene.add(zline);
 
             group = new THREE.Group();
-            scene.add(group);
             //球体
             var loader = new THREE.TextureLoader();
             loader.load('textures/land_ocean_ice_cloud_2048.jpg', function (texture) {
                 var geometry = new THREE.SphereGeometry(100, 20, 20);
                 var material = new THREE.MeshBasicMaterial({
                     map: texture,
-                    overdraw: 0.5
                 });
                 var mesh = new THREE.Mesh(geometry, material);
                 group.add(mesh);
+                scene.add(group);
             }, function (xhr) {
                 console.log((xhr.loaded / xhr.total * 100) + '% loaded');
             }, function (xhr) {
