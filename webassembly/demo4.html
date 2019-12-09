@@ -9,7 +9,7 @@
 </head>
 
 <body>
-  <img id="img1" src="../img/lena.jpg" alt="">
+  <img id="img1" src="../img/img-conv.jpg" alt="">
   <script type="text/javascript" src="demo4.js"></script>
   <script>
     function getCvMat(imageId) {
@@ -71,9 +71,9 @@
       HEAPU8.set(matData, mat / Uint8Array.BYTES_PER_ELEMENT);
       let dst = Module['_malloc'](dstData.length * Float32Array.BYTES_PER_ELEMENT);
       HEAPF32.set(dstData, dst / Float32Array.BYTES_PER_ELEMENT);
-      Module['_convolution'](dst, ker, 3, 3, mat, imgData.width, imgData.height);
+      Module['_convolution'](dst, ker, 3, 3, mat, imgData.height, imgData.width);
       let result = HEAPF32.subarray(dst / Float32Array.BYTES_PER_ELEMENT, dst / Float32Array.BYTES_PER_ELEMENT +
-        matData
+        dstData
         .length);
       let t1 = window.performance.now();
       console.log(t1 - t0 + ' ms');
