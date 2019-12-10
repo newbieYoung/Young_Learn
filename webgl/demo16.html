@@ -134,17 +134,15 @@
             });
 
             loader.load('./stl/static-xbot.stl', function (buffer) {
-                let geometry = new THREE.Geometry();
-                geometry.fromBufferGeometry(buffer)
-                var points = new THREE.Points(geometry, material);
-                //调整方向、位置以及大小
-                points.rotation.x = -0.5 * Math.PI;
-                points.scale.set(50, 50, 50);
-                geometry.center();
-                scene.add(points);
-                console.log(points.geometry);
-                console.log(points.geometry.vertices[0]);
-                obj2 = points;
+                //调整初始模型位置、大小以及方向
+                //rotation.x = -0.5 * Math.PI;
+                //scale.set(50, 50, 50);
+                var matrix = new THREE.Matrix4()
+                matrix.set(50, 0, 0, 0, 0, 1.1102230246251565e-14, -50, 0, 0, 50, 1.1102230246251565e-14, 0, 0,
+                    0, 0, 1);
+                //重新计算初始模型顶点
+                var obj2 = resetModelPoints(buffer, matrix, material);
+                scene.add(obj2);
             }, function (xhr) {
                 if (xhr.lengthComputable) {
                     var percentComplete = xhr.loaded / xhr.total * 100;
@@ -153,6 +151,27 @@
             }, function (xhr) {
                 console.error(xhr);
             });
+        }
+
+        //重置模型顶点
+        function resetModelPoints(buffer, matrix, material) {
+            var points = buffer.getAttribute('position').array;
+            var array = [];
+            for (var i = 0; i < points.length; i = i + 3) {
+                var vec3 = new THREE.Vector3(points[i], points[i + 1], points[i + 2]);
+                vec3.applyMatrix4(matrix);
+                array.push(vec3.x);
+                array.push(vec3.y);
+                array.push(vec3.z);
+            }
+            var bufgeo = new THREE.BufferGeometry();
+            var vertices = new Float32Array(array);
+            bufgeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            let geometry = new THREE.Geometry();
+            geometry.fromBufferGeometry(bufgeo)
+            var points = new THREE.Points(geometry, material);
+            console.log(points);
+            return points;
         }
 
         function addParticles(obj1, obj2) { //添加粒子系统
