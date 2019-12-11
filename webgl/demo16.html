@@ -115,15 +115,15 @@
             //加载模型
             var loader = new THREE.STLLoader();
             loader.load('./stl/solid_head.stl', function (buffer) {
-                let geometry = new THREE.Geometry();
-                geometry.fromBufferGeometry(buffer)
-                var points = new THREE.Points(geometry, material);
-                //调整方向、位置以及大小
-                points.rotation.x = -0.5 * Math.PI;
-                points.scale.set(0.5, 0.5, 0.5);
-                geometry.center();
-                scene.add(points);
-                obj1 = points;
+                //调整初始模型位置、大小以及方向
+                //rotation.x = -0.5 * Math.PI;
+                //scale.set(.5,.5,.5);
+                var matrix = new THREE.Matrix4();
+                matrix.set(0.5, 0, 0, 0, 0, 0, -0.5, 0, 0, 0.5, 0, 0,
+                    0, 0, 0, -1);
+                //重新计算初始模型顶点
+                var obj1 = resetModelPoints(buffer, matrix, material);
+                scene.add(obj1);
             }, function (xhr) {
                 if (xhr.lengthComputable) {
                     var percentComplete = xhr.loaded / xhr.total * 100;
@@ -138,8 +138,8 @@
                 //rotation.x = -0.5 * Math.PI;
                 //scale.set(50, 50, 50);
                 var matrix = new THREE.Matrix4()
-                matrix.set(50, 0, 0, 0, 0, 1.1102230246251565e-14, -50, 0, 0, 50, 1.1102230246251565e-14, 0, 0,
-                    0, 0, 1);
+                matrix.set(50, 0, 0, 0, 0, 0, -50, 0, 0, 50, 0, 0, 0,
+                    0, 0, -1);
                 //重新计算初始模型顶点
                 var obj2 = resetModelPoints(buffer, matrix, material);
                 scene.add(obj2);
@@ -168,9 +168,9 @@
             var vertices = new Float32Array(array);
             bufgeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
             let geometry = new THREE.Geometry();
-            geometry.fromBufferGeometry(bufgeo)
+            geometry.fromBufferGeometry(bufgeo);
+            geometry.center(); //会对几何体中所有顶点进行位移，从而让几何体居中
             var points = new THREE.Points(geometry, material);
-            console.log(points);
             return points;
         }
 
