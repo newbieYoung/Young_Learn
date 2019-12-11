@@ -122,8 +122,10 @@
                 matrix.set(0.5, 0, 0, 0, 0, 0, -0.5, 0, 0, 0.5, 0, 0,
                     0, 0, 0, -1);
                 //重新计算初始模型顶点
-                var obj1 = resetModelPoints(buffer, matrix, material);
-                scene.add(obj1);
+                obj1 = resetModelPoints(buffer, matrix, material);
+                if (obj1 && obj2) {
+                    initParticles(obj1, obj2);
+                }
             }, function (xhr) {
                 if (xhr.lengthComputable) {
                     var percentComplete = xhr.loaded / xhr.total * 100;
@@ -141,8 +143,10 @@
                 matrix.set(50, 0, 0, 0, 0, 0, -50, 0, 0, 50, 0, 0, 0,
                     0, 0, -1);
                 //重新计算初始模型顶点
-                var obj2 = resetModelPoints(buffer, matrix, material);
-                scene.add(obj2);
+                obj2 = resetModelPoints(buffer, matrix, material);
+                if (obj1 && obj2) {
+                    initParticles(obj1, obj2);
+                }
             }, function (xhr) {
                 if (xhr.lengthComputable) {
                     var percentComplete = xhr.loaded / xhr.total * 100;
@@ -174,93 +178,68 @@
             return points;
         }
 
-        function addParticles(obj1, obj2) { //添加粒子系统
-            var moreObj, lessObj;
-            if (obj1.vertices.length > obj2.vertices.length) {
-                moreObj = obj1;
-                lessObj = obj2;
-            } else {
-                moreObj = obj2;
-                lessObj = obj1;
+        //粒子系统
+        function initParticles(obj1, obj2) {
+            var len1 = obj1.geometry.vertices.length;
+            var len2 = obj2.geometry.vertices.length;
+            var start;
+            var end;
+            if (len1 > len2) { //两个模型顶点数量不一致则把顶点较少模型的用自身已经存在的顶点补齐
+                for (var i = len2 + 1; i < len1; i++) {
+                    var insertNo = parseInt(Math.random() * len2);
+                    obj2.geometry.vertices.push(obj2.geometry.vertices[insertNo].clone());
+                }
+                start = obj2;
+                end = obj1;
+            } else if (len2 > len1) {
+                for (var i = len1 + 1; i < len2; i++) {
+                    var insertNo = parseInt(Math.random() * len1);
+                    obj1.geometry.vertices.push(obj1.geometry.vertices[insertNo].clone());
+                }
+                start = obj1;
+                end = obj2;
             }
+            var cur = start.clone();
+            scene.add(cur);
 
-            var morePoints = [];
-            var lessPoints = [];
-            var moreLen = moreObj.vertices.length;
-            var lessLen = lessObj.vertices.length;
-            moreObj.vertices.forEach(function (o) {
-                morePoints.push(o.clone());
-            });
-            lessObj.vertices.forEach(function (o) {
-                lessPoints.push(o.clone());
-            });
-            for (var i = lessLen, j = 0; i < moreLen; i++, j++) {
-                lessPoints[i] = lessPoints[j]; //两个模型顶点数量不一致则把顶点较少模型的用自身已经存在的顶点补齐
-            }
-
-            var texture = new THREE.TextureLoader().load('./textures/dot.png');
-
-            for (var i = 0; i < moreLen; i++) {
-                var lessItem = lessPoints[i];
-
-                var color = new THREE.Color();
-                color.r = lessItem.x / 30;
-                color.g = lessItem.y / 30;
-                color.b = lessItem.z / 30;
-
-                var time = Date.now() * 0.005;
-                var size = 1.5 * (2.0 + Math.sin(0.02 * i + time));
-
-                var geometry = new THREE.Geometry();
-                geometry.vertices.push(new THREE.Vector3());
-                var material = new THREE.PointsMaterial({
-                    color: color,
-                    size: size,
-                    map: texture,
-                    blending: THREE.AddEquation,
-                    depthTest: false,
-                    transparent: true
-                });
-                var particle = new THREE.Points(geometry, material);
-                particle.position.copy(lessItem);
-                group.add(particle);
-            }
-
+            //模型切换
             var pos = {
                 val: 1
             };
             var tween = new TWEEN.Tween(pos).to({
                 val: 0
             }, 2000).easing(TWEEN.Easing.Quadratic.InOut).delay(1000).onUpdate(function () {
-                tweenCallback(this.val, lessPoints, morePoints);
+                tweenCallback(this.val, cur, start, end);
             });
             var tweenBack = new TWEEN.Tween(pos).to({
                 val: 1
             }, 2000).easing(TWEEN.Easing.Quadratic.InOut).delay(1000).onUpdate(function () {
-                tweenCallback(this.val, lessPoints, morePoints);
+                tweenCallback(this.val, cur, start, end);
             });
             tween.chain(tweenBack);
             tweenBack.chain(tween);
             tween.start();
         }
 
-        function tweenCallback(val, lessPoints, morePoints) { //更新每个粒子的位置
-            var particles = group.children;
+        //状态更新
+        function tweenCallback(val, cur, start, end) {
+            for (var i = 0; i < cur.geometry.vertices.length; i++) {
+                var sItem = start.geometry.vertices[i];
+                var eItem = end.geometry.vertices[i];
+                var vertice = cur.geometry.vertices[i];
 
-            for (var i = 0; i < particles.length; i++) {
-                var particle = particles[i];
-
-                var lessItem = lessPoints[i];
-                var moreItem = morePoints[i];
-
-                particle.position.x = lessItem.x * val + moreItem.x * (1 - val);
-                particle.position.y = lessItem.y * val + moreItem.y * (1 - val);
-                particle.position.z = lessItem.z * val + moreItem.z * (1 - val);
-
-                particle.material.color.r = particle.position.x / (20 + 10 * val); //亮度变量
-                particle.material.color.g = particle.position.y / (20 + 10 * val);
-                particle.material.color.b = particle.position.z / (20 + 10 * val);
+                //位置变化
+                vertice.x = sItem.x * val + eItem.x * (1 - val);
+                vertice.y = sItem.y * val + eItem.y * (1 - val);
+                vertice.z = sItem.z * val + eItem.z * (1 - val);
             }
+
+            //亮度变化
+            //cur.material.color.r = cur.position.x / (20 + 10 * val);
+            //cur.material.color.g = cur.position.y / (20 + 10 * val);
+            //cur.material.color.b = cur.position.z / (20 + 10 * val);
+
+            cur.geometry.verticesNeedUpdate = true;
         }
 
         //渲染
@@ -268,16 +247,6 @@
             renderer.clear();
             TWEEN.update();
             stats.update();
-
-            var time = Date.now() * 0.005;
-            if (group) {
-                group.rotation.y = 0.01 * time;
-                var particles = group.children;
-                for (var i = 0; i < particles.length; i++) {
-                    var material = particles[i].material;
-                    material.size = 1.5 * (2.0 + Math.sin(0.02 * i + time)); //大小变化
-                }
-            }
 
             renderer.render(scene, camera);
             window.requestAnimFrame(render);
