@@ -53,13 +53,5 @@ void sqdiff(float dst[], unsigned char src[], int srcW, int srcH, unsigned char 
   for (int i = 0; i < dstLen; i++)
   {
     dst[i] = ((dst[i] - min) / len) * 255;
-    if (dst[i] > 255)
-    {
-      dst[i] = 255;
-    }
-    else if (dst[i] < 0)
-    {
-      dst[i] = 0;
-    }
   }
 }
