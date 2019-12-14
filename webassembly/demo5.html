@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>模版匹配一</title>
+</head>
+
+<body>
+  <img id="src" src="../img/lena.jpg" alt="" />
+  <img id="tmp" src="../img/lena-part.jpg" alt="" />
+  <script>
+    //emcc -O3 demo5.c -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s EXPORTED_FUNCTIONS="['_sqdiff','_malloc']" -o demo5.js
+    Module['onRuntimeInitialized'] = function () {
+      console.log('---start---');
+      console.log(Module);
+
+
+    };
+  </script>
+</body>
+
+</html>
