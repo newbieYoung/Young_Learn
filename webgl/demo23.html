@@ -7,7 +7,7 @@
     <script type="text/javascript" src="../lib/inflate.min.js"></script>
     <script type="text/javascript" src="../lib/three.js"></script>
     <script type="text/javascript" src="../lib/three-FBXLoader.js"></script>
-    <script type="text/javascript" src="../lib/three-orbit-controls.js"></script>
+    <script type="text/javascript" src="../lib/three-OrbitControls.js"></script>
     <style type="text/css">
         body {
             padding: 0;
@@ -55,6 +55,7 @@
             renderer = new THREE.WebGLRenderer({
                 antialias: true
             });
+            renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(width, height);
             renderer.setClearColor(0x000000);
             document.getElementById('canvas-frame').appendChild(renderer.domElement);
@@ -113,19 +114,15 @@
                 action.play();
 
                 scene.add(object);
-            }, onProgress, onError);
+            }, function (xhr) {
+                if (xhr.lengthComputable) {
+                    var percentComplete = xhr.loaded / xhr.total * 100;
+                    console.log(Math.round(percentComplete, 2) + '% downloaded');
+                }
+            }, function (xhr) {
+                console.error(xhr);
+            });
         }
-
-        //模型加载回掉函数
-        var onProgress = function (xhr) {
-            if (xhr.lengthComputable) {
-                var percentComplete = xhr.loaded / xhr.total * 100;
-                console.log(Math.round(percentComplete, 2) + '% downloaded');
-            }
-        };
-        var onError = function (xhr) {
-            console.error(xhr);
-        };
 
         //渲染
         var clock = new THREE.Clock();
