@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>模版匹配一</title>
+</head>
+
+<body>
+  <img id="src" src="../img/lena.jpg" alt="" />
+  <img id="tmp" src="../img/lena-part.jpg" alt="" />
+  <script type="text/javascript" src="demo5.js"></script>
+  <script>
+    function getGrayData(id) {
+      //获取图片的灰度数据
+      let $img = document.querySelector("#" + id);
+      let data = {
+        width: $img.width,
+        height: $img.height
+      };
+      let $canvas = document.createElement("canvas");
+      $canvas.width = $img.width;
+      $canvas.height = $img.height;
+      let ctx = $canvas.getContext("2d");
+      ctx.filter = "grayscale(100%)";
+      ctx.drawImage($img, 0, 0, $img.width, $img.height);
+      let array = ctx.getImageData(0, 0, $img.width, $img.height).data;
+
+      let gray = [];
+      for (i = 0; i < array.length; i = i + 4) {
+        gray.push(array[i]);
+      }
+
+      data.gray = gray;
+      return data;
+    }
+
+    function drawRect(id, pos, tmpW, tmpH) {
+      //绘制定位框
+      let $img = document.querySelector("#" + id);
+      let data = {
+        width: $img.width,
+        height: $img.height
+      };
+      let $canvas = document.createElement("canvas");
+      $canvas.width = $img.width;
+      $canvas.height = $img.height;
+      let ctx = $canvas.getContext("2d");
+      ctx.drawImage($img, 0, 0, $img.width, $img.height);
+
+      ctx.beginPath();
+      ctx.lineWidth = "1";
+      ctx.strokeStyle = "red";
+      ctx.rect(pos.x, pos.y, tmpW, tmpH);
+      ctx.stroke();
+
+      document.body.appendChild($canvas);
+    }
+
+    function getMinPos(data, width) {
+      //获得最小位置
+      var no = 0;
+      var min = data[0];
+      for (let i = 0; i < data.length; i++) {
+        if (data[i] < min) {
+          min = data[i];
+          no = i;
+        }
+      }
+
+      var pos = {
+        x: 0,
+        y: 0
+      };
+
+      pos.x = no % width;
+      pos.y = (no - pos.y) / width;
+
+      return pos;
+    }
+
+    function getDst(width, height) {
+      let len = width * height;
+      let dst = [];
+      for (let i = 0; i < len; i++) {
+        dst.push(0.0);
+      }
+      return dst;
+    }
+
+    function drawDst(dst, dstW, dstH) {
+      let $canvas = document.createElement("canvas");
+      $canvas.width = dstW;
+      $canvas.height = dstH;
+      let ctx = $canvas.getContext("2d");
+      let imageData = ctx.getImageData(0, 0, dstW, dstH);
+      for (let i = 0; i < imageData.data.length; i++) {
+        if (i % 4 == 3) {
+          imageData.data[i] = 255;
+        } else {
+          let no = parseInt(i / 4);
+          imageData.data[i] = dst[no];
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+      document.body.appendChild($canvas);
+    }
+
+    //emcc -O3 demo5.c -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s EXPORTED_FUNCTIONS="['_sqdiff','_malloc']" -o demo5.js
+    Module['onRuntimeInitialized'] = function () {
+      console.log('---start---');
+      console.log(Module);
+
+      let src = getGrayData("src");
+      let tmp = getGrayData("tmp");
+
+      let dstW = src.width - tmp.width + 1;
+      let dstH = src.height - tmp.height + 1;
+      let dst = getDst(dstW, dstH);
+
+      let m0 = window.performance.now();
+      let srcP = Module['_malloc'](src.gray.length * Uint8Array.BYTES_PER_ELEMENT);
+      HEAPU8.set(src.gray, srcP / Uint8Array.BYTES_PER_ELEMENT);
+      let tmpP = Module['_malloc'](tmp.gray.length * Uint8Array.BYTES_PER_ELEMENT);
+      HEAPU8.set(tmp.gray, tmpP / Uint8Array.BYTES_PER_ELEMENT);
+      let dstP = Module['_malloc'](dst.length * Float32Array.BYTES_PER_ELEMENT);
+      HEAPF32.set(dst, dstP / Float32Array.BYTES_PER_ELEMENT);
+
+      Module['_sqdiff'](dstP, srcP, src.width, src.height, tmpP, tmp.width, tmp.height);
+      let result = HEAPF32.subarray(dstP / Float32Array.BYTES_PER_ELEMENT, dstP / Float32Array.BYTES_PER_ELEMENT +
+        dst.length);
+      let m1 = window.performance.now();
+      console.log(m1 - m0 + " ms");
+      let pos = getMinPos(result, dstW);
+      console.log(pos);
+      drawRect("src", pos, tmp.width, tmp.height);
+      drawDst(result, dstW, dstH);
+    };
+  </script>
+</body>
+
+</html>
