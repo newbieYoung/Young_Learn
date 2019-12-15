@@ -1,13 +1,10 @@
 // 初始化着色器程序
 function initShaders(gl) {
-	var shaderProgram;
-
-	// 编译顶点着色器和片元着色器
 	var fragmentShader = getShader(gl, 'shader-fs');
 	var vertexShader = getShader(gl, 'shader-vs');
 
 	// 创建着色器程序并绑定编译好的顶点着色器和片元着色器
-	shaderProgram = gl.createProgram();
+	var shaderProgram = gl.createProgram();
 	gl.attachShader(shaderProgram, vertexShader);
 	gl.attachShader(shaderProgram, fragmentShader);
 

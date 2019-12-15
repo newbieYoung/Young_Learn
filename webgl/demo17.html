@@ -1,234 +1,297 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>ThreeJS GPU 粒子系统 模型切换</title>
     <script type="text/javascript" src="../lib/three.js"></script>
+    <script type="text/javascript" src="../lib/three-STLLoader.js"></script>
+    <script type="text/javascript" src="../lib/three-OrbitControls.js"></script>
     <script type="text/javascript" src="../lib/tween.min.js"></script>
     <script type="text/javascript" src="../lib/stats.min.js"></script>
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <style type="text/css">
-        body{
-            margin:0;
-            padding:0;
+        body {
+            margin: 0;
+            padding: 0;
         }
+
         div#canvas-frame {
             cursor: pointer;
-            width:100%;
-            height:100%;
+            width: 100%;
+            height: 100%;
             background-color: #EEEEEE;
         }
     </style>
 </head>
+
 <body onload="threeStart();">
-<div id="canvas-frame"></div>
-<script>
-    'use strict';
-    var renderer;//渲染器
-    var width;//页面宽度
-    var height;//页面高度
-    var stats;//性能检测
-    window.requestAnimFrame = (function() {//如果有变化则可能还需要requestAnimationFrame刷新
-        return window.requestAnimationFrame ||
+    <div id="canvas-frame"></div>
+    <script>
+        'use strict';
+        var renderer; //渲染器
+        var width; //页面宽度
+        var height; //页面高度
+        var stats; //性能检测
+        window.requestAnimFrame = (function () { //如果有变化则可能还需要requestAnimationFrame刷新
+            return window.requestAnimationFrame ||
                 window.mozRequestAnimationFrame ||
                 window.webkitRequestAnimationFrame ||
                 window.msRequestAnimationFrame ||
                 window.webkitRequestAnimationFrame;
-    })();
-    //开始
-    function threeStart() {
-        initThree();
-        initCamera();
-        initScene();
-        initLight();
-        initObject();
-        render();
-    }
-    //根据页面宽度和高度创建渲染器，并添加容器中
-    function initThree() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        renderer = new THREE.WebGLRenderer();
-        renderer.setPixelRatio( window.devicePixelRatio );
-        renderer.setSize(width, height);
-        var container = document.getElementById('canvas-frame');
+        })();
+        //开始
+        function threeStart() {
+            initThree();
+            initCamera();
+            initScene();
+            initLight();
+            initObject();
+            render();
+        }
+        //根据页面宽度和高度创建渲染器，并添加容器中
+        function initThree() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            renderer = new THREE.WebGLRenderer({
+                antialias: true
+            });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(width, height);
+            renderer.setClearColor(0x000000, 1.0);
 
-        container.appendChild(renderer.domElement);
+            var container = document.getElementById('canvas-frame');
+            stats = new Stats();
+            container.appendChild(stats.dom);
+            container.appendChild(renderer.domElement);
+        }
+        //创建相机，并设置正方向和中心点
+        var camera, controls;
 
-        stats = new Stats();
-        container.appendChild( stats.dom );
-    }
-    //创建相机，并设置正方向和中心点
-    var camera;
-    function initCamera() {
-        camera = new THREE.PerspectiveCamera(40, width / height, 1, 1000);
-        camera.position.x = 0;
-        camera.position.y = 0;
-        camera.position.z = 150;
-        camera.up.x = 0;//正方向
-        camera.up.y = 1;
-        camera.up.z = 0;
-        camera.lookAt({
-            x : 0,
-            y : 0,
-            z : 0
-        });
-    }
-    //创建场景，后续元素需要加入到场景中才会显示出来
-    var scene;
-    function initScene() {
-        scene = new THREE.Scene();
-    }
-    //创建光线
-    var light;
-    function initLight() {
-        light = new THREE.DirectionalLight(0xffffff);
-        light.position.set(0,200,0);
-        scene.add(light);
-    }
-    //创建展示场景所需的各种元素
-    var particleSystem;
-    function initObject() {
+        function initCamera() {
+            camera = new THREE.PerspectiveCamera(40, width / height, 1, 1000);
+            camera.position.set(0, 0, 150);
+            camera.up.set(0, 1, 0); //正方向
+            camera.lookAt(new THREE.Vector3(0, 0, 0))
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.update();
+        }
+        //创建场景，后续元素需要加入到场景中才会显示出来
+        var scene;
 
-        var loader = new THREE.JSONLoader();
-        var obj1,obj2;
+        function initScene() {
+            scene = new THREE.Scene();
+        }
+        //创建光线
+        var light;
 
-        //加载模型
-        loader.load('./json/teapot.js',function(obj){
-            obj1 = obj;
-            if(obj1&&obj2){
-                addParticles(obj1,obj2);
+        function initLight() {
+            light = new THREE.DirectionalLight(0xffffff);
+            light.position.set(0, 200, 0);
+            scene.add(light);
+        }
+        //创建展示场景所需的各种元素
+
+        var texture, particles;
+
+        function initObject() {
+
+            //纹理材质
+            texture = new THREE.TextureLoader().load('./textures/dot.png');
+            var material = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 0.4,
+                opacity: 0.6,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthTest: false,
+                map: texture
+            });
+
+            var obj1, obj2;
+            //加载模型
+            var loader = new THREE.STLLoader();
+            loader.load('./stl/solid_head.stl', function (buffer) {
+                //调整初始模型位置、大小以及方向
+                //rotation.x = -0.5 * Math.PI;
+                //scale.set(.5,.5,.5);
+                var matrix = new THREE.Matrix4();
+                matrix.set(0.5, 0, 0, 0, 0, 0, -0.5, 0, 0, 0.5, 0, 0,
+                    0, 0, 0, -1);
+                //重新计算初始模型顶点
+                obj1 = resetModelPoints(buffer, matrix, material);
+                if (obj1 && obj2) {
+                    initParticles(obj1, obj2);
+                }
+            }, function (xhr) {
+                if (xhr.lengthComputable) {
+                    var percentComplete = xhr.loaded / xhr.total * 100;
+                    console.log(Math.round(percentComplete, 2) + '% downloaded');
+                }
+            }, function (xhr) {
+                console.error(xhr);
+            });
+
+            loader.load('./stl/static-xbot.stl', function (buffer) {
+                //调整初始模型位置、大小以及方向
+                //rotation.x = -0.5 * Math.PI;
+                //scale.set(50, 50, 50);
+                var matrix = new THREE.Matrix4()
+                matrix.set(50, 0, 0, 0, 0, 0, -50, 0, 0, 50, 0, 0, 0,
+                    0, 0, -1);
+                //重新计算初始模型顶点
+                obj2 = resetModelPoints(buffer, matrix, material);
+                if (obj1 && obj2) {
+                    initParticles(obj1, obj2);
+                }
+            }, function (xhr) {
+                if (xhr.lengthComputable) {
+                    var percentComplete = xhr.loaded / xhr.total * 100;
+                    console.log(Math.round(percentComplete, 2) + '% downloaded');
+                }
+            }, function (xhr) {
+                console.error(xhr);
+            });
+        }
+
+        //重置模型顶点
+        function resetModelPoints(buffer, matrix, material) {
+            var points = buffer.getAttribute('position').array;
+            var array = [];
+            for (var i = 0; i < points.length; i = i + 3) {
+                var vec3 = new THREE.Vector3(points[i], points[i + 1], points[i + 2]);
+                vec3.applyMatrix4(matrix);
+                array.push(vec3.x);
+                array.push(vec3.y);
+                array.push(vec3.z);
             }
-        });
-        loader.load('./json/head.js',function(obj){
-            obj2 = obj;
-            if(obj1&&obj2){
-                addParticles(obj1,obj2);
+            var bufgeo = new THREE.BufferGeometry();
+            var vertices = new Float32Array(array);
+            bufgeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            let geometry = new THREE.Geometry();
+            geometry.fromBufferGeometry(bufgeo);
+            geometry.center(); //会对几何体中所有顶点进行位移，从而让几何体居中
+            var points = new THREE.Points(geometry, material);
+            return points;
+        }
+
+        //粒子系统
+        function initParticles(obj1, obj2) {
+            var len1 = obj1.geometry.vertices.length;
+            var len2 = obj2.geometry.vertices.length;
+            var moreObj, lessObj;
+            if (len1 > len2) { //两个模型顶点数量不一致则把顶点较少模型的用自身已经存在的顶点补齐
+                for (var i = len2; i < len1; i++) {
+                    var insertNo = parseInt(Math.random() * len2);
+                    obj2.geometry.vertices.push(obj2.geometry.vertices[insertNo].clone());
+                }
+                moreObj = obj1;
+                lessObj = obj2;
+            } else if (len2 > len1) {
+                for (var i = len1; i < len2; i++) {
+                    var insertNo = parseInt(Math.random() * len1);
+                    obj1.geometry.vertices.push(obj1.geometry.vertices[insertNo].clone());
+                }
+                moreObj = obj2;
+                lessObj = obj1;
             }
-        });
-    }
 
-    function addParticles(obj1,obj2){
-        var moreObj, lessObj;
-        if(obj1.vertices.length > obj2.vertices.length) {
-            moreObj = obj1;
-            lessObj = obj2;
-        } else {
-            moreObj = obj2;
-            lessObj = obj1;
-        }
-
-        moreObj = new THREE.BufferGeometry().fromGeometry(moreObj);
-        lessObj = new THREE.BufferGeometry().fromGeometry(lessObj);
-
-        var morePos = moreObj.attributes.position.array;
-        var lessPos = lessObj.attributes.position.array;
-        var moreLen = morePos.length;
-        var lessLen = lessPos.length;
-
-        var newLessPos = new Float32Array(moreLen);
-        newLessPos.set(lessPos);
-
-        for(var i = lessLen, j = 0; i < moreLen; i++, j++) {
-            newLessPos[i] = lessPos[j];
-        }
-
-        var sizes = new Float32Array(moreLen);
-        for (var i = 0; i < moreLen; i++) {
-            var time = Date.now()*0.005;
-            sizes[i] = 1.5*(2.0+Math.sin(0.02*i+time));
-        }
-
-        moreObj.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
-        moreObj.addAttribute('morePos', new THREE.BufferAttribute(morePos, 3));
-        moreObj.addAttribute('lessPos', new THREE.BufferAttribute(newLessPos, 3));
-
-        var uniforms = {
-            texture:{value: new THREE.TextureLoader().load( './textures/dot.png')},
-            val: {value: 1.0}
-        };
-        var shaderMaterial = new THREE.ShaderMaterial({
-            uniforms:       uniforms,
-            vertexShader:   document.getElementById('vs').textContent,
-            fragmentShader: document.getElementById('fs').textContent,
-            blending:       THREE.AdditiveBlending,
-            depthTest:      false,
-            transparent:    true
-        });
-
-        particleSystem = new THREE.Points(moreObj, shaderMaterial);
-        scene.add(particleSystem);
-
-        var pos = {val: 1};
-        var tween = new TWEEN.Tween(pos).to({val: 0}, 2000).easing(TWEEN.Easing.Quadratic.InOut).delay(1000).onUpdate(function(){
-            tweenCallback(this.val);
-        });
-        var tweenBack = new TWEEN.Tween(pos).to({val: 1}, 2000).easing(TWEEN.Easing.Quadratic.InOut).delay(1000).onUpdate(function(){
-            tweenCallback(this.val);
-        });
-        tween.chain(tweenBack);
-        tweenBack.chain(tween);
-        tween.start();
-    }
-    function tweenCallback(val){
-        particleSystem.material.uniforms.val.value = val;
-    }
-
-    //渲染
-    function render(){
-        renderer.clear();
-        TWEEN.update();
-        stats.update();
-
-        if(particleSystem) {
-            var time = Date.now()*0.005;
-            particleSystem.rotation.y = 0.01 * time;
-
-            var bufferObj = particleSystem.geometry;
-            var sizes = bufferObj.attributes.size.array;
-            var len = sizes.length;
-            for (var i = 0; i < len; i++) {
-                sizes[i] = 1.5*(2.0+Math.sin(0.02*i+time));
+            var moreLen = moreObj.geometry.vertices.length;
+            var lessPos = new Float32Array(moreLen * 3);
+            var morePos = new Float32Array(moreLen * 3);
+            for (var i = 0; i < moreLen; i++) {
+                var lessVec = lessObj.geometry.vertices[i].clone();
+                var moreVec = moreObj.geometry.vertices[i].clone();
+                var index = i * 3;
+                lessPos[index] = lessVec.x;
+                lessPos[index + 1] = lessVec.y;
+                lessPos[index + 2] = lessVec.z;
+                morePos[index] = moreVec.x;
+                morePos[index + 1] = moreVec.y;
+                morePos[index + 2] = moreVec.z;
             }
-            bufferObj.attributes.size.needsUpdate = true;
+
+            var lessBuffer = new THREE.BufferGeometry().fromGeometry(lessObj.geometry);
+            lessBuffer.setAttribute('morePos', new THREE.BufferAttribute(morePos, 3));
+            lessBuffer.setAttribute('lessPos', new THREE.BufferAttribute(lessPos, 3));
+
+            var uniforms = {
+                texture: {
+                    value: texture
+                },
+                val: {
+                    value: 1.0
+                }
+            };
+            var shaderMaterial = new THREE.ShaderMaterial({
+                uniforms: uniforms,
+                vertexShader: document.getElementById('vs').textContent,
+                fragmentShader: document.getElementById('fs').textContent,
+                blending: THREE.AdditiveBlending,
+                depthTest: false,
+                transparent: true
+            });
+
+            particles = new THREE.Points(lessBuffer, shaderMaterial);
+            scene.add(particles);
+
+            //模型切换
+            var pos = {
+                val: 1
+            };
+            var tween = new TWEEN.Tween(pos).to({
+                val: 0
+            }, 2000).easing(TWEEN.Easing.Quadratic.InOut).delay(1000).onUpdate(function () {
+                tweenCallback(this.val);
+            });
+            var tweenBack = new TWEEN.Tween(pos).to({
+                val: 1
+            }, 2000).easing(TWEEN.Easing.Quadratic.InOut).delay(1000).onUpdate(function () {
+                tweenCallback(this.val);
+            });
+            tween.chain(tweenBack);
+            tweenBack.chain(tween);
+            tween.start();
         }
 
-        renderer.render(scene, camera);
-        window.requestAnimFrame(render);
-    }
-</script>
-<script id="fs" type="x-shader/x-fragment">
-    varying vec3 color;
-    uniform sampler2D texture;
+        function tweenCallback(val) {
+            particles.material.uniforms.val.value = val;
+        }
 
-    void main() {
-        vec3 vColor = vec3(1.0, 1.0, 1.0);
-        gl_FragColor = vec4( color * vColor, 1.0 );
-        gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
-    }
-</script>
-<script id="vs" type="x-shader/x-vertex">
-    attribute float size;
-    attribute vec3 morePos;
-    attribute vec3 lessPos;
-    uniform float val;
-    varying vec3 color;
+        //渲染
+        function render() {
+            renderer.clear();
+            TWEEN.update();
+            stats.update();
+            renderer.render(scene, camera);
+            window.requestAnimFrame(render);
+        }
+    </script>
+    <script id="fs" type="x-shader/x-fragment">
+        uniform sampler2D texture;
 
-    void main() {
-        vec3 vPos;
+        void main() {
+            gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 ); // 固定颜色
+            gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+        }
+    </script>
+    <script id="vs" type="x-shader/x-vertex">
+        attribute vec3 morePos;
+        attribute vec3 lessPos;
+        uniform float val;
 
-        vPos.x = lessPos.x * val + morePos.x * (1.0-val);
-        vPos.y = lessPos.y * val + morePos.y * (1.0-val);
-        vPos.z = lessPos.z * val + morePos.z * (1.0-val);
+        void main() {
+            vec3 vPos;
 
-        color.r = vPos.x/(20.0+10.0*val);
-        color.g = vPos.y/(20.0+10.0*val);
-        color.b = vPos.z/(20.0+10.0*val);
+            vPos.x = lessPos.x * val + morePos.x * (1.0-val);
+            vPos.y = lessPos.y * val + morePos.y * (1.0-val);
+            vPos.z = lessPos.z * val + morePos.z * (1.0-val);
 
-        gl_PointSize = size;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4( vPos, 1.0 );
+            gl_PointSize = 1.0; // 固定大小
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( vPos, 1.0 );
 
-    }
-</script>
+        }
+    </script>
 </body>
+
 </html>
