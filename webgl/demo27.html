@@ -1,191 +1,200 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>ThreeJS 简单骨骼动画</title>
     <script type="text/javascript" src="../lib/three.js"></script>
     <script type="text/javascript" src="../lib/three-orbit-controls.js"></script>
     <style type="text/css">
-        body{
-            padding:0;
-            margin:0;
+        body {
+            padding: 0;
+            margin: 0;
         }
+
         div#canvas-frame {
             cursor: pointer;
-            width:100%;
-            height:100%;
+            width: 100%;
+            height: 100%;
             background-color: #EEEEEE;
         }
     </style>
 </head>
-<body onload="threeStart();">
-<div id="canvas-frame"></div>
-<script>
-    var renderer;//渲染器
-    var width;//页面宽度
-    var height;//页面高度
 
-    window.requestAnimFrame = (function() {//如果有变化则可能还需要requestAnimationFrame刷新
-        return window.requestAnimationFrame ||
+<body onload="threeStart();">
+    <div id="canvas-frame"></div>
+    <script>
+        var renderer; //渲染器
+        var width; //页面宽度
+        var height; //页面高度
+
+        window.requestAnimFrame = (function () { //如果有变化则可能还需要requestAnimationFrame刷新
+            return window.requestAnimationFrame ||
                 window.mozRequestAnimationFrame ||
                 window.webkitRequestAnimationFrame ||
                 window.msRequestAnimationFrame ||
                 window.webkitRequestAnimationFrame;
-    })();
+        })();
 
-    //开始
-    function threeStart() {
-        initThree();
-        initCamera();
-        initScene();
-        initLight();
-        initObject();
-        render();
-    }
-
-    //根据页面宽度和高度创建渲染器，并添加容器中
-    function initThree() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        renderer = new THREE.WebGLRenderer({
-            antialias : true
-        });
-        renderer.setSize(width, height);
-        renderer.setClearColor( 0x000000 );
-        document.getElementById('canvas-frame').appendChild(renderer.domElement);
-    }
-
-    //创建相机，并设置正方向和中心点
-    var camera,controls;
-    function initCamera() {
-        camera = new THREE.PerspectiveCamera( 25, window.innerWidth / window.innerHeight, 1, 10000 );
-        camera.position.set( 15, 10, - 15 );
-        controls = new THREE.OrbitControls( camera, renderer.domElement );
-        controls.update();
-    }
-
-    //创建场景，后续元素需要加入到场景中才会显示出来
-    var scene;
-    function initScene() {
-        scene = new THREE.Scene();
-    }
-
-    //创建光线
-    var ambientLight,directionalLight;
-    function initLight() {
-        var ambientLight = new THREE.AmbientLight( 0xffffff, 0.2 );
-        scene.add( ambientLight );
-
-        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
-        directionalLight.position.set( 1, 1, - 1 );
-        scene.add( directionalLight );
-    }
-
-    //创建展示场景所需的各种元素
-    var mesh;
-    function initObject() {
-        createBones();
-    }
-
-    function createBones(){
-        var segmentHeight = 8;//单骨骼高度
-        var segmentCount = 4;//单骨骼数量
-        var height = segmentHeight * segmentCount;
-        var halfHeight = height * 0.5;
-
-        var sizing = {
-            segmentHeight : segmentHeight,
-            segmentCount : segmentCount,
-            height : height,
-            halfHeight : halfHeight
-        };
-
-        //创建骨架
-        bones = [];
-        var prevBone = new THREE.Bone();
-        bones.push( prevBone );
-        prevBone.position.y = - sizing.halfHeight;
-        for ( var i = 0; i < sizing.segmentCount; i ++ ) {
-            var bone = new THREE.Bone();
-            bone.position.y = sizing.segmentHeight;
-            bones.push( bone );
-            prevBone.add( bone );
-            prevBone = bone;
+        //开始
+        function threeStart() {
+            initThree();
+            initCamera();
+            initScene();
+            initLight();
+            initObject();
+            render();
         }
-        var skeleton = new THREE.Skeleton( bones );
 
-        //创建形状
-        var geometry = new THREE.CylinderGeometry(
-                5,                       // radiusTop
-                5,                       // radiusBottom
-                sizing.height,           // height
-                8,                       // radiusSegments
+        //根据页面宽度和高度创建渲染器，并添加容器中
+        function initThree() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            renderer = new THREE.WebGLRenderer({
+                antialias: true
+            });
+            renderer.setSize(width, height);
+            renderer.setClearColor(0x000000, 1.0);
+            document.getElementById('canvas-frame').appendChild(renderer.domElement);
+        }
+
+        //创建相机，并设置正方向和中心点
+        var camera, controls;
+
+        function initCamera() {
+            camera = new THREE.PerspectiveCamera(25, window.innerWidth / window.innerHeight, 1, 10000);
+            camera.position.set(15, 10, -15);
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.update();
+        }
+
+        //创建场景，后续元素需要加入到场景中才会显示出来
+        var scene;
+
+        function initScene() {
+            scene = new THREE.Scene();
+        }
+
+        //创建光线
+        var ambientLight, directionalLight;
+
+        function initLight() {
+            var ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+            scene.add(ambientLight);
+
+            var directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(1, 1, -1);
+            scene.add(directionalLight);
+        }
+
+        //创建展示场景所需的各种元素
+        var mesh;
+
+        function initObject() {
+            createBones();
+        }
+
+        function createBones() {
+            var segmentHeight = 8; //单骨骼高度
+            var segmentCount = 4; //单骨骼数量
+            var height = segmentHeight * segmentCount;
+            var halfHeight = height * 0.5;
+
+            var sizing = {
+                segmentHeight: segmentHeight,
+                segmentCount: segmentCount,
+                height: height,
+                halfHeight: halfHeight
+            };
+
+            //创建骨架
+            bones = [];
+            var prevBone = new THREE.Bone();
+            bones.push(prevBone);
+            prevBone.position.y = -sizing.halfHeight;
+            for (var i = 0; i < sizing.segmentCount; i++) {
+                var bone = new THREE.Bone();
+                bone.position.y = sizing.segmentHeight;
+                bones.push(bone);
+                prevBone.add(bone);
+                prevBone = bone;
+            }
+            var skeleton = new THREE.Skeleton(bones);
+
+            //创建形状
+            var geometry = new THREE.CylinderGeometry(
+                5, // radiusTop
+                5, // radiusBottom
+                sizing.height, // height
+                8, // radiusSegments
                 sizing.segmentCount * 3, // heightSegments
-                true                     // openEnded
-        );
-        //将形状的每个点和骨骼建立关联，其中skinIndices指定该点由哪些骨骼控制（通过骨骼序号指定），skinWeights指定这些骨骼对该点的控制能力
-        for ( var i = 0; i < geometry.vertices.length; i ++ ) {
-            var vertex = geometry.vertices[ i ];
-            var y = ( vertex.y + sizing.halfHeight );
-            var skinIndex = Math.floor( y / sizing.segmentHeight );
-            var skinWeight = ( y % sizing.segmentHeight ) / sizing.segmentHeight;
-            geometry.skinIndices.push( new THREE.Vector4( skinIndex, skinIndex + 1, 0, 0 ) );
-            geometry.skinWeights.push( new THREE.Vector4( 1 - skinWeight, skinWeight, 0, 0 ) );
+                true // openEnded
+            );
+            //将形状的每个点和骨骼建立关联，其中skinIndices指定该点由哪些骨骼控制（通过骨骼序号指定），skinWeights指定这些骨骼对该点的控制能力
+            for (var i = 0; i < geometry.vertices.length; i++) {
+                var vertex = geometry.vertices[i];
+                var y = (vertex.y + sizing.halfHeight);
+                var skinIndex = Math.floor(y / sizing.segmentHeight);
+                var skinWeight = (y % sizing.segmentHeight) / sizing.segmentHeight;
+                geometry.skinIndices.push(new THREE.Vector4(skinIndex, skinIndex + 1, 0, 0));
+                geometry.skinWeights.push(new THREE.Vector4(1 - skinWeight, skinWeight, 0, 0));
+            }
+            console.log(geometry.vertices);
+            console.log(skeleton);
+            console.log(geometry.skinIndices);
+            console.log(geometry.skinWeights);
+            /**
+             * e.g.
+             * geometry.skinIndices[10] = new THREE.Vector4(   0,   3,   4, 0 );
+             * geometry.skinWeights[10] = new THREE.Vector4( 0, 0.3333333730697632, 0.6666666269302368, 0 );
+             *
+             * geometry.vertices[10] = new THREE.Vector3(5,13.333333015441895,3.0616169991140216e-16);
+             *
+             * 在SkinnedMesh中每个顶点最多只能被四个骨骼影响，那么影响第10个顶点的骨骼以及影响权重分别如下：
+             * skeleton.bones[0]; // weight of 0
+             * skeleton.bones[3]; // weight of 0.3333333730697632
+             * skeleton.bones[4]; // weight of 0.6666666269302368
+             * skeleton.bones[10]; // weight of 0
+             */
+
+            var material = new THREE.MeshPhongMaterial({
+                skinning: true,
+                color: 0x156289,
+                emissive: 0xa72534,
+                side: THREE.DoubleSide,
+                flatShading: THREE.FlatShading,
+                wireframe: true
+            });
+            mesh = new THREE.SkinnedMesh(geometry, material);
+
+            //绑定骨架和网格，任务完成
+            mesh.add(bones[0]);
+            mesh.bind(skeleton);
+            mesh.scale.multiplyScalar(1);
+            scene.add(mesh);
+
+            //SkeletonHelper可以用线显示出骨架，帮助我们调试骨架，可有可无
+            var skeletonHelper = new THREE.SkeletonHelper(mesh);
+            skeletonHelper.material.linewidth = 2;
+            scene.add(skeletonHelper);
         }
-        console.log(geometry.vertices);
-        console.log(skeleton);
-        console.log(geometry.skinIndices);
-        console.log(geometry.skinWeights);
-        /**
-         * e.g.
-         * geometry.skinIndices[10] = new THREE.Vector4(   0,   3,   4, 0 );
-         * geometry.skinWeights[10] = new THREE.Vector4( 0, 0.3333333730697632, 0.6666666269302368, 0 );
-         *
-         * geometry.vertices[10] = new THREE.Vector3(5,13.333333015441895,3.0616169991140216e-16);
-         *
-         * 在SkinnedMesh中每个顶点最多只能被四个骨骼影响，那么影响第10个顶点的骨骼以及影响权重分别如下：
-         * skeleton.bones[0]; // weight of 0
-         * skeleton.bones[3]; // weight of 0.3333333730697632
-         * skeleton.bones[4]; // weight of 0.6666666269302368
-         * skeleton.bones[10]; // weight of 0
-         */
 
-        var material = new THREE.MeshPhongMaterial( {
-            skinning : true,
-            color: 0x156289,
-            emissive: 0xa72534,
-            side: THREE.DoubleSide,
-            flatShading: THREE.FlatShading,
-            wireframe:true
-        } );
-        mesh = new THREE.SkinnedMesh( geometry,material );
+        //渲染
+        var angle = 0;
 
-        //绑定骨架和网格，任务完成
-        mesh.add( bones[ 0 ] );
-        mesh.bind( skeleton );
-        mesh.scale.multiplyScalar( 1 );
-        scene.add( mesh );
+        function render() {
+            //console.log('render');
+            renderer.clear();
 
-        //SkeletonHelper可以用线显示出骨架，帮助我们调试骨架，可有可无
-        var skeletonHelper = new THREE.SkeletonHelper( mesh );
-        skeletonHelper.material.linewidth = 2;
-        scene.add( skeletonHelper );
-    }
+            angle += 0.1;
+            angle = angle % 60;
+            mesh.skeleton.bones[3].rotation.z = angle / 180 * Math.PI;
+            mesh.skeleton.bones[1].rotation.z = -angle / 180 * Math.PI;
 
-    //渲染
-    var angle = 0;
-    function render(){
-        //console.log('render');
-        renderer.clear();
-
-        angle += 0.1;
-        angle = angle%60;
-        mesh.skeleton.bones[ 3 ].rotation.z  = angle/180*Math.PI;
-        mesh.skeleton.bones[ 1 ].rotation.z  = -angle/180*Math.PI;
-
-        renderer.render(scene, camera);
-        window.requestAnimFrame(render);
-    }
-</script>
+            renderer.render(scene, camera);
+            window.requestAnimFrame(render);
+        }
+    </script>
 </body>
+
 </html>
