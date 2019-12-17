@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>立方体全景图</title>
     <script src="../lib/three.js"></script>
-    <script type="text/javascript" src="../lib/three-orbit-controls.js"></script>
+    <script type="text/javascript" src="../lib/three-OrbitControls.js"></script>
     <style type="text/css">
         body {
             padding: 0;
@@ -44,20 +44,21 @@
             renderer = new THREE.WebGLRenderer({
                 antialias: true
             });
+            renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(width, height);
             renderer.setClearColor(0xFFFFFF, 1.0);
             //并添加容器中
             document.getElementById('canvas-frame').appendChild(renderer.domElement);
         }
 
-        var camera;
-        var controller;
+        var camera, controls;
 
         function initCamera() {
             //创建相机
             camera = new THREE.PerspectiveCamera(60, width / height, 1, 2000);
-            camera.position.z = 0.001;
-            controls = new THREE.OrbitControls(camera);
+            camera.position.set(0, 0, 0.001)
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.update();
         }
 
         var scene;
