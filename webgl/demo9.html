@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>ThreeJS EdgesGeometry 边框几何体</title>
+  <script type="text/javascript" src="../lib/three.js"></script>
+  <script type="text/javascript" src="../lib/three-STLLoader.js"></script>
+  <script type="text/javascript" src="../lib/three-OrbitControls.js"></script>
+  <style type="text/css">
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    div#canvas-frame {
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      background-color: #EEEEEE;
+    }
+  </style>
+</head>
+
+<body onload="threeStart();">
+  <div id="canvas-frame"></div>
+  <script>
+    var renderer; //渲染器
+    var width; //页面宽度
+    var height; //页面高度
+
+    window.requestAnimFrame = (function () { //如果有变化则可能还需要requestAnimationFrame刷新
+      return window.requestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame;
+    })();
+
+    //开始
+    function threeStart() {
+      initThree();
+      initCamera();
+      initScene();
+      initLight();
+      initObject();
+      render();
+    }
+
+    //根据页面宽度和高度创建渲染器，并添加容器中
+    function initThree() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      renderer = new THREE.WebGLRenderer({
+        antialias: true
+      });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(width, height);
+      renderer.shadowMap.enabled = true; //打开渲染器的阴影地图
+      renderer.setClearColor(0x000000, 1.0);
+      document.getElementById('canvas-frame').appendChild(renderer.domElement);
+    }
+
+    //创建相机，并设置正方向和中心点
+    var camera;
+    var controller;
+
+    function initCamera() {
+      camera = new THREE.PerspectiveCamera(25, window.innerWidth / window.innerHeight, 1, 10000);
+      camera.position.set(15, 10, -15);
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.update();
+    }
+
+    //创建场景，后续元素需要加入到场景中才会显示出来
+    var scene;
+
+    function initScene() {
+      scene = new THREE.Scene();
+    }
+
+    //创建光线
+    var shadowLight, hemisphereLight, shadowLight2;
+
+    function initLight() {
+      //创建光线
+      // 第一个参数是天空的颜色，第二个参数是地上的颜色，第三个参数是光源的强度
+      hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, 1);
+      scene.add(hemisphereLight);
+
+      shadowLight = new THREE.DirectionalLight(0xffffff, .6);
+      shadowLight.position.set(150, 200, 300);
+      scene.add(shadowLight);
+
+      shadowLight2 = new THREE.DirectionalLight(0xffffff, .6);
+      shadowLight2.position.set(-150, -200, -300);
+      scene.add(shadowLight2);
+    }
+
+    //创建展示场景所需的各种元素
+    function initObject() {
+      var loader = new THREE.STLLoader();
+      loader.load('./stl/solid_head.stl', function (geometry) {
+        geometry.center(); //居中显示
+
+        //边框几何体
+        var edges = new THREE.EdgesGeometry(geometry, 1);
+        var edgesMtl = new THREE.LineBasicMaterial({
+          color: 0xff0000
+        });
+        var edgesLine = new THREE.LineSegments(edges, edgesMtl);
+
+        //处理一下模型位置、方向及大小
+        edgesLine.rotation.set(-90 / 180 * Math.PI, 0, 90 / 180 * Math.PI);
+        edgesLine.scale.set(0.05, 0.05, 0.05);
+        scene.add(edgesLine);
+      }, function (xhr) {
+        if (xhr.lengthComputable) {
+          var percentComplete = xhr.loaded / xhr.total * 100;
+          console.log(Math.round(percentComplete, 2) + '% downloaded');
+        }
+      }, function (xhr) {
+        console.error(xhr);
+      });
+    }
+
+    //渲染
+    function render() {
+      renderer.clear();
+      renderer.render(scene, camera);
+      window.requestAnimFrame(render);
+    }
+  </script>
+</body>
+
+</html>
