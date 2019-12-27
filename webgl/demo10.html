@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>ThreeJS EdgesGeometry 边框几何体</title>
+  <title>ThreeJS ExtrudeGeometry 拉伸几何体</title>
   <script type="text/javascript" src="../lib/three.js"></script>
   <script type="text/javascript" src="../lib/three-STLLoader.js"></script>
   <script type="text/javascript" src="../lib/three-OrbitControls.js"></script>
@@ -68,7 +68,7 @@
 
     function initCamera() {
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
-      camera.position.set(15, 10, -15);
+      camera.position.set(30, 20, -30);
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.update();
     }
@@ -100,29 +100,43 @@
 
     //创建展示场景所需的各种元素
     function initObject() {
-      var loader = new THREE.STLLoader();
-      loader.load('./stl/solid_head.stl', function (geometry) {
-        geometry.center(); //居中显示
+      //绘制二维图形
+      var length = 12;
+      var width = 8;
+      var shape = new THREE.Shape();
+      shape.moveTo(0, 0);
+      shape.lineTo(0, width);
+      shape.lineTo(length, width);
+      shape.lineTo(length, 0);
+      shape.lineTo(0, 0);
 
-        //边框几何体
-        var edges = new THREE.EdgesGeometry(geometry, 1);
-        var edgesMtl = new THREE.LineBasicMaterial({
-          color: 0xff0000
-        });
-        var edgesLine = new THREE.LineSegments(edges, edgesMtl);
+      //拉伸参数
+      var extrudeSettings = {
+        steps: 2, // 拉伸段数，段数越大顶点越多
+        depth: 10, // 拉伸深度，深度越大，拉伸距离越长
+        bevelEnabled: true, //是否应用斜角
+        bevelThickness: 1, // 斜角厚度
+        bevelSize: 1, // 斜角尺寸
+        bevelOffset: 0, // 斜角顶部偏移
+        bevelSegments: 1 // 斜角段数
+      };
 
-        //处理一下模型位置、方向及大小
-        edgesLine.rotation.set(-90 / 180 * Math.PI, 0, 90 / 180 * Math.PI);
-        edgesLine.scale.set(0.05, 0.05, 0.05);
-        scene.add(edgesLine);
-      }, function (xhr) {
-        if (xhr.lengthComputable) {
-          var percentComplete = xhr.loaded / xhr.total * 100;
-          console.log(Math.round(percentComplete, 2) + '% downloaded');
-        }
-      }, function (xhr) {
-        console.error(xhr);
+      //创建拉伸几何体
+      var geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      geometry.center();
+      var material = new THREE.MeshBasicMaterial({
+        color: 0x00ff00
       });
+      var mesh = new THREE.Mesh(geometry, material);
+      scene.add(mesh);
+
+      //边框几何体
+      var edges = new THREE.EdgesGeometry(geometry, 1);
+      var edgesMtl = new THREE.LineBasicMaterial({
+        color: 0xff0000
+      });
+      var edgesLine = new THREE.LineSegments(edges, edgesMtl);
+      scene.add(edgesLine);
     }
 
     //渲染
