@@ -114,7 +114,8 @@
                 cubegeo.faces[i + 1].color.setHex(hex);
             }
             var cubemat = new THREE.MeshBasicMaterial({
-                vertexColors: THREE.FaceColors
+                vertexColors: THREE.FaceColors,
+                // wireframe: true // 将材质渲染成线框
             });
             cube = new THREE.Mesh(cubegeo, cubemat);
             cube.position.y = 150;
