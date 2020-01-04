@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>方向光示例</title>
@@ -7,104 +8,115 @@
     <style type="text/css">
         div#retina {
             cursor: pointer;
-            width:100%;
-            height:100%;
+            width: 100%;
+            height: 100%;
             background-color: #EEEEEE;
         }
     </style>
 </head>
+
 <body>
-<div id="retina"></div>
-<script>
-    //页面加载完成
-    window.onload = function(){
-        createWorld();
-    }
-    //模拟现实场景
-    function createWorld() {
-        initRender();//创建渲染器
-        initCamera();//创建相机
-        initLight();//创建光源
-        initObject();//创建物体
-        initScene();//创建场景
-        render();//渲染
-    }
-    var renderer;//渲染器
-    var width;
-    var height;
-    function initRender(){
-        width = window.innerWidth;
-        height = window.innerHeight;
-        renderer = new THREE.WebGLRenderer({
-            antialias : true//抗锯齿开启
-        });
-        renderer.setSize(width, height);//设置渲染器宽度和高度
-        renderer.setClearColor('#ffffff', 1.0);//设置背景颜色
-        renderer.shadowMap.enabled = true;//打开渲染器的阴影地图
-        document.getElementById('retina').appendChild(renderer.domElement);//把渲染器放置到页面中
-    }
-    var camera;
-    var origPoint = new THREE.Vector3(0, 0, 0);//原点
-    function initCamera(){
-        camera = new THREE.PerspectiveCamera(45, width / height, 1, 2000);
-        camera.position.set(0, 400, 600);//设置相机位置
-        camera.up.set(0, 1, 0);//设置相机正方向
-        camera.lookAt(origPoint);//设置相机视点
-    }
-    var shadowLight;
-    var ambientLight;
-    function initLight() {
-        //环境光
-        ambientLight = new THREE.AmbientLight( 0xffffff, .4);
+    <div id="retina"></div>
+    <script>
+        //页面加载完成
+        window.onload = function () {
+            createWorld();
+        }
+        //模拟现实场景
+        function createWorld() {
+            initRender(); //创建渲染器
+            initCamera(); //创建相机
+            initLight(); //创建光源
+            initObject(); //创建物体
+            initScene(); //创建场景
+            render(); //渲染
+        }
+        var renderer; //渲染器
+        var width;
+        var height;
 
-        shadowLight = new THREE.DirectionalLight(0xffffff, .9);
-        shadowLight.position.set(100,120,-100);
-        shadowLight.castShadow = true;//开启光源投影
+        function initRender() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            renderer = new THREE.WebGLRenderer({
+                antialias: true //抗锯齿开启
+            });
+            renderer.setSize(width, height); //设置渲染器宽度和高度
+            renderer.setClearColor('#ffffff', 1.0); //设置背景颜色
+            renderer.shadowMapEnabled = true; //打开渲染器的阴影地图
+            document.getElementById('retina').appendChild(renderer.domElement); //把渲染器放置到页面中
+        }
+        var camera;
 
-        //定义可见域的投射阴影
-        shadowLight.shadow.camera.left = -400;
-        shadowLight.shadow.camera.right = 400;
-        shadowLight.shadow.camera.top = 400;
-        shadowLight.shadow.camera.bottom = -400;
-        shadowLight.shadow.camera.near = 1;
-        shadowLight.shadow.camera.far = 2000;
+        function initCamera() {
+            camera = new THREE.PerspectiveCamera(45, width / height, 1, 2000);
+            camera.position.set(0, 400, 600); //设置相机位置
+            camera.up.set(0, 1, 0); //设置相机正方向
+            camera.lookAt(new THREE.Vector3(0, 0, 0)); //设置相机视点
+        }
+        var shadowLight;
+        var ambientLight;
 
-        //定义阴影的分辨率；虽然分辨率越高越好，但是需要付出更加昂贵的代价维持高性能的表现
-        shadowLight.shadow.mapSize.width = 2048;
-        shadowLight.shadow.mapSize.height = 2048;
-    }
-    var cube;
-    var floor;
-    function initObject(){
-        var geometry = new THREE.BoxGeometry( 100, 100, 100);
-        var material = new THREE.MeshLambertMaterial( {color: 0xff0000} );
-        cube = new THREE.Mesh( geometry, material );
-        cube.castShadow = true;//开启阴影产生
-        cube.position.set(0,0,0);
+        function initLight() {
+            //环境光
+            ambientLight = new THREE.AmbientLight(0xffffff, .4);
 
-        //添加地板
-        var floorGeo = new THREE.PlaneBufferGeometry( 500, 500 );
-        floorGeo.rotateX( - Math.PI / 2 );
-        var floorMaterial = new THREE.MeshLambertMaterial({ color: 0xe0e0e0 });
-        floor = new THREE.Mesh(floorGeo, floorMaterial);
-        floor.receiveShadow = true; //接受阴影
-        floor.position.set(0, -100, 0);
-    }
-    var scene;
-    function initScene(){
-        scene = new THREE.Scene();
-        scene.add(cube);
-        scene.add(floor);
-        scene.add(ambientLight);
-        scene.add(shadowLight);
-    }
-    function render(){
-        renderer.clear();
-        renderer.render(scene, camera);
-        cube.rotation.x += 0.005;
-        cube.rotation.y += 0.005;
-        requestAnimationFrame(render);
-    }
-</script>
+            shadowLight = new THREE.DirectionalLight(0xffffff, .9);
+            shadowLight.position.set(100, 120, -100);
+            shadowLight.castShadow = true; //开启光源投影
+
+            //定义可见域的投射阴影
+            shadowLight.shadow.camera.left = -400;
+            shadowLight.shadow.camera.right = 400;
+            shadowLight.shadow.camera.top = 400;
+            shadowLight.shadow.camera.bottom = -400;
+            shadowLight.shadow.camera.near = 1;
+            shadowLight.shadow.camera.far = 2000;
+
+            //定义阴影的分辨率；虽然分辨率越高越好，但是需要付出更加昂贵的代价维持高性能的表现
+            shadowLight.shadow.mapSize.width = 2048;
+            shadowLight.shadow.mapSize.height = 2048;
+        }
+        var cube;
+        var floor;
+
+        function initObject() {
+            var geometry = new THREE.BoxGeometry(100, 100, 100);
+            var material = new THREE.MeshLambertMaterial({
+                color: 0xff0000
+            });
+            cube = new THREE.Mesh(geometry, material);
+            cube.castShadow = true; //开启阴影产生
+            cube.position.set(0, 0, 0);
+
+            //添加地板
+            var floorGeo = new THREE.PlaneBufferGeometry(500, 500);
+            floorGeo.rotateX(-Math.PI / 2);
+            var floorMaterial = new THREE.MeshLambertMaterial({
+                color: 0xe0e0e0
+            });
+            floor = new THREE.Mesh(floorGeo, floorMaterial);
+            floor.receiveShadow = true; //接受阴影
+            floor.position.set(0, -100, 0);
+        }
+        var scene;
+
+        function initScene() {
+            scene = new THREE.Scene();
+            scene.add(cube);
+            scene.add(floor);
+            scene.add(ambientLight);
+            scene.add(shadowLight);
+        }
+
+        function render() {
+            renderer.clear();
+            renderer.render(scene, camera);
+            cube.rotation.x += 0.005;
+            cube.rotation.y += 0.005;
+            requestAnimationFrame(render);
+        }
+    </script>
 </body>
+
 </html>
