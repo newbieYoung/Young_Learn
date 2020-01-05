@@ -60,8 +60,8 @@
       camera = new THREE.PerspectiveCamera(60, width / height, 1, 2000);
       camera.position.set(0, 12, 15);
       camera.up.set(0, 1, 0);
+
       controls = new THREE.OrbitControls(camera, renderer.domElement);
-      controls.update();
     }
 
     var scene;

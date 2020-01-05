@@ -73,8 +73,8 @@
             camera.position.set(0, 0, 150);
             camera.up.set(0, 1, 0); //正方向
             camera.lookAt(new THREE.Vector3(0, 0, 0))
+
             controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.update();
         }
         //创建场景，后续元素需要加入到场景中才会显示出来
         var scene;

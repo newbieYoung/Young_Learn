@@ -66,8 +66,8 @@
         function initCamera() {
             camera = new THREE.PerspectiveCamera(25, window.innerWidth / window.innerHeight, 1, 10000);
             camera.position.set(15, 10, -15);
+
             controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.update();
         }
 
         //创建场景，后续元素需要加入到场景中才会显示出来

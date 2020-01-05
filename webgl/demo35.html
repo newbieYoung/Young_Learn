@@ -57,8 +57,8 @@
             //创建相机
             camera = new THREE.PerspectiveCamera(60, width / height, 1, 2000);
             camera.position.set(0, 0, 0.001)
+
             controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.update();
         }
 
         var scene;
