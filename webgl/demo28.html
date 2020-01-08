@@ -122,6 +122,7 @@
             ]);
 
             var num = 4; //顶点数目
+            var size = datas.BYTES_PER_ELEMENT; //数组中的每个元素的大小（以字节为单位）
             var vertexBuffer = gl.createBuffer(); //创建缓冲区对象
             if (!vertexBuffer) {
                 console.log('Failed to create the buffer object!');
@@ -131,8 +132,6 @@
             //将缓冲区对象绑定到目标并写入数据
             gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, datas, gl.STATIC_DRAW);
-
-            var size = datas.BYTES_PER_ELEMENT; //数组中的每个元素的大小（以字节为单位）
 
             //告诉显卡从当前绑定的缓冲区中读取顶点坐标和纹理坐标数据
             var a_Position = gl.getAttribLocation(shaderPorgram, 'a_Position');

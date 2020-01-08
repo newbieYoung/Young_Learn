@@ -7,8 +7,9 @@
     <script type="text/javascript" src="./sim-tools.js"></script>
 </head>
 
-<body onload="main()">
+<body>
     <canvas id="webgl" width="256" height="256"></canvas>
+
     <!-- 片段着色器程序 -->
     <script id="shader-fs" type="x-shader/x-fragment">
         precision highp float;
@@ -68,7 +69,8 @@
             gl_FragColor = iterationColor(gl_FragColor,6,v_Blur,0.00895781211794);
             gl_FragColor = iterationColor(gl_FragColor,7,v_Blur,0.0044299121055113265);
         }
-</script>
+    </script>
+
     <!-- 顶点着色器程序 -->
     <script id="shader-vs" type="x-shader/x-vertex">
         attribute vec4 a_Position;//顶点坐标
@@ -78,8 +80,14 @@
 	        gl_Position= a_Position;
             v_TexCoord = a_TexCoord;
 	    }
-</script>
+    </script>
+
     <script>
+        window.onload = function () {
+            main();
+        }
+
+        //高斯模糊相关参数
         var blur;
         var v_Blur;
         var canvas;
@@ -164,8 +172,8 @@
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); //配置纹理对象的参数
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
             /**
-             * 使用NEAREST过滤器的纹理始终会返回最接近样本点的马赛克（texel）中心点的颜色，
-             * 使用LINEAR过滤器返回以样本点为中心四个方向上像素的平均值，这会形成一个逐渐过渡的颜色，这效果通常也是更理想的，但是这也意味着显卡需要消耗四倍的工作量。
+             * 使用 NEAREST 过滤器的纹理始终会返回最接近样本点的马赛克（texel）中心点的颜色，
+             * 使用 LINEAR 过滤器返回以样本点为中心四个方向上像素的平均值，这会形成一个逐渐过渡的颜色，这效果通常也是更理想的，但是这也意味着显卡需要消耗四倍的工作量。
              */
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -198,8 +206,8 @@
             ]);
 
             var num = 4; //顶点数目
+            var size = datas.BYTES_PER_ELEMENT; //数组中的每个元素的大小（以字节为单位）
             var vertexBuffer = gl.createBuffer(); //创建缓冲区对象
-
             if (!vertexBuffer) {
                 console.log('Failed to create the buffer object!');
                 return -1;
@@ -209,9 +217,7 @@
             gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, datas, gl.STATIC_DRAW);
 
-            var size = datas.BYTES_PER_ELEMENT; //数组中的每个元素的大小（以字节为单位）
-
-            //顶点着色器接受顶点坐标和纹理坐标映射关系
+            //告诉显卡从当前绑定的缓冲区中读取顶点坐标和纹理坐标数据
             var a_Position = gl.getAttribLocation(shaderPorgram, 'a_Position');
             gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, size * 4, 0);
             gl.enableVertexAttribArray(a_Position);
