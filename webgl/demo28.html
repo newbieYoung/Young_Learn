@@ -7,14 +7,15 @@
     <script type="text/javascript" src="./sim-tools.js"></script>
 </head>
 
-<body onload="main()">
+<body>
     <canvas id="webgl" width="1000" height="1000"></canvas>
+
     <!-- 片段着色器程序 -->
     <script id="shader-fs" type="x-shader/x-fragment">
         precision highp float;
 		varying vec2 v_TexCoord;
-		uniform sampler2D u_Sampler;//纹理取样器
-		uniform float contrastM[20];//contrast矩阵
+		uniform sampler2D u_Sampler; //纹理取样器
+		uniform float contrastM[20]; //contrast矩阵
 
 		void main(void) {
             vec4 c = texture2D(u_Sampler, v_TexCoord);
@@ -23,25 +24,31 @@
 			gl_FragColor.b = contrastM[10] * c.r + contrastM[11] * c.g + contrastM[12] * c.b + contrastM[14];
 			gl_FragColor.a = c.a;
 		}
-	</script>
+    </script>
+
     <!-- 顶点着色器程序 -->
     <script id="shader-vs" type="x-shader/x-vertex">
-        attribute vec4 a_Position;//顶点坐标
-		attribute vec2 a_TexCoord;//纹理坐标
+        attribute vec4 a_Position; //顶点坐标
+		attribute vec2 a_TexCoord; //纹理坐标
 		varying vec2 v_TexCoord;
 	    void main() {
 	        gl_Position= a_Position;
             v_TexCoord = a_TexCoord;
 	    }
-	</script>
+    </script>
+
     <script>
+        window.onload = function () {
+            main();
+        }
+
         function main() {
             var canvas = document.querySelector('#webgl');
             var gl = canvas.getContext('webgl'); //获取canvas上下文
             var shaderPorgram = initShaders(gl); //初始化着色器程序
-            var contrast = 5; //contrast值
 
             //生成contrast矩阵
+            var contrast = 5; //contrast值
             var v = (contrast || 0) + 1;
             var o = -128 * (v - 1);
             var constrastMatrix = [
@@ -116,7 +123,6 @@
 
             var num = 4; //顶点数目
             var vertexBuffer = gl.createBuffer(); //创建缓冲区对象
-
             if (!vertexBuffer) {
                 console.log('Failed to create the buffer object!');
                 return -1;
@@ -128,10 +134,23 @@
 
             var size = datas.BYTES_PER_ELEMENT; //数组中的每个元素的大小（以字节为单位）
 
-            //顶点着色器接受顶点坐标和纹理坐标映射关系
+            //告诉显卡从当前绑定的缓冲区中读取顶点坐标和纹理坐标数据
             var a_Position = gl.getAttribLocation(shaderPorgram, 'a_Position');
             gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, size * 4, 0);
             gl.enableVertexAttribArray(a_Position);
+
+            /**
+             * vertexAttribPointer(index, size, type, normalized, stride, offset)
+             * index 变量索引
+             * size 变量大小
+             * type 变量类型
+             * normalized 是否归一化
+             * stride 读取划分大小
+             * offset 读取偏移
+             * 
+             * gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, size * 4, 0);
+             * 意味着从缓冲区中读取 a_Position 变量数据，该变量读取 2 位缓冲区，类型为浮点数，不归一化，每 4 位读取一次，偏移为 0
+             */
 
             var a_TexCoord = gl.getAttribLocation(shaderPorgram, 'a_TexCoord');
             gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, size * 4, size * 2);
