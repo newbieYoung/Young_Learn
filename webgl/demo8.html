@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>WebGL 卷积</title>
+  <script type="text/javascript" src="./sim-tools.js"></script>
+</head>
+
+<body>
+  <canvas id="webgl" width="512" height="512"></canvas>
+
+  <!-- 片段着色器程序 -->
+  <script id="shader-fs" type="x-shader/x-fragment">
+    precision highp float;
+    varying vec2 v_TexCoord;
+    uniform sampler2D u_Sampler; //纹理取样器
+    const int w = 3; // 宽
+    const int h = 3; // 高
+    uniform float kernalM[9]; //卷积矩阵
+
+    void main(void) {
+      vec4 color = vec4(0.0);
+      for(int i=0;i<h;i++){ // 按行遍历
+        for(int j=0;j<w;j++){ // for 循环限制变量必须为常量
+          vec4 c = texture2D(u_Sampler, v_TexCoord+vec2((j-1)/512,(i-1)/512));
+          color += c * kernalM[i*h+j]; // 数据取值必须为常量
+        }
+      }
+
+      color /= 16.0;
+      gl_FragColor = color;
+    }
+  </script>
+
+  <!-- 顶点着色器程序 -->
+  <script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec4 a_Position; //顶点坐标
+    attribute vec2 a_TexCoord; //纹理坐标
+    varying vec2 v_TexCoord;
+    void main() {
+        gl_Position= a_Position;
+        v_TexCoord = a_TexCoord;
+    }
+  </script>
+
+  <script>
+    window.onload = function () {
+      main();
+    }
+
+    function main() {
+      var canvas = document.querySelector('#webgl');
+      var gl = canvas.getContext('webgl'); //获取canvas上下文
+      var shaderPorgram = initShaders(gl); //初始化着色器程序
+
+      //卷积矩阵
+      // var kernal = [
+      //   -2, -1, 0,
+      //   -1, 1, 1,
+      //   0, 1, 2,
+      // ];
+      var kernal = [
+        1, 2, 1,
+        2, 4, 2,
+        1, 2, 1,
+      ];
+      var m = new Float32Array(kernal);
+
+      var num = initVertexBuffers(gl, shaderPorgram);
+      var kernalM = gl.getUniformLocation(shaderPorgram, 'kernalM');
+      gl.uniform1fv(kernalM, m);
+
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+      // Set texture
+      if (!initTextures(gl, shaderPorgram, num)) {
+        console.log('Failed to intialize the texture.');
+        return;
+      }
+    }
+
+    //初始化纹理
+    function initTextures(gl, shaderPorgram, n) {
+      var texture = gl.createTexture(); //创建纹理对象
+
+      if (!texture) {
+        console.log('Failed to create the texture object!');
+        return false;
+      }
+
+      var u_Sampler = gl.getUniformLocation(shaderPorgram, 'u_Sampler');
+      var image = new Image();
+      image.src = '../img/lena.jpg';
+      image.onload = function () {
+        loadTextures(gl, n, texture, u_Sampler, image);
+      }
+      return true;
+    }
+
+    //加载纹理图片
+    function loadTextures(gl, n, texture, u_Sampler, image) {
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); //对纹理图像进行y轴反转
+      gl.activeTexture(gl.TEXTURE0); //激活纹理单元
+      gl.bindTexture(gl.TEXTURE_2D, texture); //绑定纹理对象
+
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); //设置纹理对象参数
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image); //将纹理图像分配给纹理对象
+
+      gl.uniform1i(u_Sampler, 0); //将0号纹理传给着色器中的取样器变量
+
+      gl.clear(gl.COLOR_BUFFER_BIT); // Clear <canvas>
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, n); // Draw the rectangle
+    }
+
+    //初始化顶点位置
+    function initVertexBuffers(gl, shaderPorgram) {
+      //顶点坐标和纹理坐标映射关系
+      var datas = new Float32Array([
+        //顶点坐标、纹理坐标
+        -1.0, 1.0, 0.0, 1.0,
+        -1.0, -1.0, 0.0, 0.0,
+        1.0, 1.0, 1.0, 1.0,
+        1.0, -1.0, 1.0, 0.0,
+      ]);
+
+      var num = 4; //顶点数目
+      var size = datas.BYTES_PER_ELEMENT; //数组中的每个元素的大小（以字节为单位）
+      var vertexBuffer = gl.createBuffer(); //创建缓冲区对象
+      if (!vertexBuffer) {
+        console.log('Failed to create the buffer object!');
+        return -1;
+      }
+
+      //将缓冲区对象绑定到目标并写入数据
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, datas, gl.STATIC_DRAW);
+
+      //告诉显卡从当前绑定的缓冲区中读取顶点坐标和纹理坐标数据
+      var a_Position = gl.getAttribLocation(shaderPorgram, 'a_Position');
+      gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, size * 4, 0);
+      gl.enableVertexAttribArray(a_Position);
+
+      /**
+       * vertexAttribPointer(index, size, type, normalized, stride, offset)
+       * index 变量索引
+       * size 变量大小
+       * type 变量类型
+       * normalized 是否归一化
+       * stride 读取划分大小
+       * offset 读取偏移
+       * 
+       * gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, size * 4, 0);
+       * 意味着从缓冲区中读取 a_Position 变量数据，该变量读取 2 位缓冲区，类型为浮点数，不归一化，每 4 位读取一次，偏移为 0
+       */
+
+      var a_TexCoord = gl.getAttribLocation(shaderPorgram, 'a_TexCoord');
+      gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, size * 4, size * 2);
+      gl.enableVertexAttribArray(a_TexCoord);
+
+      return num;
+    }
+  </script>
+</body>
+
+</html>
