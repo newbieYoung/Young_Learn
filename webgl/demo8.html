@@ -144,19 +144,6 @@
       gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, size * 4, 0);
       gl.enableVertexAttribArray(a_Position);
 
-      /**
-       * vertexAttribPointer(index, size, type, normalized, stride, offset)
-       * index 变量索引
-       * size 变量大小
-       * type 变量类型
-       * normalized 是否归一化
-       * stride 读取划分大小
-       * offset 读取偏移
-       * 
-       * gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, size * 4, 0);
-       * 意味着从缓冲区中读取 a_Position 变量数据，该变量读取 2 位缓冲区，类型为浮点数，不归一化，每 4 位读取一次，偏移为 0
-       */
-
       var a_TexCoord = gl.getAttribLocation(shaderPorgram, 'a_TexCoord');
       gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, size * 4, size * 2);
       gl.enableVertexAttribArray(a_TexCoord);
