@@ -169,11 +169,18 @@
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); //对纹理图像进行y轴反转
             gl.bindTexture(gl.TEXTURE_2D, texture); //绑定纹理对象
 
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); //配置纹理对象的参数
+
+            /**
+             * gl.TEXTURE_MAG_FILTER 纹理放大滤波器
+             * gl.TEXTURE_MIN_FILTER 纹理缩小滤波器
+             * gl.TEXTURE_WRAP_S 纹理坐标水平填充
+             * gl.TEXTURE_WRAP_T 纹理坐标垂直填充
+             */
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); //设置纹理对象参数
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
             /**
-             * 使用 NEAREST 过滤器的纹理始终会返回最接近样本点的马赛克（texel）中心点的颜色，
-             * 使用 LINEAR 过滤器返回以样本点为中心四个方向上像素的平均值，这会形成一个逐渐过渡的颜色，这效果通常也是更理想的，但是这也意味着显卡需要消耗四倍的工作量。
+             * 使用 NEAREST 过滤器的纹理会返回最接近样本点的中心点的颜色；
+             * 使用 LINEAR 过滤器的纹理会返回以样本点为中心四个方向上像素的平均值，这会形成一个逐渐过渡的颜色，这效果通常也是更理想的，但是这也意味着显卡需要消耗四倍的工作量。
              */
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
