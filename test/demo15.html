@@ -4,32 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>串并连奖项审核 DEMO</title>
+  <style>
+    table td{
+      border:1px solid #000;
+      margin:1px;
+    }
+  </style>
 </head>
 <body>
-
-  <table border="1">
-    <tr>
-      <th colspan="3">物资详情说明</th>
-    </tr>
-    <tr>
-      <td colspan="2" align="center">数量(支)</td>
-      <td rowspan="2">重量(吨)</td>
-    </tr>
-    <tr>
-      <td>实发数</td>
-      <td>实收数</td>
-    </tr>
-    <tr>
-      <td>12</td>
-      <td>10</td>
-      <td>100.00</td>
-    </tr>
-  </table>
   <script src="../lib/state-machine.js"></script>
   <script>
     window.onload = function(){
-      var list1 = ['A',['B','C',['D',['E','F'],'G',['H','I']]]];
-      console.log(JSON.stringify(list1));
+      var data1 = ['A','B','C','D','E']; //串连
+      var data2 = ['A',['B','C',2],'D',['E','F',2],'G']; //串+并连 简单混合
+      var data3 = ['A',[['B',[['C','D'],'E','F',3]],['G','H'],2],'I'] //串+并连 复杂混合
+
+      var list1 = new CheckList(data3);
+      list1.table();
     }
 
     //审核列表
@@ -39,6 +30,7 @@
        * 1、第一项 和 最后一项必须为单项；
        * 2、不允许重复关键字；
        * 3、数组末尾存在数字，则数组元素属于并行结构，该数字表示并行结构中的最少通过数；没有数字则属于串行结构；
+       * 4、子数组不能为空
        */
 
       //列表校验
@@ -57,6 +49,44 @@
       this.history = history && history.length > 0 ? history : []; // 历史记录
     }
 
+    //构建 table 可视化 demo
+    CheckList.prototype.table = function(){
+      this.$table = document.createElement('table');
+      this.$table.innerHTML = this._array(this.list);
+      document.body.appendChild(this.$table);
+    }
+    CheckList.prototype._array = function(array){
+      let end = array[array.length-1];
+      let html = '<table>';
+      if(this._isNumber(end)){ //最后一位是数字，并行
+        for(let i=0;i<array.length-1;i++){
+          let item = array[i];
+          html += '<tr><td>'
+          if(Array.isArray(item)){
+            html += this._array(item);
+          }else{
+            html += item;
+          }
+          html += '</td></tr>'
+        }
+      }else{ //串行
+        html += '<tr>'
+        for(let i=0;i<array.length;i++){
+          let item = array[i];
+          html += '<td>'
+          if(Array.isArray(item)){
+            html += this._array(item);
+          }else{
+            html += item;
+          }
+          html += '</td>'
+        }
+        html += '</tr>'
+      }
+      html += '</table>';
+      return html;
+    }
+
     //通过
     CheckList.prototype.pass = function(key, status){
 
@@ -65,9 +95,9 @@
       //查询 key 是否能进行操作
     }
 
-    //计算关键字索引
-    function getIndex(key,list){
-
+    //判断是否是数字
+    CheckList.prototype._isNumber = function(num){
+      return typeof num === 'number' && !isNaN(num);
     }
   </script>
 </body>
