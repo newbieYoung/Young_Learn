@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>串并连奖项审核 DEMO</title>
+</head>
+<body>
+
+  <table border="1">
+    <tr>
+      <th colspan="3">物资详情说明</th>
+    </tr>
+    <tr>
+      <td colspan="2" align="center">数量(支)</td>
+      <td rowspan="2">重量(吨)</td>
+    </tr>
+    <tr>
+      <td>实发数</td>
+      <td>实收数</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>10</td>
+      <td>100.00</td>
+    </tr>
+  </table>
+  <script src="../lib/state-machine.js"></script>
+  <script>
+    window.onload = function(){
+      var list1 = ['A',['B','C',['D',['E','F'],'G',['H','I']]]];
+      console.log(JSON.stringify(list1));
+    }
+
+    //审核列表
+    function CheckList(list, cur, history){
+      /**
+       * 列表说明
+       * 1、第一项 和 最后一项必须为单项；
+       * 2、不允许重复关键字；
+       * 3、数组末尾存在数字，则数组元素属于并行结构，该数字表示并行结构中的最少通过数；没有数字则属于串行结构；
+       */
+
+      //列表校验
+      this.list = list;
+
+      let defCur = {
+        keys: [this.list[0]],
+        indexs: ['0'],
+        statuses: [0] /* 0 未评审、1 通过、2 未通过、3 驳回 */
+      }
+
+      //cur校验
+      this.cur = cur ? cur : defCur;
+
+      //history校验
+      this.history = history && history.length > 0 ? history : []; // 历史记录
+    }
+
+    //通过
+    CheckList.prototype.pass = function(key, status){
+
+    }
+    CheckList.prototype._pass = function(key, status){
+      //查询 key 是否能进行操作
+    }
+
+    //计算关键字索引
+    function getIndex(key,list){
+
+    }
+  </script>
+</body>
+</html>
