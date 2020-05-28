@@ -1,104 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>串并连奖项审核 DEMO</title>
-  <style>
-    table td{
-      border:1px solid #000;
-      margin:1px;
-    }
-  </style>
-</head>
-<body>
-  <script src="../lib/state-machine.js"></script>
-  <script>
-    window.onload = function(){
-      var data1 = ['A','B','C','D','E']; //串连
-      var data2 = ['A',['B','C',2],'D',['E','F',2],'G']; //串+并连 简单混合
-      var data3 = ['A',[['B',[['C','D'],'E','F',3]],['G','H'],2],'I'] //串+并连 复杂混合
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>串并连奖项审核 DEMO</title>
+    <style>
+      table td {
+        border: 1px solid #000;
+        margin: 1px;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="../lib/state-machine.js"></script>
+    <script>
+      window.onload = function () {
+        var data1 = ["A", "B", "C", "D", "E"]; //串连
+        var data2 = ["A", ["B", "C", 2], "D", ["E", "F", 2], "G"]; //串+并连 简单混合
+        var data3 = [
+          "A",
+          [["B", [["C", "D"], "E", "F", 3]], ["G", "H"], 2],
+          "I",
+        ]; //串+并连 复杂混合
 
-      var list1 = new CheckList(data3);
-      list1.table();
-    }
+        var list1 = new CheckList(data2);
+        list1.table();
+      };
 
-    //审核列表
-    function CheckList(list, cur, history){
       /**
-       * 列表说明
-       * 1、第一项 和 最后一项必须为单项；
-       * 2、不允许重复关键字；
-       * 3、数组末尾存在数字，则数组元素属于并行结构，该数字表示并行结构中的最少通过数；没有数字则属于串行结构；
-       * 4、子数组不能为空
+       * 404 系统异常
+       * 100 未到该流程
+       * 101 处于未通过或者驳回状态，不能进行操作
        */
 
-      //列表校验
-      this.list = list;
+      //审核列表
+      function CheckList(list, cur, history) {
+        /**
+         * 列表说明
+         * 1、第一项 和 最后一项必须为单项；
+         * 2、不允许重复关键字；
+         * 3、数组末尾存在数字，则数组元素属于并行结构，该数字表示并行结构中的最少通过数；没有数字则属于串行结构；
+         * 4、子数组不能为空
+         */
 
-      let defCur = {
-        keys: [this.list[0]],
-        indexs: ['0'],
-        statuses: [0] /* 0 未评审、1 通过、2 未通过、3 驳回 */
+        //列表校验
+        this.list = list;
+
+        let defCur = {
+          keys: [this.list[0]],
+          indexs: ["0"],
+        };
+
+        this.status = 0; // 0 未评审、1 通过、2 未通过、3 驳回
+        this.cur = cur ? cur : defCur;
+        this.history = history && history.length > 0 ? history : []; // 历史记录
       }
 
-      //cur校验
-      this.cur = cur ? cur : defCur;
+      CheckList.prototype.check = function () {
+        //根据历史记录校验当前状态
+      };
 
-      //history校验
-      this.history = history && history.length > 0 ? history : []; // 历史记录
-    }
-
-    //构建 table 可视化 demo
-    CheckList.prototype.table = function(){
-      this.$table = document.createElement('table');
-      this.$table.innerHTML = this._array(this.list);
-      document.body.appendChild(this.$table);
-    }
-    CheckList.prototype._array = function(array){
-      let end = array[array.length-1];
-      let html = '<table>';
-      if(this._isNumber(end)){ //最后一位是数字，并行
-        for(let i=0;i<array.length-1;i++){
-          let item = array[i];
-          html += '<tr><td>'
-          if(Array.isArray(item)){
-            html += this._array(item);
-          }else{
-            html += item;
+      //构建 table 可视化 demo
+      CheckList.prototype.table = function () {
+        this.$table = document.createElement("table");
+        this.$table.innerHTML = this._array(this.list);
+        document.body.appendChild(this.$table);
+      };
+      CheckList.prototype._array = function (array) {
+        let end = array[array.length - 1];
+        let html = "<table>";
+        if (this._isNumber(end)) {
+          //最后一位是数字，并行
+          for (let i = 0; i < array.length - 1; i++) {
+            let item = array[i];
+            html += "<tr><td>";
+            if (Array.isArray(item)) {
+              html += this._array(item);
+            } else {
+              html += item;
+            }
+            html += "</td></tr>";
           }
-          html += '</td></tr>'
-        }
-      }else{ //串行
-        html += '<tr>'
-        for(let i=0;i<array.length;i++){
-          let item = array[i];
-          html += '<td>'
-          if(Array.isArray(item)){
-            html += this._array(item);
-          }else{
-            html += item;
+        } else {
+          //串行
+          html += "<tr>";
+          for (let i = 0; i < array.length; i++) {
+            let item = array[i];
+            html += "<td>";
+            if (Array.isArray(item)) {
+              html += this._array(item);
+            } else {
+              html += item;
+            }
+            html += "</td>";
           }
-          html += '</td>'
+          html += "</tr>";
         }
-        html += '</tr>'
-      }
-      html += '</table>';
-      return html;
-    }
+        html += "</table>";
+        return html;
+      };
 
-    //通过
-    CheckList.prototype.pass = function(key, status){
+      //通过
+      CheckList.prototype.pass = function (key) {
+        if (!this.cur.keys.includes(key)) {
+          //查询是否处于当前流程
+          return 100;
+        }
 
-    }
-    CheckList.prototype._pass = function(key, status){
-      //查询 key 是否能进行操作
-    }
+        if (this.status == 2 || this.status == 3) {
+          //驳回或者未通过状态，不能进行操作
+          return 101;
+        }
 
-    //判断是否是数字
-    CheckList.prototype._isNumber = function(num){
-      return typeof num === 'number' && !isNaN(num);
-    }
-  </script>
-</body>
+        let no = this.cur.keys.indexOf(key);
+        let index = this.cur.indexs[no];
+        this.history.push({
+          //加入操作历史记录
+          key: key,
+          index: index,
+          status: 1,
+        });
+        this.status = 1; //更新状态
+      };
+
+      CheckList.prototype.getList = function (index) {
+        let arr = index.split("-");
+        if (arr.length == 1) {
+          return null;
+        } else {
+          let list = this.list;
+          for (let i = 0; i < arr.length - 1; i++) {
+            list = list[arr[i]];
+          }
+          return list;
+        }
+      };
+
+      CheckList.prototype.isFinished = function (list) {
+        let total = list.length;
+        if (this._isNumber(list[list.length - 1])) {
+          total = list[list.length - 1];
+        }
+        let count = 0;
+        for (let i = 0; i < list.length; i++) {
+          let item = list[i];
+          if (!item.length) {
+            //非数组
+            for (j = 0; j < this.history.length; j++) {
+              if (this.history[j].key == item && this.history[j].status == 1) {
+                count++;
+              }
+            }
+          } else {
+            if (this.isFinished(item)) {
+              count++;
+            }
+          }
+        }
+        if (count >= total) {
+          return true;
+        } else {
+          return false;
+        }
+      };
+
+      CheckList.prototype.done = function (no) {
+        this.cur.keys = this.cur.keys.splice(no, 1);
+        this.cur.indexs = this.cur.indexs.splice(no, 1);
+      };
+
+      //结束
+      CheckList.prototype.end = function () {
+        this.cur.keys = [];
+        this.cur.indexs = [];
+      };
+
+      //是否结束
+      CheckList.prototype.isEnd = function () {
+        if (this.cur.keys.length == 0) {
+          return true;
+        } else {
+          return false;
+        }
+      };
+
+      //判断是否是数字
+      CheckList.prototype._isNumber = function (num) {
+        return typeof num === "number" && !isNaN(num);
+      };
+    </script>
+  </body>
 </html>
