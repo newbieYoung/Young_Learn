@@ -27,13 +27,6 @@
         list1.table();
       };
 
-      /**
-       * 404 系统异常
-       * 403、402 审核列表数据异常
-       * 100 未匹配到当前流程
-       * 101 处于未通过或者驳回状态，不能执行 pass 操作
-       */
-
       //审核列表
       function CheckList(list, cur, history) {
         /**
@@ -61,6 +54,77 @@
         //根据历史记录校验当前状态
       };
 
+      //完成
+      CheckList.prototype.finish = function(list, index){
+        //列表已完成，删除归属于当前列表的流程
+        let newKeys = [];
+        let newIndexs = [];
+        for(let i=0;i<this.cur.indexs.length;i++){
+          if(this.cur.indexs[i].indexOf(index) != 0){//列表
+            newKeys.push(this.cur.keys[i]);
+            newIndex.push(this.cur.indexs[i]);
+          }
+        }
+        this.cur.keys = newKeys;
+        this.cur.indexs = newIndexs;
+
+        //递归处理父列表
+        let arr = index.split('-');
+
+        let parent = this.getList(index);
+        let parentIndex = '';
+        if(parent && parent.length > 0){
+          if(this.isFinished(parent)){ //父列表也完成了
+
+          }else{ //父列表没完成
+
+          }
+        }else{
+          throw new Error(JSON.stringify({
+            errCode: 403,
+            errMsg: '审核列表数据异常',
+            data: {
+              index: index,
+              list: this.list
+            }
+          }))
+        }
+      }
+
+      //下一步
+      CheckList.prototype.next = function(list, lIndex, curIndex){
+        if(!this._isNumber(list[list.length-1])){//当前节点所在的审核列表为串行列表
+          let arr = index.split('-');
+          let next = parseInt(arr[arr.length-1])+1;
+          if(!list[next]){
+            throw new Error(JSON.stringify({
+              errCode: 300,
+              errMsg: '审核列表数据异常',
+              data: {
+                index: index,
+                list: list
+              }
+            }))
+          }
+
+          //nextIndex
+          let nextIndex = '';
+          for(let i=0;i<arr.length-1;i++){
+            nextIndex += arr[i]+'-';
+          }
+          nextIndex += next;
+
+          if(list[next].length>=0){//下一个节点为列表
+
+          }else{
+            this.cur.keys.push(list[next]);
+            this.cur.indexs.push(nextIndex);
+          }
+        }else{
+          //并行列表删除当前流程即可
+        }
+      }
+
       //通过
       CheckList.prototype.pass = function (key) {
         if (!this.cur.keys.includes(key)) {
@@ -70,7 +134,7 @@
             errMsg: '未匹配到当前流程',
             data:{
               key: key,
-              cur: this.cur
+              keys: this.cur.keys
             }
           }))
         }
@@ -82,6 +146,7 @@
             errMsg: '处于未通过或者驳回状态，不能执行 pass 操作',
             data:{
               key: key,
+              history: this.history,
               status: this.status
             }
           }))
@@ -100,60 +165,70 @@
         this.cur.indexs = this.cur.indexs.splice(no, 1);
 
         let list = this.getList(index);
-        if(list && list.length > 0){
-          if(!this.isFinished(list)){ //当前节点所在的审核列表并没有完成
-            if(!this._isNumber(list[list.length-1])){//当前节点所在的审核列表为串行列表
-              let arr = index.split('-');
-              let next = parseInt(arr[arr.length-1])+1;
-              if(!list[next]){
-                throw new Error(JSON.stringify({
-                  errCode: 402,
-                  errMsg: '审核列表数据异常',
-                  data: {
-                    index: index,
-                    list: this.list
-                  }
-                }))
-              }
-              let nextIndex = '';
-              for(let i=0;i<arr.length-1;i++){
-                nextIndex += arr[i]+'-';
-              }
-              nextIndex += next;
-              this.cur.keys.push(list[next]);
-              this.cur.indexs.push(nextIndex);
-            }
+        let llt = list.list;
+        if(list && llt && llt.length > 0){
+          if(!this.isFinished(llt)){ //当前节点所在的审核列表并没有完成
+            this.next(llt, list.index, index);
           }else{
-
+            this.finish(list.list, list.index)
           }
         }else{
           throw new Error(JSON.stringify({
-            errCode: 403,
+            errCode: 102,
             errMsg: '审核列表数据异常',
             data: {
               index: index,
-              list: this.list
+              list: list
             }
           }))
         }
       };
 
-      //完成当前审核列表
-      CheckList.prototype.finishList = function(list, index){
-
-      }
+      //获取父节点索引
+      // CheckList.prototype.getParentIndex = function(index){
+      //   let arr = index.split('-');
+      //   if(arr.length > 1){
+      //     let parentIndex = '';
+      //     for(let i=0;i<arr.length-1;i++){
+      //       parentIndex += arr[i]+'-';
+      //     }
+      //     parentIndex = parentIndex.substring(0,parentIndex.length-1);//去掉最后一位的横线
+      //     return parentIndex;
+      //   }else{
+      //     return null;
+      //   }
+      // }
 
       //查找当前元素所在的审核列表
       CheckList.prototype.getList = function (index) {
         let arr = index.split("-");
-        if (arr.length == 1) { //只有一层序号，最外层列表
-          return this.list;
-        } else {
-          let list = this.list;
-          for (let i = 0; i < arr.length - 1; i++) {
-            list = list[arr[i]];
+        if(arr && arr.length>=1){
+          if (arr.length == 1) { //只有一层序号，最外层列表
+            return {
+              index : -1,
+              list : this.list
+            };
+          } else {
+            let list = this.list;
+            let listIndex = '';
+            for (let i = 0; i < arr.length - 1; i++) {
+              list = list[arr[i]];
+              listIndex += arr[i]+'-';
+            }
+            listIndex = listIndex.substring(0, listIndex.length-1);//去掉最后一位横线
+            return {
+              index: listIndex,
+              list: list
+            };
           }
-          return list;
+        }else{
+          throw new Error(JSON.stringify({
+            errCode: 200,
+            errMsg: '节点索引异常',
+            data: {
+              index: index
+            }
+          }))
         }
       };
 
