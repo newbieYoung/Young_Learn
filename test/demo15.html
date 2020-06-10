@@ -52,6 +52,8 @@
 
       CheckList.prototype.check = function () {
         //根据历史记录校验当前状态
+        //历史记录不能存在状态为 0 的记录
+        //历史记录不能存在重复记录
       };
 
       //完成
@@ -91,17 +93,23 @@
         }
       }
 
-      //下一步
+      /**
+       * 下一步
+       * list 当前列表
+       * lIndex 当前列表索引
+       * curIndex 当前流程索引
+       */
       CheckList.prototype.next = function(list, lIndex, curIndex){
         if(!this._isNumber(list[list.length-1])){//当前节点所在的审核列表为串行列表
-          let arr = index.split('-');
+          let arr = curIndex.split('-');
           let next = parseInt(arr[arr.length-1])+1;
-          if(!list[next]){
+          let nextNode = list[next]
+          if(!nextNode){
             throw new Error(JSON.stringify({
               errCode: 300,
               errMsg: '审核列表数据异常',
               data: {
-                index: index,
+                index: curIndex,
                 list: list
               }
             }))
@@ -114,14 +122,88 @@
           }
           nextIndex += next;
 
-          if(list[next].length>=0){//下一个节点为列表
+          if(nextNode.length>=0){ //列表节点
+            if(this.isFinished(nextNode)){
+              this.finish(nextNode, nextIndex)
+            }else{
+              if(this._isNumber(nextNode[nextNode.length-1])){ //并行列表
 
+              }else{ //串行列表
+                this.ready1(nextNode, nextIndex, nextNode[0], nextIndex+'-0');
+              }
+            }
           }else{
-            this.cur.keys.push(list[next]);
-            this.cur.indexs.push(nextIndex);
+            this.ready1(list, lIndex, nextNode, nextIndex)
           }
         }else{
           //并行列表删除当前流程即可
+        }
+      }
+
+      //准备处理某个并行列表节点
+      CheckList.prototype.ready2 = function(list, lIndex){
+        for(let i=0;i<list.length;i++){
+          let node = list[i];
+          if(node.length>0){ //列表元素
+            if(this.isFinished(node, lIndex+'-'+i)){
+              // nothing
+            }else{
+              if(this._isNumber(node[node.length-1])){ //并行列表
+                this.ready2(node, lIndex+'-'+i);
+              }else{ // 串行列表
+                this.ready1(node, lIndex+'-'+i, node[0], lIndex+'-'+i+'-0');
+              }
+            }
+          }else{ //节点元素
+            let exist = false;
+            for(let j=0;j<this.history.length;j++){
+              if(this.history[j].key == node){ //历史记录中存在
+                if(this.history[j].status == 1){ //pass
+                }else{
+                  this.status = this.history[i].status;
+                }
+                exist = true;
+              }
+            }
+            if(!exist){ //历史记录中不存在则加入当前流程
+              this.cur.keys.push(node);
+              this.cur.indexs.push(lIndex+'-'+i);
+            }
+          }
+        }
+      }
+
+      /**
+       * 准备处理串行列表中的某个节点（该串行列表并没有完成）
+       */
+      CheckList.prototype.ready1 = function(list, lIndex, curNode, curIndex){
+        if(curNode.length>0){ //列表元素
+          if(this.isFinished(curNode)){ // 已完成
+            this.next(list, lIndex, curIndex); //下一步
+          }else{
+            if(this._isNumber(curNode[curNode.length-1])){ //并行列表
+              this.ready2(curNode, curIndex)
+            }else{ //串行列表
+              this.ready1(curNode, curIndex, curNode[0], curIndex+'-0');
+            }
+          }
+        }else{ //节点元素
+          let exist = false;
+          for(let i=0;i<this.history.length;i++){
+            if(this.history[i].key == curNode){ //历史记录中存在
+              if(this.history[i].status == 1){ //pass
+                this.next(list, lIndex, curIndex); // 再下一步
+              }else{
+                this.status = this.history[i].status;
+              }
+              exist = true;
+              break;
+            }
+          }
+          if(!exist){//历史记录中不存在则加入当前流程
+            this.cur.keys.push(curNode);
+            this.cur.indexs.push(curIndex);
+          }
         }
       }
 
@@ -170,7 +252,7 @@
           if(!this.isFinished(llt)){ //当前节点所在的审核列表并没有完成
             this.next(llt, list.index, index);
           }else{
-            this.finish(list.list, list.index)
+            this.finish(llt, list.index)
           }
         }else{
           throw new Error(JSON.stringify({
