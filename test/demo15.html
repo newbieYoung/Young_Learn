@@ -323,17 +323,16 @@
         let count = 0;
         for (let i = 0; i < list.length; i++) {
           let item = list[i];
-          if (!item.length) {
-            //非数组
+          if(item.length>=0){ //列表元素
+            if (this.isFinished(item)) {
+              count++;
+            }
+          }else{ //节点元素
             for (j = 0; j < this.history.length; j++) {
               if (this.history[j].key == item && this.history[j].status == 1) {
                 count++;
                 break;
               }
-            }
-          } else {
-            if (this.isFinished(item)) {
-              count++;
             }
           }
         }
