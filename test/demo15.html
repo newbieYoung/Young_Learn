@@ -28,6 +28,10 @@
 
         console.log(list1);
         list1.pass('A')
+        // list1.pass('B')
+        // list1.pass('C')
+        // list1.pass('D')
+        // list1.pass('E')
       };
 
       //审核列表
@@ -266,8 +270,8 @@
             status: 1,
           });
         }
-        this.cur.keys = this.cur.keys.splice(no, 1); //删除当前流程
-        this.cur.indexs = this.cur.indexs.splice(no, 1);
+        this.cur.keys.splice(no, 1); //删除当前流程
+        this.cur.indexs.splice(no, 1);
         this.status = this.getListStatus(this.list); //更新状态
 
         if(this.status != 1 && this.status != 2){ //整个流程未处理完成
@@ -360,6 +364,7 @@
                 }else if(this.history[j].status == 3){
                   wait++;
                 }
+                break;
               }
             }
           }
@@ -376,6 +381,8 @@
             status = 0;
           }
         }
+
+        return status;
       }
 
       //构建 table 可视化 demo
