@@ -23,15 +23,13 @@
           "I",
         ]; //串+并连 复杂混合
 
-        var list1 = new CheckList(data1);
+        var list1 = new CheckList(data2);
         list1.table();
 
         console.log(list1);
         list1.pass('A')
-        // list1.pass('B')
-        // list1.pass('C')
-        // list1.pass('D')
-        // list1.pass('E')
+        list1.pass('B')
+        list1.pass('C')
       };
 
       //审核列表
@@ -63,36 +61,42 @@
         //历史记录不能存在重复记录
       };
 
+      //结束
+      CheckList.prototype.reject = function(){
+        console.log('reject');
+      }
+
       //完成
       CheckList.prototype.finish = function(list, index){
-        //列表已完成，删除归属于当前列表的流程
-        let newKeys = [];
-        let newIndexs = [];
-        for(let i=0;i<this.cur.indexs.length;i++){
-          if(this.cur.indexs[i].indexOf(index) != 0){//列表
-            newKeys.push(this.cur.keys[i]);
-            newIndex.push(this.cur.indexs[i]);
-          }
-        }
-        this.cur.keys = newKeys;
-        this.cur.indexs = newIndexs;
+        console.log('finish');
+        // //列表已完成，删除归属于当前列表的流程
+        // let newKeys = [];
+        // let newIndexs = [];
+        // for(let i=0;i<this.cur.indexs.length;i++){
+        //   if(this.cur.indexs[i].indexOf(index) != 0){//列表
+        //     newKeys.push(this.cur.keys[i]);
+        //     newIndex.push(this.cur.indexs[i]);
+        //   }
+        // }
+        // this.cur.keys = newKeys;
+        // this.cur.indexs = newIndexs;
 
-        //递归处理父列表
-        let arr = index.split('-');
+        // //递归处理父列表
+        // let arr = index.split('-');
 
-        let parent = this.getList(index);
-        let parentIndex = '';
-        if(parent && parent.length > 0){
-          if(this.isFinished(parent)){ //父列表也完成了
+        // let parent = this.getList(index);
+        // let parentIndex = '';
+        // if(parent && parent.length > 0){
+        //   if(this.isFinished(parent)){ //父列表也完成了
 
-          }else{ //父列表没完成
+        //   }else{ //父列表没完成
 
-          }
-        }else{
-          throw new Error(JSON.stringify({
-            errMsg: '审核列表数据异常'
-          }))
-        }
+        //   }
+        // }else{
+        //   throw new Error(JSON.stringify({
+        //     errMsg: '审核列表数据异常'
+        //   }))
+        // }
       }
 
       //下一步 - 元素节点
@@ -155,7 +159,7 @@
         }else if(lStatus == 1){
           this.finish();
         }else{
-          if(!this._isNumber(list[list.length-1])){ //串行列表
+          if(this._isNumber(list[list.length-1])){ //并行列表
             for(let i=0;i<list.length-1;i++){
               let iNode = list[i];
               let iIndex = index+'-'+i;
@@ -165,7 +169,7 @@
                 this.nextNode(iNode, iIndex);
               }
             }
-          }else{ //并行列表
+          }else{ //串行列表
             let firstNode = list[0];
             let firstIndex = index+'-0';
             if(Array.isArray(firstNode)){
@@ -334,7 +338,7 @@
         let status = 0;
         let total = list.length; // 总流程数
         let finish = list.length; // 最少通过数
-        if(this._isNumber(list[list.length-1])){
+        if(this._isNumber(list[list.length-1])){ //并行列表
           total = list.length-1;
           finish = list[list.length - 1];
         }
