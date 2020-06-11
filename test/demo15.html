@@ -95,10 +95,7 @@
           let hItem = this.history[i];
           if(hItem.key == node){ //存在操作记录
             if(hItem.status == 2){
-              throw new Error(JSON.stringify({
-                errMsg: '计算列表状态异常',
-                data: llt
-              }))
+              //nothing
             }else if(hItem.status == 1){
               this.next(index); //再下一步
             }else{ //继续处理
@@ -257,23 +254,7 @@
         this.status = this.getListStatus(this.list); //更新状态
 
         if(this.status != 1 && this.status != 2){ //整个流程未处理完成
-          let list = this.getList(index);
-          let llt = list.list;
-          if(list && llt && llt.length > 0){
-            let llStatus = this.getListStatus(llt);
-            if(llStatus == 2){
-              this.reject();
-            }else if(llStatus == 1){
-              this.finish();
-            }else{ //当前节点所在的审核列表并没有完成
-              this.next(llt, list.index, index); //下一步
-            }
-          }else{
-            throw new Error(JSON.stringify({
-              errMsg: '列表元素不能为空',
-              data: llt
-            }))
-          }
+          this.next(index); //下一步
         }
       };
 
