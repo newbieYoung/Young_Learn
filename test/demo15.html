@@ -130,22 +130,28 @@
           if(lStatus == 2){
             this.reject();
           }else if(lStatus == 1){
-
+            this.finish();
+          }else{
+            if(!this._isNumber(list[list.length-1])){ //串行列表
+              for(let i=0;i<list.length-1;i++){
+                let iNode = list[i];
+                let iIndex = index+'-'+i;
+                if(iNode.length>=0){ //列表节点
+                  this.nextList(iNode, iIndex);
+                }else{ // 元素节点
+                  this.nextNode(iNode, iIndex);
+                }
+              }
+            }else{ //并行列表
+              let firstNode = list[0];
+              let firstIndex = index+'-0';
+              if(firstNode.length >= 0){
+                this.nextList(firstNode, firstNode);
+              }else{
+                this.nextNode(firstNode, firstIndex);
+              }
+            }
           }
-          // if(!this._isNumber(list[list.length-1])){ //串行列表
-          //   for(let i=0;i<list.length-1;i++){
-          //     let iNode = list[i];
-
-          //   }
-          // }else{ //并行列表
-          //   let firstNode = list[0];
-          //   let firstIndex = index+'-0';
-          //   if(firstNode.length >= 0){
-          //     this.nextList(firstNode, firstNode);
-          //   }else{
-          //     this.nextNode(firstNode, firstIndex);
-          //   }
-          // }
         }else{
           throw new Error(JSON.stringify({
             errMsg: '列表节点不能为空',
