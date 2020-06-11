@@ -23,8 +23,11 @@
           "I",
         ]; //串+并连 复杂混合
 
-        var list1 = new CheckList(data3);
+        var list1 = new CheckList(data1);
         list1.table();
+
+        console.log(list1);
+        list1.pass('A')
       };
 
       //审核列表
@@ -125,40 +128,48 @@
 
       //下一步 - 列表节点
       CheckList.prototype.nextList = function(list, index){
-        if(list.length > 0){
-          let lStatus = this.getListStatus(list);
-          if(lStatus == 2){
-            this.reject();
-          }else if(lStatus == 1){
-            this.finish();
-          }else{
-            if(!this._isNumber(list[list.length-1])){ //串行列表
-              for(let i=0;i<list.length-1;i++){
-                let iNode = list[i];
-                let iIndex = index+'-'+i;
-                if(iNode.length>=0){ //列表节点
-                  this.nextList(iNode, iIndex);
-                }else{ // 元素节点
-                  this.nextNode(iNode, iIndex);
-                }
-              }
-            }else{ //并行列表
-              let firstNode = list[0];
-              let firstIndex = index+'-0';
-              if(firstNode.length >= 0){
-                this.nextList(firstNode, firstNode);
-              }else{
-                this.nextNode(firstNode, firstIndex);
-              }
+        if(!Array.isArray(list)){
+          throw new Error(JSON.stringify({
+            errMsg: '参数必须为数组',
+            data: {
+              list: list
             }
-          }
-        }else{
+          }))
+        }
+        if(list.length <= 0){
           throw new Error(JSON.stringify({
             errMsg: '列表节点不能为空',
             data: {
               list: list
             }
           }))
+        }
+
+        let lStatus = this.getListStatus(list);
+        if(lStatus == 2){
+          this.reject();
+        }else if(lStatus == 1){
+          this.finish();
+        }else{
+          if(!this._isNumber(list[list.length-1])){ //串行列表
+            for(let i=0;i<list.length-1;i++){
+              let iNode = list[i];
+              let iIndex = index+'-'+i;
+              if(Array.isArray(iNode)){ //列表节点
+                this.nextList(iNode, iIndex);
+              }else{ // 元素节点
+                this.nextNode(iNode, iIndex);
+              }
+            }
+          }else{ //并行列表
+            let firstNode = list[0];
+            let firstIndex = index+'-0';
+            if(Array.isArray(firstNode)){
+              this.nextList(firstNode, firstNode);
+            }else{
+              this.nextNode(firstNode, firstIndex);
+            }
+          }
         }
       }
 
@@ -194,7 +205,7 @@
               }
               nextIndex += next;
 
-              if(nextNode.length>=0){ //列表节点
+              if(Array.isArray(nextNode)){ //列表节点
                 this.nextList(nextNode, nextIndex);
               }else{ // 元素节点
                 this.nextNode(nextNode, nextIndex);
@@ -303,7 +314,13 @@
        * 其它未评审
        */
       CheckList.prototype.getListStatus = function(list){
-        if(!list && list.length<=0){
+        if(!Array.isArray(list)){
+          throw new Error(JSON.stringify({
+            msg: '参数必须为数组',
+            data: list
+          }))
+        }
+        if(list.length<=0){
           throw new Error(JSON.stringify({
             msg: '列表元素不能为空',
             data: list
@@ -324,7 +341,7 @@
 
         for(let i=0;i<list.length;i++){
           let item = list[i];
-          if(item.length>=0){ //列表元素
+          if(Array.isArray(item)){ //列表元素
             let iStatus = this.getListStatus(item);
             if(iStatus == 1){
               pass++;
