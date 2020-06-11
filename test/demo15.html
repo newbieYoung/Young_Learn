@@ -30,6 +30,10 @@
         list1.pass('A')
         list1.pass('B')
         list1.pass('C')
+        list1.pass('D')
+        list1.pass('E')
+        list1.pass('F')
+        list1.pass('G')
       };
 
       //审核列表
@@ -82,14 +86,14 @@
 
         //递归处理父列表
         let parent = this.getList(index);
-        let pIndex = '';
-        let arr = index.split('-');
-        for(let i=0;i<arr.length-1;i++){
-          pIndex += arr[i]+'-';
+        let pStatus = this.getListStatus(parent.list);
+        if(pStatus == 2){
+          this.reject();
+        }else if(pStatus == 1){
+          this.finish(parent.list, parent.index);
+        }else{
+          this.next(index);
         }
-        pIndex = pIndex.substring(0,pIndex.length);
-
-        //...
       }
 
       //下一步 - 元素节点
@@ -150,7 +154,7 @@
         if(lStatus == 2){
           this.reject();
         }else if(lStatus == 1){
-          this.finish();
+          this.finish(list, index);
         }else{
           if(this._isNumber(list[list.length-1])){ //并行列表
             for(let i=0;i<list.length-1;i++){
@@ -182,7 +186,7 @@
         if(llStatus == 2){
           this.reject();
         }else if(llStatus == 1){
-          this.finish();
+          this.finish(list, list.index);
         }else{
           if(!this._isNumber(llt[llt.length-1])){ //当前节点所在列表为串行列表
             let arr = curIndex.split('-');
