@@ -68,35 +68,28 @@
 
       //完成
       CheckList.prototype.finish = function(list, index){
-        console.log('finish');
-        // //列表已完成，删除归属于当前列表的流程
-        // let newKeys = [];
-        // let newIndexs = [];
-        // for(let i=0;i<this.cur.indexs.length;i++){
-        //   if(this.cur.indexs[i].indexOf(index) != 0){//列表
-        //     newKeys.push(this.cur.keys[i]);
-        //     newIndex.push(this.cur.indexs[i]);
-        //   }
-        // }
-        // this.cur.keys = newKeys;
-        // this.cur.indexs = newIndexs;
+        //列表已完成，删除归属于当前列表的流程
+        let newKeys = [];
+        let newIndexs = [];
+        for(let i=0;i<this.cur.indexs.length;i++){
+          if(this.cur.indexs[i].indexOf(index) != 0){ //列表
+            newKeys.push(this.cur.keys[i]);
+            newIndex.push(this.cur.indexs[i]);
+          }
+        }
+        this.cur.keys = newKeys;
+        this.cur.indexs = newIndexs;
 
-        // //递归处理父列表
-        // let arr = index.split('-');
+        //递归处理父列表
+        let parent = this.getList(index);
+        let pIndex = '';
+        let arr = index.split('-');
+        for(let i=0;i<arr.length-1;i++){
+          pIndex += arr[i]+'-';
+        }
+        pIndex = pIndex.substring(0,pIndex.length);
 
-        // let parent = this.getList(index);
-        // let parentIndex = '';
-        // if(parent && parent.length > 0){
-        //   if(this.isFinished(parent)){ //父列表也完成了
-
-        //   }else{ //父列表没完成
-
-        //   }
-        // }else{
-        //   throw new Error(JSON.stringify({
-        //     errMsg: '审核列表数据异常'
-        //   }))
-        // }
+        //...
       }
 
       //下一步 - 元素节点
@@ -185,48 +178,41 @@
       CheckList.prototype.next = function(curIndex){
         let list = this.getList(curIndex);
         let llt = list.list;
-        if(list && llt && llt.length > 0){
-          let llStatus = this.getListStatus(llt);
-          if(llStatus == 2){
-            this.reject();
-          }else if(llStatus == 1){
-            this.finish();
-          }else{
-            if(!this._isNumber(llt[llt.length-1])){ //当前节点所在列表为串行列表
-              let arr = curIndex.split('-');
-              let next = parseInt(arr[arr.length-1]) + 1;
-              let nextNode = llt[next]
-              if(!nextNode){
-                throw new Error(JSON.stringify({
-                  errMsg: '列表节点不存在',
-                  data: {
-                    list: list,
-                    no: next
-                  }
-                }))
-              }
-
-              //nextIndex
-              let nextIndex = '';
-              for(let i=0;i<arr.length-1;i++){
-                nextIndex += arr[i]+'-';
-              }
-              nextIndex += next;
-
-              if(Array.isArray(nextNode)){ //列表节点
-                this.nextList(nextNode, nextIndex);
-              }else{ // 元素节点
-                this.nextNode(nextNode, nextIndex);
-              }
-            }else{ //当前节点所在列表为并行列表
-              //并行列表删除当前流程即可
-            }
-          }
+        let llStatus = this.getListStatus(llt);
+        if(llStatus == 2){
+          this.reject();
+        }else if(llStatus == 1){
+          this.finish();
         }else{
-          throw new Error(JSON.stringify({
-            errMsg: '列表元素不能为空',
-            data: llt
-          }))
+          if(!this._isNumber(llt[llt.length-1])){ //当前节点所在列表为串行列表
+            let arr = curIndex.split('-');
+            let next = parseInt(arr[arr.length-1]) + 1;
+            let nextNode = llt[next]
+            if(!nextNode){
+              throw new Error(JSON.stringify({
+                errMsg: '列表节点不存在',
+                data: {
+                  list: list,
+                  no: next
+                }
+              }))
+            }
+
+            //nextIndex
+            let nextIndex = '';
+            for(let i=0;i<arr.length-1;i++){
+              nextIndex += arr[i]+'-';
+            }
+            nextIndex += next;
+
+            if(Array.isArray(nextNode)){ //列表节点
+              this.nextList(nextNode, nextIndex);
+            }else{ // 元素节点
+              this.nextNode(nextNode, nextIndex);
+            }
+          }else{ //当前节点所在列表为并行列表
+            //并行列表删除当前流程即可
+          }
         }
       }
 
@@ -300,10 +286,21 @@
               listIndex += arr[i]+'-';
             }
             listIndex = listIndex.substring(0, listIndex.length-1);//去掉最后一位横线
-            return {
-              index: listIndex,
-              list: list
-            };
+
+            if(Array.isArray(list) && list.length > 0){
+              return {
+                index: listIndex,
+                list: list
+              };
+            }else{
+              throw new Error(JSON.stringify({
+                errMsg: '列表数据异常',
+                data: {
+                  list: list,
+                  index: listIndex
+                }
+              }))
+            }
           }
         }else{
           throw new Error(JSON.stringify({
