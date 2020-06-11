@@ -88,127 +88,86 @@
         }
       }
 
-      /**
-       * 下一步
-       * list 当前列表
-       * lIndex 当前列表索引
-       * curIndex 当前流程索引
-       */
-      CheckList.prototype.next = function(list, lIndex, curIndex){
-        if(!this._isNumber(list[list.length-1])){//当前节点所在的审核列表为串行列表
-          let arr = curIndex.split('-');
-          let next = parseInt(arr[arr.length-1])+1;
-          let nextNode = list[next]
-          if(!nextNode){
-            throw new Error(JSON.stringify({
-              errMsg: '列表节点不存在',
-              data: {
-                list: list,
-                no: next
-              }
-            }))
-          }
-
-          //nextIndex
-          let nextIndex = '';
-          for(let i=0;i<arr.length-1;i++){
-            nextIndex += arr[i]+'-';
-          }
-          nextIndex += next;
-
-          if(nextNode.length>=0){ //列表节点
-            let nextStatus = this.getListStatus(nextNode); //可能存在已有评审记录的情况，因此下一步可能已完成
-            if(nextStatus == 2){
-              throw new Error(JSON.stringify({
-                errMsg: '系统异常'
-              }))
-            }else if(nextStatus == 1){
-              this.finish(nextNode, nextIndex)
-            }else{
-              if(this._isNumber(nextNode[nextNode.length-1])){ //并行列表
-
-              }else{ //串行列表
-                this.ready1(nextNode, nextIndex, nextNode[0], nextIndex+'-0');
-              }
-            }
+      //下一步
+      CheckList.prototype.next = function(curIndex){
+        let list = this.getList(curIndex);
+        let llt = list.list;
+        if(list && llt && llt.length > 0){
+          let llStatus = this.getListStatus(llt);
+          if(llStatus == 2){
+            this.reject();
+          }else if(llStatus == 1){
+            this.finish();
           }else{
-            this.ready1(list, lIndex, nextNode, nextIndex)
+            if(!this._isNumber(llt[llt.length-1])){ //当前节点所在列表为串行列表
+              let arr = curIndex.split('-');
+              let next = parseInt(arr[arr.length-1]) + 1;
+              let nextNode = llt[next]
+              if(!nextNode){
+                throw new Error(JSON.stringify({
+                  errMsg: '列表节点不存在',
+                  data: {
+                    list: list,
+                    no: next
+                  }
+                }))
+              }
+
+              //nextIndex
+              let nextIndex = '';
+              for(let i=0;i<arr.length-1;i++){
+                nextIndex += arr[i]+'-';
+              }
+              nextIndex += next;
+
+              if(nextNode.length>=0){ //列表节点
+
+              }else{ // 元素节点
+                let exist = false;
+                for(let i=0;i<this.history.length;i++){
+                  let hItem = this.history[i];
+                  if(hItem.key == nextNode){
+                    if(hItem.status == 2){
+                      throw new Error(JSON.stringify({
+                        errMsg: '计算列表状态异常',
+                        data: llt
+                      }))
+                    }else if(hItem.status == 1){
+                      this.next(nextIndex); //再下一步
+                    }else{ //继续处理
+                      let update = false;
+                      hItem.index = nextIndex; //更新索引
+                      for(let z=0;z<this.cur.keys.length;z++){
+                        if(this.cur.keys[z] == nextNode){
+                          this.cur.keys[z].index = nextIndex;
+                          update = true;
+                        }
+                      }
+                      if(!update){
+                        this.cur.keys.push(nextNode);
+                        this.cur.indexs.push(nextIndex);
+                      }
+                    }
+                    exist = true;
+                    break;
+                  }
+                }
+                if(!exist){
+                  this.cur.keys.push(nextNode);
+                  this.cur.indexs.push(nextIndex);
+                }
+              }
+            }else{ //当前节点所在列表为并行列表
+              //并行列表删除当前流程即可
+            }
           }
         }else{
-          //并行列表删除当前流程即可
+          throw new Error(JSON.stringify({
+            errMsg: '列表元素不能为空',
+            data: llt
+          }))
         }
       }
-
-      /**
-       * 准备处理串行列表中的某个节点（该串行列表并没有完成）
-       */
-       CheckList.prototype.ready1 = function(list, lIndex, curNode, curIndex){
-        if(curNode.length>0){ //列表元素
-          if(this.isFinished(curNode)){ // 已完成
-            this.next(list, lIndex, curIndex); //下一步
-          }else{
-            if(this._isNumber(curNode[curNode.length-1])){ //并行列表
-              this.ready2(curNode, curIndex)
-            }else{ //串行列表
-              this.ready1(curNode, curIndex, curNode[0], curIndex+'-0');
-            }
-          }
-        }else{ //节点元素
-          let exist = false;
-          for(let i=0;i<this.history.length;i++){
-            if(this.history[i].key == curNode){ //历史记录中存在
-              let hStatus = this.history[i].status;
-              if(hStatus == 1){ //pass
-                this.next(list, lIndex, curIndex) // 再下一步
-              }else if(hStatus != 2){
-                this.cur.keys.push(curNode); //继续处理
-                this.cur.indexs.push(curIndex);
-              }
-              exist = true;
-              break;
-            }
-          }
-          if(!exist){//历史记录中不存在则加入当前流程
-            this.cur.keys.push(curNode);
-            this.cur.indexs.push(curIndex);
-          }
-        }
-      }
-
-      //准备处理某个并行列表节点
-      CheckList.prototype.ready2 = function(list, lIndex){
-        for(let i=0;i<list.length;i++){
-          let node = list[i];
-          if(node.length>0){ //列表元素
-            if(this.isFinished(node, lIndex+'-'+i)){
-              // nothing
-            }else{
-              if(this._isNumber(node[node.length-1])){ //并行列表
-                this.ready2(node, lIndex+'-'+i);
-              }else{ // 串行列表
-                this.ready1(node, lIndex+'-'+i, node[0], lIndex+'-'+i+'-0');
-              }
-            }
-          }else{ //节点元素
-            let exist = false;
-            for(let j=0;j<this.history.length;j++){
-              if(this.history[j].key == node){ //历史记录中存在
-                if(this.history[j].status == 1){ //pass
-                }else{
-                  this.status = this.history[i].status;
-                }
-                exist = true;
-              }
-            }
-            if(!exist){ //历史记录中不存在则加入当前流程
-              this.cur.keys.push(node);
-              this.cur.indexs.push(lIndex+'-'+i);
-            }
-          }
-        }
-      }
-
-
 
       //通过
       CheckList.prototype.pass = function (key) {
@@ -264,11 +223,9 @@
           if(list && llt && llt.length > 0){
             let llStatus = this.getListStatus(llt);
             if(llStatus == 2){
-              throw new Error(JSON.stringify({
-                errMsg: '系统异常'
-              }))
+              this.reject();
             }else if(llStatus == 1){
-              this.finish(llt, list.index) //完成
+              this.finish();
             }else{ //当前节点所在的审核列表并没有完成
               this.next(llt, list.index, index); //下一步
             }
