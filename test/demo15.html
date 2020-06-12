@@ -23,7 +23,7 @@
           "I",
         ]; //串+并连 复杂混合
 
-        var list1 = new CheckList(data2);
+        var list1 = new CheckList(data3);
         list1.table();
       };
 
@@ -69,7 +69,7 @@
         for(let i=0;i<this.cur.indexs.length;i++){
           if(this.cur.indexs[i].indexOf(index) != 0){ //列表
             newKeys.push(this.cur.keys[i]);
-            newIndex.push(this.cur.indexs[i]);
+            newIndexs.push(this.cur.indexs[i]);
           }
         }
         this.cur.keys = newKeys;
@@ -341,6 +341,7 @@
             }
           }
         }
+
         return {
           status: 0,
           name: '未评审'
@@ -487,7 +488,22 @@
         if(this.$table){
           this.$table.innerHTML = this._array(this.list);
         }
-      },
+      };
+      CheckList.prototype._getNodeBgColor = function(key){
+        let iStatus = this.getKeyStatus(key);
+        let bgColor = '';
+        if(iStatus.status == 2){
+          bgColor = 'red';
+        }else if(iStatus.status == 1){
+          bgColor = 'green';
+        }else if(iStatus.status == 3){
+          bgColor = 'pink';
+        }else if(this.cur.keys.includes(key)){
+          bgColor = 'lightgreen';
+        }
+
+        return bgColor;
+      };
       CheckList.prototype._array = function (array) {
         let end = array[array.length - 1];
         let html = "<table>";
@@ -500,16 +516,7 @@
               html += this._array(item);
               html += "</td></tr>";
             } else {
-              let iStatus = this.getKeyStatus(item);
-              let bgColor = '';
-              if(iStatus.status == 2){
-                bgColor = 'red';
-              }else if(iStatus.status == 1){
-                bgColor = 'green';
-              }else if(iStatus.status == 3){
-                bgColor = 'pink';
-              }
-              html += "<tr><td node-type='key' style='background-color:"+bgColor+";'>";
+              html += "<tr><td node-type='key' style='background-color:"+this._getNodeBgColor(item)+";'>";
               html += item;
               html += "</td></tr>";
             }
@@ -524,16 +531,7 @@
               html += this._array(item);
               html += "</td>";
             } else {
-              let iStatus = this.getKeyStatus(item);
-              let bgColor = '';
-              if(iStatus.status == 2){
-                bgColor = 'red';
-              }else if(iStatus.status == 1){
-                bgColor = 'green';
-              }else if(iStatus.status == 3){
-                bgColor = 'pink';
-              }
-              html += "<td node-type='key' style='background-color:"+bgColor+";'>";
+              html += "<td node-type='key' style='background-color:"+this._getNodeBgColor(item)+";'>";
               html += item;
               html += "</td>";
             }
