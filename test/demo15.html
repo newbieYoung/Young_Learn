@@ -25,15 +25,6 @@
 
         var list1 = new CheckList(data2);
         list1.table();
-
-        console.log(list1);
-        list1.pass('A')
-        list1.pass('B')
-        list1.pass('C')
-        list1.pass('D')
-        list1.pass('E')
-        list1.pass('F')
-        list1.pass('G')
       };
 
       //审核列表
@@ -460,9 +451,43 @@
             let key = $target.innerHTML.trim();
             let status = self.getKeyStatus(key);
             self.$name.innerHTML = key+' '+status.name;
+            self.$name.setAttribute('node-key',key);
+          }
+        })
+
+        //操作按钮
+        this.$pass = this.$control.children[1].children[0];
+        this.$pass.addEventListener('click',function(){
+          if(self.$name){
+            let key = self.$name.getAttribute('node-key');
+            self.pass(key);
+            self.update();
+          }
+        })
+
+        this.$wait = this.$control.children[1].children[1];
+        this.$wait.addEventListener('click', function(){
+          if(self.$name){
+            let key = self.$name.getAttribute('node-key');
+            self.wait(key);
+            self.update();
+          }
+        })
+
+        this.$reject = this.$control.children[1].children[2];
+        this.$reject.addEventListener('click', function(){
+          if(self.$name){
+            let key = self.$name.getAttribute('node-key');
+            self.reject(key);
+            self.update();
           }
         })
       };
+      CheckList.prototype.update = function(){
+        if(this.$table){
+          this.$table.innerHTML = this._array(this.list);
+        }
+      },
       CheckList.prototype._array = function (array) {
         let end = array[array.length - 1];
         let html = "<table>";
@@ -475,7 +500,16 @@
               html += this._array(item);
               html += "</td></tr>";
             } else {
-              html += "<tr><td node-type='key'>";
+              let iStatus = this.getKeyStatus(item);
+              let bgColor = '';
+              if(iStatus.status == 2){
+                bgColor = 'red';
+              }else if(iStatus.status == 1){
+                bgColor = 'green';
+              }else if(iStatus.status == 3){
+                bgColor = 'pink';
+              }
+              html += "<tr><td node-type='key' style='background-color:"+bgColor+";'>";
               html += item;
               html += "</td></tr>";
             }
@@ -490,7 +524,16 @@
               html += this._array(item);
               html += "</td>";
             } else {
-              html += "<td node-type='key'>";
+              let iStatus = this.getKeyStatus(item);
+              let bgColor = '';
+              if(iStatus.status == 2){
+                bgColor = 'red';
+              }else if(iStatus.status == 1){
+                bgColor = 'green';
+              }else if(iStatus.status == 3){
+                bgColor = 'pink';
+              }
+              html += "<td node-type='key' style='background-color:"+bgColor+";'>";
               html += item;
               html += "</td>";
             }
