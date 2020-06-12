@@ -244,15 +244,16 @@
         let index = this.cur.indexs[no];
         let exist = false;
         for(let i=0;i<this.history.length;i++){
-          if(this.history[i].key == key){ //操作记录中存在
-            let hStatus = this.history[i].status;
+          let hItem = this.history[i];
+          if(hItem.key == key){ //操作记录中存在
+            let hStatus = hItem.status;
             if(hStatus == 2){
               throw new Error(JSON.stringify({
                 errMsg: '未通过不能重新审核'
               }))
             }
-            this.history[i].index = index;
-            this.history[i].status = 1;
+            hItem.index = index;
+            hItem.status = 1;
             exist = true;
             break;
           }
@@ -313,6 +314,47 @@
           }))
         }
       };
+
+      //获取节点状态
+      CheckList.prototype.getKeyStatus = function(key){
+        for(let i=0;i<this.history.length;i++){
+          let hItem = this.history[i];
+          if(hItem.key == key){
+            if(hItem.status == 0){
+              throw new Error(JSON.stringify({
+                errMsg: '操作记录中不能存在未评审',
+              }))
+            }else if(hItem.status == 2){
+              return {
+                status: 2,
+                name: '未通过'
+              };
+            }else if(hItem.status == 1){
+              return {
+                status: 1,
+                name: '通过'
+              };
+            }else if(hItem.status == 3){
+              return {
+                status: 3,
+                name: '驳回'
+              };
+            }else{
+              throw new Error(JSON.stringify({
+                errMsg: '节点状态异常',
+                data: {
+                  key: key,
+                  status: hItem.status
+                }
+              }))
+            }
+          }
+        }
+        return {
+          status: 0,
+          name: '未评审'
+        };
+      }
 
       /**
        * 获取审核列表状态
@@ -395,6 +437,31 @@
         this.$table = document.createElement("table");
         this.$table.innerHTML = this._array(this.list);
         document.body.appendChild(this.$table);
+
+        this.$control = document.createElement("div");
+        this.$control.style.marginTop = '5px';
+        let controlHtml = '';
+        controlHtml += `
+          <p style="padding:0;margin:0;"></p>
+          <div>
+            <button>通过</button>
+            <button>驳回</button>
+            <button>拒绝</button>
+          </div>
+        `
+        this.$control.innerHTML = controlHtml;
+        document.body.appendChild(this.$control);
+
+        this.$name = this.$control.children[0];
+        let self = this;
+        this.$table.addEventListener('click',function(e){
+          let $target = e.target;
+          if($target.getAttribute('node-type') == 'key'){
+            let key = $target.innerHTML.trim();
+            let status = self.getKeyStatus(key);
+            self.$name.innerHTML = key+' '+status.name;
+          }
+        })
       };
       CheckList.prototype._array = function (array) {
         let end = array[array.length - 1];
@@ -403,26 +470,30 @@
           //最后一位是数字，并行
           for (let i = 0; i < array.length - 1; i++) {
             let item = array[i];
-            html += "<tr><td>";
             if (Array.isArray(item)) {
+              html += "<tr><td>";
               html += this._array(item);
+              html += "</td></tr>";
             } else {
+              html += "<tr><td node-type='key'>";
               html += item;
+              html += "</td></tr>";
             }
-            html += "</td></tr>";
           }
         } else {
           //串行
           html += "<tr>";
           for (let i = 0; i < array.length; i++) {
             let item = array[i];
-            html += "<td>";
             if (Array.isArray(item)) {
+              html += "<td>";
               html += this._array(item);
+              html += "</td>";
             } else {
+              html += "<td node-type='key'>";
               html += item;
+              html += "</td>";
             }
-            html += "</td>";
           }
           html += "</tr>";
         }
