@@ -19,7 +19,7 @@
         var data2 = ["A", ["B", "C", 2], "D", ["E", "F", 2], "G"]; //串+并连 简单混合
         var data3 = [
           "A",
-          [["B", [["C", "D"], "E", "F", 3]], ["G", "H"], 2],
+          [["B", [["C", "D"], "E", "F", 2]], ["G", "H"], 2],
           "I",
         ]; //串+并连 复杂混合
 
@@ -50,18 +50,13 @@
         this.history = history && history.length > 0 ? history : []; // 历史记录
       }
 
-      CheckList.prototype.check = function () {
-        //根据历史记录校验当前状态
-        //历史记录不能存在状态为 0 的记录
-        //历史记录不能存在重复记录
-      };
+      // CheckList.prototype.check = function () {
+      //   //根据历史记录校验当前状态
+      //   //历史记录不能存在状态为 0 的记录
+      //   //历史记录不能存在重复记录
+      // };
 
-      //结束
-      CheckList.prototype.reject = function(){
-        console.log('reject');
-      }
-
-      //完成
+      //完成（整体通过或者结束）
       CheckList.prototype.finish = function(list, index){
         //列表已完成，删除归属于当前列表的流程
         let newKeys = [];
@@ -78,9 +73,7 @@
         //递归处理父列表
         let parent = this.getList(index);
         let pStatus = this.getListStatus(parent.list);
-        if(pStatus == 2){
-          this.reject();
-        }else if(pStatus == 1){
+        if(pStatus == 2 || pStatus == 1){
           this.finish(parent.list, parent.index);
         }else{
           this.next(index);
@@ -142,9 +135,7 @@
         }
 
         let lStatus = this.getListStatus(list);
-        if(lStatus == 2){
-          this.reject();
-        }else if(lStatus == 1){
+        if(lStatus == 1 || lStatus == 2){
           this.finish(list, index);
         }else{
           if(this._isNumber(list[list.length-1])){ //并行列表
@@ -174,10 +165,8 @@
         let list = this.getList(curIndex);
         let llt = list.list;
         let llStatus = this.getListStatus(llt);
-        if(llStatus == 2){
-          this.reject();
-        }else if(llStatus == 1){
-          this.finish(list, list.index);
+        if(llStatus == 1 || llStatus == 2){
+          this.finish(list.list, list.index);
         }else{
           if(!this._isNumber(llt[llt.length-1])){ //当前节点所在列表为串行列表
             let arr = curIndex.split('-');
@@ -211,10 +200,24 @@
         }
       }
 
+      //拒绝
+      CheckList.prototype.reject = function(key){
+        this.check(key,2);
+      }
+
+      //驳回
+      CheckList.prototype.wait = function(key){
+        this.check(key,3);
+      }
+
       //通过
       CheckList.prototype.pass = function (key) {
-        if (!this.cur.keys.includes(key)) {
-          //查询是否处于当前流程
+        this.check(key,1);
+      };
+
+      //执行校验操作
+      CheckList.prototype.check = function(key, status){
+        if (!this.cur.keys.includes(key)) { //查询是否处于当前流程
           throw new Error(JSON.stringify({
             errMsg: '未匹配到当前流程',
             data:{
@@ -224,10 +227,9 @@
           }))
         }
 
-        if (this.status == 2){
-          //未通过状态
+        if (this.status == 2){ //未通过状态
           throw new Error(JSON.stringify({
-            errMsg: '处于未通过状态，不能执行 pass 操作'
+            errMsg: '处于未通过状态，不能再进行操作'
           }))
         }
 
@@ -240,11 +242,11 @@
             let hStatus = hItem.status;
             if(hStatus == 2){
               throw new Error(JSON.stringify({
-                errMsg: '未通过不能重新审核'
+                errMsg: '处于未通过状态，不能再进行操作'
               }))
             }
             hItem.index = index;
-            hItem.status = 1;
+            hItem.status = status;
             exist = true;
             break;
           }
@@ -253,17 +255,22 @@
           this.history.push({ //加入操作历史记录
             key: key,
             index: index,
-            status: 1,
+            status: status,
           });
         }
-        this.cur.keys.splice(no, 1); //删除当前流程
-        this.cur.indexs.splice(no, 1);
         this.status = this.getListStatus(this.list); //更新状态
 
-        if(this.status != 1 && this.status != 2){ //整个流程未处理完成
-          this.next(index); //下一步
+        if(status == 1 || status == 2){ //通过或者未通过
+          this.cur.keys.splice(no, 1); //删除当前流程
+          this.cur.indexs.splice(no, 1);
+
+          if(this.status != 1 && this.status != 2){ //整个流程未处理完成
+            this.next(index); //下一步
+          }
+        }else{
+          //驳回还可以继续操作，对状态没有影响
         }
-      };
+      }
 
       //查找当前元素所在的审核列表
       CheckList.prototype.getList = function (index) {
@@ -484,11 +491,24 @@
           }
         })
       };
+
+      //生成随机数据
+      CheckList.prototype.randomDemo = function(){
+        let keys = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+
+      }
+
+      //更新可视化表格
       CheckList.prototype.update = function(){
         if(this.$table){
           this.$table.innerHTML = this._array(this.list);
+          console.log('-----');
+          console.log(this.history);
+          console.log(this.status);
         }
       };
+
+      //获取节点状态背景色
       CheckList.prototype._getNodeBgColor = function(key){
         let iStatus = this.getKeyStatus(key);
         let bgColor = '';
@@ -504,6 +524,8 @@
 
         return bgColor;
       };
+
+      //生成可视化表格 html 代码
       CheckList.prototype._array = function (array) {
         let end = array[array.length - 1];
         let html = "<table>";
