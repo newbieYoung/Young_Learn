@@ -23,9 +23,43 @@
           "I",
         ]; //串+并连 复杂混合
 
-        var list1 = new CheckList(data3);
+        var data5 = ['M',['O','M','K',1],[['W'],'R','D','Z','G'],'O','A']
+
+        var data4 = randomDemo(0);
+        console.log(data4);
+        var list1 = new CheckList(data5);
         list1.table();
       };
+
+      //生成随机数据
+      function randomDemo(kIndex){
+        let keys = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+        let index = kIndex ? kIndex : '0';
+        let iArr = index.split('-');
+        let len = parseInt(Math.random() * 9) + 1; //1 - 10
+        let array = [];
+        for(let i=0;i<len;i++){
+          let isNode = Math.random() > Math.pow(0.5, iArr.length) ? true : false; //是否元素节点
+          if(kIndex == '0' && (i==0 || i==len-1)){ //最外层起始和结束必须为元素节点
+            isNode = true;
+          }
+          if(isNode){
+            let kNo = parseInt(Math.random() * keys.length);
+            array.push(keys.splice(kNo,1)[0]);
+          }else{
+            array.push(this.randomDemo(index+'-'+i));
+          }
+        }
+
+        if(index != '0'){ //最外层必须为串行列表
+          let type = Math.random() > 0.5 ? 1 : 0;
+          if(type == 1){
+            array.push(parseInt(Math.random() * array.length));
+          }
+        }
+
+        return array;
+      }
 
       //审核列表
       function CheckList(list, cur, history) {
@@ -152,7 +186,7 @@
             let firstNode = list[0];
             let firstIndex = index+'-0';
             if(Array.isArray(firstNode)){
-              this.nextList(firstNode, firstNode);
+              this.nextList(firstNode, firstIndex);
             }else{
               this.nextNode(firstNode, firstIndex);
             }
@@ -491,12 +525,6 @@
           }
         })
       };
-
-      //生成随机数据
-      CheckList.prototype.randomDemo = function(){
-        let keys = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-
-      }
 
       //更新可视化表格
       CheckList.prototype.update = function(){
