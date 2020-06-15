@@ -52,7 +52,7 @@
         if(index != '0'){ //最外层必须为串行列表
           let type = Math.random() > 0.5 ? 1 : 0;
           if(type == 1){
-            array.push(parseInt(Math.random() * array.length));
+            array.push(parseInt(Math.random() * (array.length - 1)) + 1); //最少为1
           }
         }
 
