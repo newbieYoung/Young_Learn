@@ -23,11 +23,9 @@
           "I",
         ]; //串+并连 复杂混合
 
-        var data5 = ['M',['O','M','K',1],[['W'],'R','D','Z','G'],'O','A']
-
         var data4 = randomDemo(0);
         console.log(data4);
-        var list1 = new CheckList(data5);
+        var list1 = new CheckList(data4);
         list1.table();
       };
 
@@ -66,7 +64,6 @@
         /**
          * 列表说明
          * 1、第一项 和 最后一项必须为单项；
-         * 2、不允许重复关键字；
          * 3、数组末尾存在数字，则数组元素属于并行结构，该数字表示并行结构中的最少通过数；没有数字则属于串行结构；
          * 4、子数组不能为空
          */
@@ -89,6 +86,24 @@
       //   //历史记录不能存在状态为 0 的记录
       //   //历史记录不能存在重复记录
       // };
+
+      CheckList.prototype.reset = function(list){
+        this.list = list;
+        this.status = this.getListStatus(list);
+        if(this.status != 2){
+          this.cur = {
+            keys: [this.list[0]],
+            indexs: ["0"],
+          };
+          for(let i=0;i<this.history.length;i++){
+            let hItem = this.history[i];
+            if(hItem.key == this.cur.keys[0]){
+              this.check(hItem.key, hItem.status);
+              break;
+            }
+          }
+        }
+      }
 
       //完成（整体通过或者结束）
       CheckList.prototype.finish = function(list, index){
@@ -480,6 +495,7 @@
             <button>通过</button>
             <button>驳回</button>
             <button>拒绝</button>
+            <button>重置</button>
           </div>
         `
         this.$control.innerHTML = controlHtml;
@@ -524,6 +540,13 @@
             self.update();
           }
         })
+
+        this.$reset = this.$control.children[1].children[3];
+        this.$reset.addEventListener('click', function(){
+          var data = randomDemo(0);
+          self.reset(data);
+          self.update();
+        })
       };
 
       //更新可视化表格
@@ -531,7 +554,9 @@
         if(this.$table){
           this.$table.innerHTML = this._array(this.list);
           console.log('-----');
+          console.log(this.list);
           console.log(this.history);
+          console.log(this.cur);
           console.log(this.status);
         }
       };
