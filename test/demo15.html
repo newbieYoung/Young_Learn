@@ -134,13 +134,13 @@
         for(let i=0;i<this.history.length;i++){
           let hItem = this.history[i];
           if(hItem.key == node){ //存在操作记录
+            hItem.index = index; //更新索引
             if(hItem.status == 2){
               //nothing
             }else if(hItem.status == 1){
               this.next(index); //再下一步
             }else{ //继续处理
               let update = false;
-              hItem.index = index; //更新索引
               for(let z=0;z<this.cur.keys.length;z++){
                 if(this.cur.keys[z] == node){
                   this.cur.indexs[z] = index;
