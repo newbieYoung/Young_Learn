@@ -76,17 +76,9 @@
           indexs: ["0"],
         };
 
-        this.status = 0; // 0 未评审、1 通过、2 未通过、3 驳回
         this.cur = cur ? cur : defCur;
         this.history = history && history.length > 0 ? history : []; // 历史记录
-      }
-
-      //自校验
-      CheckList.prototype.autoCheck = function(){
-        let ck = new CheckList(this.list, {
-          keys: [this.list[0]],
-          indexs: ["0"],
-        }, this.history);
+        this.status = this.getListStatus(this.list); // 0 未评审、1 通过、2 未通过、3 驳回
       }
 
       //重置审核列表
