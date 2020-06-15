@@ -102,6 +102,11 @@
               break;
             }
           }
+        }else{
+          this.cur = {
+            keys: [],
+            indexs: [],
+          };
         }
       }
 
@@ -315,6 +320,9 @@
 
           if(this.status != 1 && this.status != 2){ //整个流程未处理完成
             this.next(index); //下一步
+          }else{//整个流程处理完成
+            this.cur.keys = [];
+            this.cur.indexs = [];
           }
         }else{
           //驳回还可以继续操作，对状态没有影响
