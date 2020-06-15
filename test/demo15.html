@@ -30,22 +30,31 @@
       };
 
       //生成随机数据
-      function randomDemo(kIndex){
-        let keys = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+      function randomDemo(kIndex, list){
+        let totalList = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+        let keys = Array.isArray(list) && list.length > 0 ? list : JSON.parse(JSON.stringify(totalList));
+        let eleLen = keys.length;
         let index = kIndex ? kIndex : '0';
         let iArr = index.split('-');
-        let len = parseInt(Math.random() * 9) + 1; //1 - 10
+        let len = parseInt(Math.random() * 5) + 1; //1 - 5
         let array = [];
         for(let i=0;i<len;i++){
           let isNode = Math.random() > Math.pow(0.5, iArr.length) ? true : false; //是否元素节点
           if(kIndex == '0' && (i==0 || i==len-1)){ //最外层起始和结束必须为元素节点
             isNode = true;
           }
+          if(eleLen <= len){ // 元素可选项数量不足时，全部为元素节点
+            isNode = true;
+          }
           if(isNode){
             let kNo = parseInt(Math.random() * keys.length);
             array.push(keys.splice(kNo,1)[0]);
           }else{
-            array.push(this.randomDemo(index+'-'+i));
+            let concatList = [];
+            for(let z = 0; z< len/2; z++){//随机补充
+              concatList.push(totalList[parseInt(Math.random() * totalList.length)]);
+            }
+            array.push(this.randomDemo(index+'-'+i, keys.concat(concatList)));
           }
         }
 
@@ -65,7 +74,7 @@
          * 列表说明
          * 1、第一项 和 最后一项必须为单项；
          * 2、数组末尾存在数字，则数组元素属于并行结构，该数字表示并行结构中的最少通过数；没有数字则属于串行结构；
-         * 3、子数组不能为空
+         * 3、任意列表均不能为空
          */
 
         //列表校验
