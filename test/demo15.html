@@ -64,8 +64,8 @@
         /**
          * 列表说明
          * 1、第一项 和 最后一项必须为单项；
-         * 3、数组末尾存在数字，则数组元素属于并行结构，该数字表示并行结构中的最少通过数；没有数字则属于串行结构；
-         * 4、子数组不能为空
+         * 2、数组末尾存在数字，则数组元素属于并行结构，该数字表示并行结构中的最少通过数；没有数字则属于串行结构；
+         * 3、子数组不能为空
          */
 
         //列表校验
@@ -80,12 +80,6 @@
         this.cur = cur ? cur : defCur;
         this.history = history && history.length > 0 ? history : []; // 历史记录
       }
-
-      // CheckList.prototype.check = function () {
-      //   //根据历史记录校验当前状态
-      //   //历史记录不能存在状态为 0 的记录
-      //   //历史记录不能存在重复记录
-      // };
 
       CheckList.prototype.reset = function(list){
         this.list = list;
