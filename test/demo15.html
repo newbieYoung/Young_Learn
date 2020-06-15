@@ -81,8 +81,19 @@
         this.history = history && history.length > 0 ? history : []; // 历史记录
       }
 
+      //自校验
+      CheckList.prototype.autoCheck = function(){
+        let ck = new CheckList(this.list, {
+          keys: [this.list[0]],
+          indexs: ["0"],
+        }, this.history);
+      }
+
+      //重置审核列表
       CheckList.prototype.reset = function(list){
         this.list = list;
+        this.clearHistory();
+
         this.status = this.getListStatus(list);
         if(this.status != 2){
           this.cur = {
@@ -404,6 +415,52 @@
           status: 0,
           name: '未评审'
         };
+      }
+
+      //更新操作记录索引
+      CheckList.prototype.updateHistoryIndex = function(list, index){
+        if(!Array.isArray(list)){
+          throw new Error(JSON.stringify({
+            msg: '参数必须为数组',
+            data: list
+          }))
+        }
+        if(list.length<=0){
+          throw new Error(JSON.stringify({
+            msg: '列表元素不能为空',
+            data: list
+          }))
+        }
+
+        for(let i=0;i<list.length;i++){
+          let item = list[i];
+          let iIndex = index+'-'+i;
+          if(Array.isArray(item)){ //列表元素
+            this.updateHistoryIndex(item, iIndex);
+          }else{ //节点元素
+            for (j = 0; j < this.history.length; j++) {
+              let hItem = this.history[j];
+              if (hItem.key == item) {
+                hItem.index = iIndex;
+                hItem._exist = true;
+              }
+            }
+          }
+        }
+      }
+
+      //清除操作记录中不存在的节点
+      CheckList.prototype.clearHistory = function(){
+        this.updateHistoryIndex(this.list, '0');
+        let newHistory = [];
+        for(let i=0;i<this.history.length; i++){
+          let hItem = this.history[i];
+          if(hItem._exist){
+            delete hItem._exist;
+            newHistory.push(hItem);
+          }
+        }
+        this.history = newHistory;
       }
 
       /**
