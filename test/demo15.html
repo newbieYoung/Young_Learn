@@ -635,6 +635,11 @@
           console.log(this.history);
           console.log(this.cur);
           console.log(this.status);
+          if(this.status == 2){
+            alert('评审结束')
+          }else if(this.status == 1){
+            alert('评审完成')
+          }
         }
       };
 
