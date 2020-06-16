@@ -25,7 +25,7 @@
 
         var data4 = randomDemo(0);
         console.log(data4);
-        var list1 = new CheckList(data4);
+        var list1 = new CheckList(data4, null, null);
         list1.table();
       };
 
@@ -97,15 +97,29 @@
          */
         this.listStatus = this._isFunction(listStatus) ? listStatus : function(total, finish, pass, reject, wait){
           let status = 0;
-          if(pass >= finish){ //通过数大于等于最少通过数
-            status = 1;
-          }else{
-            if((total - reject) < finish ){ //总数减不通过数小于最少通过数
-              status = 2;
-            }else if(wait > 0){ // 等待数大于0
+          let done = pass + reject;
+          if(total != finish){ //并行
+            if(done < total && wait > 0){ //已处理数小于总数
               status = 3;
+            }else if(done == total){ //已处理数等于总数
+              if(pass >= finish){ //通过数大于等于最少通过数
+                status = 1
+              }else{
+                status = 2;
+              }
+            }
+          }else{ //串行
+            if(pass >= finish){ //通过数大于等于最少通过数
+              status = 1;
+            }else{
+              if((total - reject) < finish ){ //总数减不通过数小于最少通过数
+                status = 2;
+              }else if(wait > 0){ //等待数大于0
+                status = 3;
+              }
             }
           }
+
 
           return status;
         }
