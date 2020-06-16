@@ -69,7 +69,7 @@
       }
 
       //审核列表
-      function CheckList(list, cur, history) {
+      function CheckList(list, cur, history, listStatus) {
         /**
          * 列表说明
          * 1、第一项 和 最后一项必须为单项；
@@ -86,8 +86,31 @@
         };
 
         this.cur = cur ? cur : defCur;
-        this.history = history && history.length > 0 ? history : []; // 历史记录
-        this.status = this.getListStatus(this.list); // 0 未评审、1 通过、2 未通过、3 驳回
+        this.history = Array.isArray(history) && history.length > 0 ? history : []; // 历史记录
+
+        /**
+         * total 列表总数
+         * finish 列表整体通过需要满足的最少通过数
+         * pass 列表当前通过数
+         * reject 列表当前不通过数
+         * wait 列表等待数
+         */
+        this.listStatus = this._isFunction(listStatus) ? listStatus : function(total, finish, pass, reject, wait){
+          let status = 0;
+          if(pass >= finish){ //通过数大于等于最少通过数
+            status = 1;
+          }else{
+            if((total - reject) < finish ){ //总数减不通过数小于最少通过数
+              status = 2;
+            }else if(wait > 0){ // 等待数大于0
+              status = 3;
+            }
+          }
+
+          return status;
+        }
+
+        this.status = this.getListStatus(this.list); // 0 未评审、1 通过、2 未通过、3 等待
       }
 
       //重置审核列表
@@ -265,7 +288,7 @@
         this.check(key,2);
       }
 
-      //驳回
+      //等待
       CheckList.prototype.wait = function(key){
         this.check(key,3);
       }
@@ -331,7 +354,7 @@
             this.cur.indexs = [];
           }
         }else{
-          //驳回还可以继续操作，对状态没有影响
+          //等待还可以继续操作，对状态没有影响
         }
       }
 
@@ -398,7 +421,7 @@
             }else if(hItem.status == 3){
               return {
                 status: 3,
-                name: '驳回'
+                name: '等待'
               };
             }else{
               throw new Error(JSON.stringify({
@@ -464,14 +487,7 @@
         this.history = newHistory;
       }
 
-      /**
-       * 获取审核列表状态
-       * 0 未评审、1 通过、2 未通过、3 驳回
-       * 串行列表全部通过，并行列表满足通过条件（1 通过）
-       * 列表没有满足通过条件且未通过数量已经超过阀值（2 未通过）
-       * 列表没有满足通过条件，未通过数量没有超过阀值，且存在驳回状态（3 驳回）
-       * 其它未评审
-       */
+      //获取审核列表状态
       CheckList.prototype.getListStatus = function(list){
         if(!Array.isArray(list)){
           throw new Error(JSON.stringify({
@@ -486,7 +502,6 @@
           }))
         }
 
-        let status = 0;
         let total = list.length; // 总流程数
         let finish = list.length; // 最少通过数
         if(this._isNumber(list[list.length-1])){ //并行列表
@@ -496,7 +511,7 @@
 
         let pass = 0; //目前通过数
         let reject = 0; //目前未通过数
-        let wait = 0; //目前驳回数
+        let wait = 0; //目前等待数
 
         for(let i=0;i<list.length;i++){
           let item = list[i];
@@ -525,19 +540,7 @@
           }
         }
 
-        if(pass >= finish){
-          status = 1;
-        }else{
-          if((total - reject) < finish ){
-            status = 2;
-          }else if(wait > 0){
-            status = 3;
-          }else{
-            status = 0;
-          }
-        }
-
-        return status;
+        return this.listStatus(total, finish, pass, reject, wait);
       }
 
       //构建 table 可视化 demo
@@ -553,7 +556,7 @@
           <p style="padding:0;margin:0;"></p>
           <div>
             <button>通过</button>
-            <button>驳回</button>
+            <button>等待</button>
             <button>拒绝</button>
             <button>重置</button>
           </div>
@@ -681,6 +684,11 @@
       CheckList.prototype._isNumber = function (num) {
         return typeof num === "number" && !isNaN(num);
       };
+
+      //判断是否是函数
+      CheckList.prototype._isFunction = function(func){
+        return func && {}.toString.call(func) === '[object Function]';
+      }
     </script>
   </body>
 </html>
