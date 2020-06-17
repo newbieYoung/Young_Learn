@@ -51,9 +51,9 @@
             array.push(keys.splice(kNo,1)[0]);
           }else{
             let concatList = [];
-            for(let z = 0; z< len/2; z++){//随机补充
-              concatList.push(totalList[parseInt(Math.random() * totalList.length)]);
-            }
+            // for(let z = 0; z< len/2; z++){//随机补充
+            //   concatList.push(totalList[parseInt(Math.random() * totalList.length)]);
+            // }
             array.push(this.randomDemo(index+'-'+i, keys.concat(concatList)));
           }
         }
