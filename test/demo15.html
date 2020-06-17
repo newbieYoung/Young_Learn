@@ -472,7 +472,10 @@
 
         for(let i=0;i<list.length;i++){
           let item = list[i];
-          let iIndex = index+'-'+i;
+          let iIndex = i;
+          if(index && index.length > 0){
+            iIndex = index+'-'+iIndex;
+          }
           if(Array.isArray(item)){ //列表元素
             this.updateHistoryIndex(item, iIndex);
           }else{ //节点元素
@@ -489,7 +492,7 @@
 
       //清除操作记录中不存在的节点
       CheckList.prototype.clearHistory = function(){
-        this.updateHistoryIndex(this.list, '0');
+        this.updateHistoryIndex(this.list);
         let newHistory = [];
         for(let i=0;i<this.history.length; i++){
           let hItem = this.history[i];
