@@ -476,7 +476,7 @@
           if(Array.isArray(item)){ //列表元素
             this.updateHistoryIndex(item, iIndex);
           }else{ //节点元素
-            for (j = 0; j < this.history.length; j++) {
+            for (let j = 0; j < this.history.length; j++) {
               let hItem = this.history[j];
               if (hItem.key == item) {
                 hItem.index = iIndex;
@@ -539,7 +539,7 @@
               wait++;
             }
           }else{ //节点元素
-            for (j = 0; j < this.history.length; j++) {
+            for (let j = 0; j < this.history.length; j++) {
               if (this.history[j].key == item) {
                 if(this.history[j].status == 1){
                   pass++;
