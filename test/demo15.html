@@ -120,7 +120,6 @@
             }
           }
 
-
           return status;
         }
 
@@ -133,8 +132,10 @@
           keys: [],
           indexs: []
         }
-        for(let i=0;i<this.list.length;i++){
-          this._will(i+'');
+        if(this.status != 2){
+          for(let i=0;i<this.list.length;i++){
+            this._will(i+'');
+          }
         }
       }
       CheckList.prototype._willNode = function(node, index){
