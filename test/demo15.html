@@ -145,8 +145,24 @@
           let arr = index.split('-');
           if(arr.length >= 1){
             for(let i=arr[arr.length-1]+1; i<parent.list.length; i++){
-              this.will.keys.push(parent.list[i])
-              this.will.indexs.push(parent.index+'-'+i);
+              let exist = false;
+              for(let j=0;j<this.history.length;j++){ //操作记录中没有
+                let hItem = this.history[j];
+                if(hItem.key == parent.list[i] && hItem.status > 0){
+                  exist = true;
+                  break;
+                }
+              }
+              for(let z=0;z<this.cur.keys.length;z++){ // 当前节点中没有
+                if(this.cur.keys.includes(parent.list[i])){
+                  exist = true;
+                  break;
+                }
+              }
+              if(!exist){
+                this.will.keys.push(parent.list[i])
+                this.will.indexs.push(parent.index+'-'+i);
+              }
             }
           }else{
             throw new Error(JSON.stringify({
@@ -663,6 +679,7 @@
       CheckList.prototype.update = function(){
         if(this.$table){
           this.$table.innerHTML = this._array(this.list);
+          this.getWillList();
           console.log('-----');
           console.log(this.list);
           console.log(this.history);
