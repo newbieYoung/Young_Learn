@@ -24,8 +24,9 @@
         ]; //串+并连 复杂混合
 
         var data4 = randomDemo(0);
+        var list1 = new CheckList(data4);
         console.log(data4);
-        var list1 = new CheckList(data3, null, null);
+        console.log(list1.getAllNode());
         list1.table();
       };
 
@@ -124,6 +125,22 @@
         }
 
         this.status = this.getListStatus(this.list); // 0 未评审、1 通过、2 未通过、3 等待
+      }
+
+      //获取全部节点
+      CheckList.prototype.getAllNode = function(){
+        this.getWillList();
+        let all = [];
+        for(let i=0;i<this.cur.keys.length;i++){
+          all.push(this.cur.keys[i]);
+        }
+        for(let i=0;i<this.history.length;i++){
+          all.push(this.history[i].key);
+        }
+        for(let i=0;i<this.will.keys.length;i++){
+          all.push(this.will.keys[i]);
+        }
+        return all;
       }
 
       //获得待处理节点
