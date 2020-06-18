@@ -19,13 +19,13 @@
         var data2 = ["A", ["B", "C", 2], "D", ["E", "F", 2], "G"]; //串+并连 简单混合
         var data3 = [
           "A",
-          [["B", [["C", "D"], "E", "F", 2]], ["G", "H"], 2],
+          [[["B","J",2], [["C", "D"], "E", "F", 2]], ["G", "H"], 2],
           "I",
         ]; //串+并连 复杂混合
 
         var data4 = randomDemo(0);
         console.log(data4);
-        var list1 = new CheckList(data4, null, null);
+        var list1 = new CheckList(data3, null, null);
         list1.table();
       };
 
@@ -125,6 +125,36 @@
         }
 
         this.status = this.getListStatus(this.list); // 0 未评审、1 通过、2 未通过、3 等待
+      }
+
+      //获得待处理节点
+      CheckList.prototype.getWillList = function(){
+        this.will = {
+          keys: [],
+          indexs: []
+        }
+        for(let i=0;i<this.cur.keys.length;i++){
+          this._will(this.cus.indexs[i]);
+        }
+      }
+      CheckList.prototype._will = function(index){
+        let parent = this.getList(index);
+        if(this._isNumber(list[list.length-1])){ //并行
+          this._will(parent.index)
+        }else{//串行
+          let arr = index.split('-');
+          if(arr.length >= 1){
+            for(let i=arr[arr.length-1]+1; i<parent.list.length; i++){
+              this.will.keys.push(parent.list[i])
+              this.will.indexs.push(parent.index+'-'+i);
+            }
+          }else{
+            throw new Error(JSON.stringify({
+              errMsg: '节点索引异常',
+              data: index
+            }))
+          }
+        }
       }
 
       //重置审核列表
