@@ -133,35 +133,65 @@
           keys: [],
           indexs: []
         }
-        for(let i=0;i<this.cur.keys.length;i++){
-          this._will(this.cus.indexs[i]);
+        for(let i=0;i<this.list.length;i++){
+          this._will(i+'');
+        }
+      }
+      CheckList.prototype._willNode = function(node, index){
+        let exist = false;
+        for(let j=0;j<this.history.length;j++){ //操作记录中没有
+          let hItem = this.history[j];
+          if(hItem.key == node && hItem.status > 0){
+            exist = true;
+            break;
+          }
+        }
+        for(let z=0;z<this.cur.keys.length;z++){ // 当前节点中没有
+          if(this.cur.keys.includes(node)){
+            exist = true;
+            break;
+          }
+        }
+        if(!exist && !this.will.keys.includes(node)){
+          this.will.keys.push(node)
+          this.will.indexs.push(index);
+        }
+      }
+      CheckList.prototype._willList = function(list, index){
+        if(Array.isArray(list) && list.length >= 1){
+          let endNo = list.length;
+          if(this._isNumber(list[list.length-1])){//并行
+            endNo = list.length - 1;
+          }
+          for(let i=0;i<endNo;i++){
+            let node = list[i];
+            let nIndex = index+'-'+i;
+            if(Array.isArray(node)){
+              this._willList(node, nIndex);
+            }else{
+              this._willNode(node, nIndex);
+            }
+          }
         }
       }
       CheckList.prototype._will = function(index){
         let parent = this.getList(index);
-        if(this._isNumber(list[list.length-1])){ //并行
+        if(this._isNumber(parent.list[parent.list.length-1])){ //并行
           this._will(parent.index)
         }else{//串行
           let arr = index.split('-');
           if(arr.length >= 1){
-            for(let i=arr[arr.length-1]+1; i<parent.list.length; i++){
-              let exist = false;
-              for(let j=0;j<this.history.length;j++){ //操作记录中没有
-                let hItem = this.history[j];
-                if(hItem.key == parent.list[i] && hItem.status > 0){
-                  exist = true;
-                  break;
-                }
+            let startIndex = parseInt(arr[arr.length-1])+1;
+            for(let i=startIndex; i<parent.list.length; i++){
+              let node = parent.list[i];
+              let nIndex = parent.index+'-'+i;
+              if(parent.index == -1){ //最外层列表
+                nIndex = i+'';
               }
-              for(let z=0;z<this.cur.keys.length;z++){ // 当前节点中没有
-                if(this.cur.keys.includes(parent.list[i])){
-                  exist = true;
-                  break;
-                }
-              }
-              if(!exist){
-                this.will.keys.push(parent.list[i])
-                this.will.indexs.push(parent.index+'-'+i);
+              if(Array.isArray(node)){
+                this._willList(node, nIndex);
+              }else{
+                this._willNode(node, nIndex);
               }
             }
           }else{
@@ -213,13 +243,15 @@
         this.cur.keys = newKeys;
         this.cur.indexs = newIndexs;
 
-        //递归处理父列表
-        let parent = this.getList(index);
-        let pStatus = this.getListStatus(parent.list);
-        if(pStatus == 2 || pStatus == 1){
-          this.finish(parent.list, parent.index);
-        }else{
-          this.next(index);
+        if(index != -1){ //最外层列表并不存在父列表
+          //递归处理父列表
+          let parent = this.getList(index);
+          let pStatus = this.getListStatus(parent.list);
+          if(pStatus == 2 || pStatus == 1){
+            this.finish(parent.list, parent.index);
+          }else{
+            this.next(index);
+          }
         }
       }
 
@@ -305,7 +337,7 @@
 
       //下一步
       CheckList.prototype.next = function(curIndex){
-        let list = this.getList(curIndex);
+        let list = this.getList(curIndex); // 计算后续节点索引直接使用的 curIndex，因此 getList 返回的最外层列表的 -1 索引并不用考虑
         let llt = list.list;
         let llStatus = this.getListStatus(llt);
         if(llStatus == 1 || llStatus == 2){
@@ -684,6 +716,7 @@
           console.log(this.list);
           console.log(this.history);
           console.log(this.cur);
+          console.log(this.will);
           console.log(this.status);
           if(this.status == 2){
             alert('评审结束')
