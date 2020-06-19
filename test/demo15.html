@@ -24,9 +24,10 @@
         ]; //串+并连 复杂混合
 
         var data4 = randomDemo(0);
-        var list1 = new CheckList(data4);
-        console.log(data4);
-        console.log(list1.getAllNode());
+        var list1 = new CheckList(data3);
+        console.log(data3);
+        console.log(list1.getAllNodes());
+        console.log(list1.getPrevNodes('2'));
         list1.table();
       };
 
@@ -127,19 +128,52 @@
         this.status = this.getListStatus(this.list); // 0 未评审、1 通过、2 未通过、3 等待
       }
 
+      //获取前置节点
+      CheckList.prototype.getPrevNodes = function(index){
+        let nodes = [];
+        let list = this.getList(index);
+        let arr = index.split('-');
+        let no = arr[arr.length-1];
+        if(no<=0 && list.index !=-1){
+          nodes = nodes.concat(this.getPrevNodes(list.index))
+        }else{
+          let llt = list.list;
+          if(this._isNumber(llt[llt.length-1])){//并行
+            nodes = nodes.concat(this.getPrevNodes(list.index))
+          }else{//串行
+            for(let i=no-1;i>=0;i--){
+              if(Array.isArray(llt[i])){
+                nodes = nodes.concat(this.getListNodes(llt[i]))
+              }else{
+                nodes.push(llt[i]);
+              }
+            }
+            if(list.index != -1){
+              nodes = nodes.concat(this.getPrevNodes(list.index));
+            }
+          }
+        }
+        return nodes;
+      }
+
+      //获取列表节点
+      CheckList.prototype.getListNodes = function(list){
+        let nodes = [];
+        for(let i=0;i<list.length;i++){
+          if(Array.isArray(list[i])){
+            nodes = nodes.concat(this.getListNodes(list[i]))
+          }else{
+            if(!this._isNumber(list[i])){
+              nodes.push(list[i])
+            }
+          }
+        }
+        return nodes;
+      }
+
       //获取全部节点
-      CheckList.prototype.getAllNode = function(){
-        this.getWillList();
-        let all = [];
-        for(let i=0;i<this.cur.keys.length;i++){
-          all.push(this.cur.keys[i]);
-        }
-        for(let i=0;i<this.history.length;i++){
-          all.push(this.history[i].key);
-        }
-        for(let i=0;i<this.will.keys.length;i++){
-          all.push(this.will.keys[i]);
-        }
+      CheckList.prototype.getAllNodes = function(){
+        let all = this.getListNodes(this.list);
         return all;
       }
 
