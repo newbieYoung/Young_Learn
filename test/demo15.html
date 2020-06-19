@@ -147,10 +147,7 @@
             return this.history[i].index;
           }
         }
-        throw new Error(JSON.stringify({
-          errMsg: '查询节点索引异常',
-          data: key
-        }))
+        return null;
       }
 
       //获取前置节点
