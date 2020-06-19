@@ -90,6 +90,7 @@
 
         this.cur = cur ? cur : defCur;
         this.history = Array.isArray(history) && history.length > 0 ? history : []; // 历史记录
+        this.clearHistory();
 
         /**
          * total 列表总数
