@@ -27,7 +27,8 @@
         var list1 = new CheckList(data3);
         console.log(data3);
         console.log(list1.getAllNodes());
-        console.log(list1.getPrevNodes('2'));
+        console.log(list1.getNodeIndex('E'));
+        console.log(list1.getPrevNodes('1-0-1-1'));
         list1.table();
       };
 
@@ -126,6 +127,30 @@
         }
 
         this.status = this.getListStatus(this.list); // 0 未评审、1 通过、2 未通过、3 等待
+      }
+
+      //获取节点索引
+      CheckList.prototype.getNodeIndex = function(key){
+        this.getWillList();
+        for(let i=0;i<this.cur.keys.length;i++){
+          if(this.cur.keys[i] == key){
+            return this.cur.indexs[i];
+          }
+        }
+        for(let i=0;i<this.will.keys.length;i++){
+          if(this.will.keys[i] == key){
+            return this.will.indexs[i];
+          }
+        }
+        for(let i=0;i<this.history.length;i++){
+          if(this.history[i].key == key){
+            return this.history[i].index;
+          }
+        }
+        throw new Error(JSON.stringify({
+          errMsg: '查询节点索引异常',
+          data: key
+        }))
       }
 
       //获取前置节点
