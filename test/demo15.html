@@ -143,6 +143,11 @@
             return this.will.indexs[i];
           }
         }
+        for(let i=0;i<this.undo.keys.length;i++){
+          if(this.undo.keys[i] == key){
+            return this.undo.indexs[i];
+          }
+        }
         for(let i=0;i<this.history.length;i++){
           if(this.history[i].key == key){
             return this.history[i].index;
@@ -200,16 +205,18 @@
         return all;
       }
 
-      //获得待处理节点
+      //遍历获得待处理或者未处理节点
       CheckList.prototype.getWillList = function(){
         this.will = {
           keys: [],
           indexs: []
         }
-        if(this.status != 2){
-          for(let i=0;i<this.list.length;i++){
-            this._will(i+'');
-          }
+        this.undo = {
+          keys: [],
+          indexs: []
+        }
+        for(let i=0;i<this.list.length;i++){
+          this._will(i+'');
         }
       }
       CheckList.prototype._willNode = function(node, index){
@@ -228,8 +235,13 @@
           }
         }
         if(!exist && !this.will.keys.includes(node)){
-          this.will.keys.push(node)
-          this.will.indexs.push(index);
+          if(this.status != 2){ //待处理
+            this.will.keys.push(node)
+            this.will.indexs.push(index);
+          }else{ //未处理
+            this.undo.keys.push(node)
+            this.undo.indexs.push(index);
+          }
         }
       }
       CheckList.prototype._willList = function(list, index){
