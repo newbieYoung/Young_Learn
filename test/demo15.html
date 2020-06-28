@@ -19,7 +19,7 @@
         var data2 = ["A", ["B", "C", 2], "D", ["E", "F", 2], "G"]; //串+并连 简单混合
         var data3 = [
           "A",
-          [[["B","J",2], [["C", "D"], "E", "F", 2]], ["G", "H"], 2],
+          [[["B","J","X",3], [["C", "D"], "E", "F", 2]], ["G", "H"], 2],
           "I",
         ]; //串+并连 复杂混合
 
@@ -99,10 +99,10 @@
          * reject 列表当前不通过数
          * wait 列表等待数
          */
-        this.listStatus = this._isFunction(listStatus) ? listStatus : function(total, finish, pass, reject, wait){
+        this.listStatus = this._isFunction(listStatus) ? listStatus : function(total, finish, pass, reject, wait, list){
           let status = 0;
           let done = pass + reject;
-          if(total != finish){ //并行
+          if(this._isNumber(list[list.length - 1])){ //并行
             if(done < total && wait > 0){ //已处理数小于总数
               status = 3;
             }else if(done == total){ //已处理数等于总数
@@ -722,7 +722,7 @@
           }
         }
 
-        return this.listStatus(total, finish, pass, reject, wait);
+        return this.listStatus(total, finish, pass, reject, wait, list);
       }
 
       //构建 table 可视化 demo
