@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>背景图片中间拉伸</title>
+  <style>
+    .bg-repeat-center {
+      width: 200px;
+      height: 400px;
+      position: relative;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-repeat-center">
+    <canvas style="width: 100%; height: 100%;"></canvas>
+  </div>
+  <script>
+    window.onload = function () {
+      function repeatCenter(url) {
+        let $bg = document.querySelector(".bg-repeat-center");
+        let bgRect = $bg.getBoundingClientRect();
+        let bgWidth = bgRect.width;
+        let bgHeight = bgRect.height;
+        let $canvas = document.querySelector(".bg-repeat-center > canvas");
+        $canvas.width = bgWidth;
+        $canvas.height = bgHeight;
+        let ctx = $canvas.getContext("2d");
+
+        let img = new Image();
+        img.src = url;
+        img.onload = function () {
+          console.log(img.width + " " + img.height);
+          let timestamp1 = window.performance.now();
+
+          let iWidth = img.width;
+          let iHeight = img.height;
+          ctx.drawImage(img, 0, 0, iWidth / 2, iHeight / 2, 0, 0, iWidth / 2, iHeight / 2); //top-left
+
+          let topHorRep = document.createElement('canvas'); // repeat top-hor
+          topHorRep.width = 1;
+          topHorRep.height = iHeight / 2;
+          let topHorCtx = topHorRep.getContext('2d');
+          topHorCtx.drawImage(img, iWidth / 2, 0, 1, iHeight / 2, 0, 0, 1, iHeight / 2);
+          let topHorWidth = Math.ceil(bgWidth - iWidth);
+          let topHorStart = Math.floor(iWidth / 2);
+          for (let i = 0; i < topHorWidth; i++) {
+            ctx.drawImage(topHorRep, 0, 0, 1, iHeight / 2, topHorStart + i, 0, 1, iHeight / 2);
+          }
+
+          ctx.drawImage(img, iWidth / 2, 0, iWidth / 2, iHeight / 2, (bgWidth - iWidth / 2), 0, iWidth / 2,
+            iHeight / 2); //top-left
+
+          let rightVerRep = document.createElement('canvas'); //repeat right-ver
+          rightVerRep.width = iWidth / 2;
+          rightVerRep.height = 1;
+          let rightVerCtx = rightVerRep.getContext('2d');
+          rightVerCtx.drawImage(img, iWidth / 2, iHeight / 2, iWidth / 2, 1, 0, 0, iWidth / 2, 1);
+          let rightVerHeight = Math.ceil(bgHeight - iHeight);
+          let rightVerStart = Math.floor(iHeight / 2);
+          for (let i = 0; i < rightVerHeight; i++) {
+            ctx.drawImage(rightVerRep, 0, 0, iWidth / 2, 1, (bgWidth - iWidth / 2), rightVerStart + i, iWidth / 2,
+              1);
+          }
+
+          ctx.drawImage(img, iWidth / 2, iHeight / 2, iWidth / 2, iHeight / 2, (bgWidth - iWidth / 2), (bgHeight -
+            iHeight / 2), iWidth / 2, iHeight / 2); // bottom-right
+
+          let bottomVerRep = document.createElement('canvas'); //repeat bottom-ver
+          bottomVerRep.width = 1;
+          bottomVerRep.height = iHeight / 2;
+          let bottomVerCtx = bottomVerRep.getContext('2d');
+          bottomVerCtx.drawImage(img, iWidth / 2, iHeight / 2, 1, iHeight / 2, 0, 0, 1, iHeight / 2);
+          let bottomVerWidth = Math.ceil(bgWidth - iWidth);
+          let bottomVerStart = Math.floor(iWidth / 2);
+          for (let i = 0; i < bottomVerWidth; i++) {
+            ctx.drawImage(bottomVerRep, 0, 0, 1, iHeight / 2, iWidth / 2 + i, (bgHeight - iHeight / 2), 1, iHeight /
+              2);
+          }
+
+          ctx.drawImage(img, 0, iHeight / 2, iWidth / 2, iHeight / 2, 0, (bgHeight - iHeight / 2), iWidth / 2,
+            iHeight / 2);
+
+          let leftHorRep = document.createElement('canvas'); //repeat left-hor
+          leftHorRep.width = iWidth / 2;
+          leftHorRep.height = 1;
+          let leftHorCtx = leftHorRep.getContext('2d');
+          leftHorCtx.drawImage(img, 0, iHeight / 2, iWidth / 2, 1, 0, 0, iWidth / 2, 1);
+          let leftHorHeight = Math.ceil(bgHeight - iHeight);
+          let leftHorStart = Math.floor(iHeight / 2);
+          for (let i = 0; i < leftHorHeight; i++) {
+            ctx.drawImage(leftHorRep, 0, 0, iWidth / 2, 1, 0, leftHorStart + i, iWidth / 2, 1);
+          }
+
+          let centerRep = document.createElement('canvas'); //repeat center
+          centerRep.width = 1;
+          centerRep.height = 1;
+          let centerCtx = centerRep.getContext('2d');
+          centerCtx.drawImage(img, iWidth / 2, iHeight / 2, 1, 1, 0, 0, 1, 1);
+          for (let i = 0; i < bottomVerWidth; i++) {
+            for (let j = 0; j < leftHorHeight; j++) {
+              ctx.drawImage(centerRep, 0, 0, 1, 1, bottomVerStart + i, leftHorStart + j, 1, 1)
+            }
+          }
+
+          let timestamp2 = window.performance.now();
+          console.log('timestamp: ' + (timestamp2 - timestamp1));
+        };
+      }
+      repeatCenter("../img/border-image-slice-demo.png");
+    };
+  </script>
+</body>
+
+</html>
