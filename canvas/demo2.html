@@ -95,6 +95,7 @@
             ctx.drawImage(leftHorRep, 0, 0, iWidth / 2, 1, 0, leftHorStart + i, iWidth / 2, 1);
           }
 
+          // 1px 重叠次数很多，比较影响性能
           let centerRep = document.createElement('canvas'); //repeat center
           centerRep.width = 1;
           centerRep.height = 1;
