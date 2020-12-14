@@ -24,13 +24,12 @@
     </style>
   </head>
   <body>
-    <!-- 渲染流程 -->
     <p>hello world</p>
     <script>
       window.onload = function () {
         var $p = document.body.querySelector("p");
 
-        // 需要重排的时候就重排，包括但不限于：
+        // 重排，包括但不限于：
         // 1、添加删除可见 DOM 元素
         // 2、可见 DOM 元素 位置、尺寸、内容发生变化
         // 3、浏览器窗口变化

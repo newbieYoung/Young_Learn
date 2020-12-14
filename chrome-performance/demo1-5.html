@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>chrome-performance 重绘</title>
+    <title>chrome-performance 合并渲染层</title>
     <style>
       p {
         width: 200px;
@@ -20,6 +20,7 @@
         bottom: 0;
         left: 0;
         margin: auto;
+        opacity: 0.9;
       }
     </style>
   </head>
@@ -29,8 +30,8 @@
       window.onload = function () {
         var $p = document.body.querySelector("p");
 
-        // 重绘，元素样式的变化并不影响布局
-        $p.style.backgroundColor = "lightblue";
+        // 合并渲染层
+        $p.style.opacity = 0.5;
       };
     </script>
   </body>
