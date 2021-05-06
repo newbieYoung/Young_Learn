@@ -10,7 +10,7 @@
     <script src="tool.js"></script>
     <script type="text/javascript" src="demo2.js"></script>
     <script>
-        //emcc demo2.c -O3 -s WASM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS='["UTF8ToString"]' -s EXPORTED_FUNCTIONS="['_bezier1','_hello','_sayHi','_fib','_testMath']" -o demo2.js
+        //emcc demo2.c -O3 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s EXTRA_EXPORTED_RUNTIME_METHODS='["UTF8ToString"]' -s EXPORTED_FUNCTIONS="['_len2Arr', '_bezier1','_hello','_sayHi','_fib','_testMath']" -o demo2.js
         Module['onRuntimeInitialized'] = function () {
             console.log(Module);
 
@@ -33,6 +33,12 @@
 
             console.log('-- test math --');
             console.log(Module._testMath(4.0));
+
+            console.log('-- test struct arr --');
+            const arr = Module['_len2Arr']();
+            console.log(arr);
+            const arrRes = HEAPF32.subarray(arr / Float32Array.BYTES_PER_ELEMENT, arr / Float32Array.BYTES_PER_ELEMENT + 2);
+            console.log(arrRes);
         };
     </script>
 </body>
