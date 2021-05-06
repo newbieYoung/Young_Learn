@@ -39,21 +39,17 @@ int fib(n){
   return fib(n-2)+fib(n-1);
 }
 
-// 使用结构体返回数组
-struct arrWrap {
-    float arr[2];
-};
-typedef struct arrWrap  arrWrap_t;
-typedef struct arrWrap*  arrWrapptr_t;
+//返回变长数组
+int lenArr(int len){
+  float r[len];
+  int i;
+  static int addr;
+  
+  for(i = 0; i < len; i++){
+    r[i] = 1.0;
+  }
 
-arrWrapptr_t len2Arr()
-{
-    arrWrapptr_t x = malloc(sizeof(arrWrap_t));
-    console_int(sizeof(arrWrap_t));
-
-    x->arr[0] = 10.0;
-    x->arr[1] = 20.0;
-    
-    console_float(x->arr[0]);
-    return x;
+  addr = (int)&r;
+  
+  return addr;
 }
