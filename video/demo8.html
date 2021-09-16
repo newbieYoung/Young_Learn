@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>视频截屏</title>
+  </head>
+  <body>
+    <script>
+      function screenshot(src, time, width, height) {
+        return new Promise((resolve, reject) => {
+          const $video = document.createElement("video");
+          $video.muted = true;
+          $video.src = src;
+          $video.width = width;
+          $video.height = height;
+          $video.play();
+
+          const $canvas = document.createElement("canvas");
+          $canvas.width = width;
+          $canvas.height = height;
+          const ctx = $canvas.getContext("2d");
+
+          $video.onplay = () => {
+            $video.currentTime = time;
+          };
+
+          $video.onseeked = () => {
+            $video.pause();
+            ctx.drawImage($video, 0, 0, width, height);
+            resolve($canvas);
+          };
+        });
+      }
+
+      window.onload = async function () {
+        const img = await screenshot("./all.mp4", 5, 375, 834);
+        document.body.appendChild(img);
+      };
+    </script>
+  </body>
+</html>
