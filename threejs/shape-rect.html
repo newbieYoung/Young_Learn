@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>shape rect</title>
+    <style>
+      body,
+      html {
+        background-color: #fff;
+        margin: 0px;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+    </style>
+    <!-- three.js -->
+    <script src="../node_modules/three/build/three.js"></script>
+    <script src="./graphics.js"></script>
+  </head>
+  <body>
+    <div id="retina"></div>
+    <script>
+      // rect shape
+      function rectShape(x, y, w, h, rx, ry) {
+        // Ellipse arc to Bezier approximation Coefficient (Inversed). See:
+        // https://spencermortensen.com/articles/bezier-circle/
+        const bci = 1 - 0.551915024494;
+        const shape = new THREE.Shape();
+
+        // top left
+        shape.moveTo(x + rx, y);
+        // top right
+        shape.lineTo(x + w - rx, y);
+        if (rx !== 0 || ry !== 0) {
+          shape.bezierCurveTo(
+            x + w - rx * bci,
+            y,
+            x + w,
+            y + ry * bci,
+            x + w,
+            y + ry
+          );
+        }
+
+        // bottom right
+        shape.lineTo(x + w, y + h - ry);
+        if (rx !== 0 || ry !== 0) {
+          shape.bezierCurveTo(
+            x + w,
+            y + h - ry * bci,
+            x + w - rx * bci,
+            y + h,
+            x + w - rx,
+            y + h
+          );
+        }
+
+        // bottom left
+        shape.lineTo(x + rx, y + h);
+        if (rx !== 0 || ry !== 0) {
+          shape.bezierCurveTo(
+            x + rx * bci,
+            y + h,
+            x,
+            y + h - ry * bci,
+            x,
+            y + h - ry
+          );
+        }
+
+        // back to top left
+        shape.lineTo(x, y + ry);
+        if (rx !== 0 || ry !== 0) {
+          shape.bezierCurveTo(x, y + ry * bci, x + rx * bci, y, x + rx, y);
+        }
+
+        return shape;
+      }
+
+      /**
+       * style
+       * fill fill-opacity fill-rule opacity
+       * stroke stroke-opacity stroke-width stroke-linejoin stroke-linecap stroke-miterlimit visibility
+       */
+      function rectMesh(x, y, w, h, rx, ry, style) {
+        const rect = new THREE.Group();
+        const shape = rectShape(x, y, w, h, rx, ry);
+
+        // fill
+        if (style.fill !== undefined && style.fill !== "none") {
+          rect.add(
+            new THREE.Mesh(
+              new THREE.ShapeGeometry(shape),
+              new THREE.MeshBasicMaterial({
+                color: new THREE.Color().setStyle(style.fill),
+                opacity: style.fillOpacity,
+                transparent: style.fillOpacity < 1,
+                depthWrite: false, // 2d
+                depthTest: false,
+              })
+            )
+          );
+        }
+
+        // stroke
+        if (style.stroke !== undefined && style.stroke !== "none") {
+          rect.add(
+            new THREE.Mesh(
+              Graphics.pointsToStroke(shape.extractPoints().shape, style),
+              new THREE.MeshBasicMaterial({
+                color: new THREE.Color().setStyle(style.stroke),
+                opacity: style.strokeOpacity,
+                transparent: style.strokeOpacity < 1,
+                depthWrite: false,
+                depthTest: false,
+              })
+            )
+          );
+        }
+
+        return rect;
+      }
+
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true, //抗锯齿开启
+      });
+      renderer.setSize(width, height); //设置渲染器宽度和高度
+      renderer.setClearColor("#ffffff", 1.0); //设置背景颜色
+      renderer.setPixelRatio(window.devicePixelRatio); //设置设备像素比
+      document.getElementById("retina").appendChild(renderer.domElement); //把渲染器放置到页面中
+
+      const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
+      camera.position.set(200, 400, 600); //设置相机位置
+      camera.up.set(0, 1, 0); //设置相机正方向
+      camera.lookAt(new THREE.Vector3(0, 0, 0)); //设置相机视点
+
+      // 场景、灯光
+      const pointLight = new THREE.PointLight(0xffffff, 1, 2000);
+      pointLight.position.set(70, 112, 98);
+      const ambientLight = new THREE.AmbientLight(0x333333);
+      const geometry = new THREE.BoxGeometry(100, 100, 100);
+      const material = new THREE.MeshLambertMaterial({
+        color: new THREE.Color(0xff0000),
+      });
+      const scene = new THREE.Scene();
+      scene.add(pointLight);
+      scene.add(ambientLight);
+
+      // rect
+      const style = {
+        fill: "#ffffff",
+        fillOpacity: 1,
+        stroke: "#000000",
+        strokeLineCap: "butt",
+        strokeLineJoin: "miter",
+        strokeMiterLimit: 4,
+        strokeOpacity: 1,
+        strokeWidth: 10,
+      };
+      const rect = rectMesh(
+        18.708866,
+        19.039692,
+        107.97688,
+        59.868374,
+        4,
+        4,
+        style
+      );
+      rect.lookAt(camera.position);
+      scene.add(rect);
+
+      function render() {
+        renderer.clear();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+      }
+      render();
+    </script>
+  </body>
+</html>
