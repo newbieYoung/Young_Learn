@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SVG 文字默认锚点</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      viewBox="0 0 750 400"
+      width="750"
+      height="400"
+      preserveAspectRatio="xMidYMid meet"
+      style="transform: translate3d(0px, 0px, 0px)"
+    >
+      <!-- svg 文字默认锚点和文字信息相关，比如字体、字号等 -->
+      <g
+        fill="rgba(232,41,41,1)"
+        font-size="38"
+        font-style="normal"
+        font-weight="normal"
+        opacity="1"
+        style="display: block"
+        id="text1"
+      >
+        <text text-anchor="start" letter-spacing="0">
+          <tspan x="0" y="0" style="display: inherit">阿经济</tspan>
+          <tspan x="0" y="45.6000022888184" style="display: inherit">
+            嗷嗷
+          </tspan>
+        </text>
+      </g>
+    </svg>
+    <script>
+      window.onload = function () {
+        var $g = document.querySelector("#text1");
+        $g.innerHTML = ""; // 清空
+
+        var $text = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "text"
+        );
+        $text.setAttribute("text-anchor", "start");
+        $text.setAttribute("letter-spacing", 0);
+        $g.appendChild($text);
+
+        var $tspan1 = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "tspan"
+        );
+        $tspan1.setAttribute("x", 0);
+        $tspan1.setAttribute("y", 0);
+        $tspan1.textContent = "阿经济";
+        $text.appendChild($tspan1);
+
+        var $tspan2 = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "tspan"
+        );
+        $tspan2.setAttribute("x", 0);
+        $tspan2.setAttribute("y", 45.6);
+        $tspan2.textContent = "嗷嗷";
+        $text.appendChild($tspan2);
+
+        console.log($g.getBoundingClientRect());
+      };
+    </script>
+  </body>
+</html>

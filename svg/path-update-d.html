@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>找规律操作path中的d属性</title>
+  </head>
+  <body>
+    <svg
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      x="0px"
+      y="0px"
+      viewBox="0 0 640 1136"
+      enable-background="new 0 0 640 1136"
+      xml:space="preserve"
+    >
+      <path
+        id="path"
+        fill-opacity="0.2"
+        d="M640,336.4c0.1-24.7-15.6-31-28.3-35.7c-13.8-3.4-24-15.9-23.9-30.7c0-14,9.2-25.9,21.8-29.9c13-4.7,30.3-10.3,30.3-36.2
+        L640,336.4z"
+      >
+        <animate
+          id="animate"
+          id="beginAnimation"
+          attributeName="d"
+          dur="500ms"
+          fill="freeze"
+          calcMode="spline"
+          keySplines="0.25, 0.46, 0.45, 0.94"
+          begin="indefinite"
+        />
+      </path>
+    </svg>
+    <script>
+      /**
+       * 需要注意的是软件导出的svg出于大小的考虑会采用缩写的形式，导致可读性较差；
+       * 上述代码中横杆就是负号的意思，负数之间可以省略间隔符号；
+       * 逗号就是普通的间隔符；
+       * 字母和数字之间可以省略间隔符
+       */
+      window.onload = function () {
+        var path = document.querySelector("#path");
+        var animate = document.querySelector("#animate");
+
+        var startD =
+          "M640,336.4c0.1-24.7-15.6-31-28.3-35.7c-13.8-3.4-24-15.9-23.9-30.7c0-14,9.2-25.9,21.8-29.9c13-4.7,30.3-10.3,30.3-36.2L640,336.4z";
+        var newEndD = setLength(30);
+
+        setTimeout(function () {
+          animate.setAttribute("values", startD + ";" + newEndD + ";");
+          animate.beginElement();
+        }, 1000);
+
+        setTimeout(function () {
+          animate.setAttribute("values", newEndD + ";" + startD + ";");
+          animate.beginElement();
+        }, 2000);
+
+        /**
+         * 第一个贝塞尔曲线和最后一个贝塞尔曲线表示的该路径中的直线水平区域，且使用的相对坐标系，因此直接改变第一个贝塞尔曲线和最后一个贝塞尔曲线即可；
+         * 另外需要注意不能改变直线贝塞尔曲线中各点的关系，所有点必须在同一水平直线上而且始起点和结束点必须在两个控制点的两端。
+         * @param num
+         * @param tag
+         */
+        function computeLen(num, tag) {
+          var topLine = [36, 221.2, 235.5];
+          var bottomLine = [13.9, 198.2, 235.5];
+
+          var lastTopLine = topLine[topLine.length - 1];
+          var topPercent = ((lastTopLine + num * tag) * 1.0) / lastTopLine;
+          for (var i = topLine.length - 1; i >= 0; i--) {
+            topLine[i] = topLine[i] * topPercent;
+          }
+
+          var lastBottomLine = bottomLine[bottomLine.length - 1];
+          var bottomPercent =
+            ((lastBottomLine + num * tag) * 1.0) / lastBottomLine;
+          for (var i = bottomLine.length - 1; i >= 0; i--) {
+            bottomLine[i] = bottomLine[i] * bottomPercent;
+          }
+
+          //console.log(topLine);
+          //console.log(bottomLine);
+
+          return (
+            "M640.5,300.5c-" +
+            topLine[0] +
+            ",0-" +
+            topLine[1] +
+            "-0.1-" +
+            topLine[2] +
+            "-0.1c-18.5,0-29.6-15.9-29.5-30.7c0-14,12.3-29.9,29.5-29.9c" +
+            bottomLine[0] +
+            ",0," +
+            bottomLine[1] +
+            ",0," +
+            bottomLine[2] +
+            ",0L640.5,300.5z"
+          );
+        }
+
+        /**
+         * 设置展开路径的宽度，num有效的最小数值为30
+         * @param num
+         */
+        function setLength(num) {
+          var initWidth = 265; //根据路径数据得到原始宽度为265
+          var initLineWidth = Math.floor(235.5); //根据路径数据得到水平直线区域的原始宽度为235.5
+
+          var tag = num - initWidth > 0 ? 1 : -1;
+          var diff = Math.abs(num - initWidth);
+
+          //水平区域的宽度至少大于0
+          if (diff >= initLineWidth) {
+            diff = initLineWidth;
+          }
+
+          return computeLen(diff, tag);
+        }
+      };
+    </script>
+  </body>
+</html>

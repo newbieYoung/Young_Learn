@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>环形进度条</title>
+    <style>
+      #svg circle {
+        stroke-dashoffset: 0;
+        /*stroke: #666;*/
+        stroke-width: 1em;
+      }
+      #svg #bar {
+        /*stroke: #FF9F1E;*/
+      }
+    </style>
+  </head>
+  <body>
+    <svg
+      id="svg"
+      viewBox="0 0 200 200"
+      version="1.1"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <linearGradient x1="1" y1="0" x2="0" y2="0" id="gradient1">
+          <stop offset="0%" stop-color="#e52c5c"></stop>
+          <stop offset="100%" stop-color="#ab5aea"></stop>
+        </linearGradient>
+        <linearGradient x1="1" y1="0" x2="0" y2="0" id="gradient2">
+          <stop offset="0%" stop-color="#4352f3"></stop>
+          <stop offset="100%" stop-color="#ab5aea"></stop>
+        </linearGradient>
+      </defs>
+      <circle
+        r="90"
+        cx="100"
+        cy="100"
+        stroke="url('#gradient1')"
+        stroke-linecap="round"
+        fill="transparent"
+        stroke-dasharray="565.48"
+        stroke-dashoffset="0"
+      ></circle>
+      <circle
+        id="bar"
+        r="90"
+        cx="100"
+        cy="100"
+        stroke="url('#gradient2')"
+        stroke-linecap="round"
+        fill="transparent"
+        stroke-dasharray="565.48"
+        stroke-dashoffset="0"
+      ></circle>
+    </svg>
+    <script>
+      window.onload = function () {
+        var $circle = document.querySelector("#svg #bar");
+        var r = $circle.getAttribute("r"); //半径
+        var c = Math.PI * (r * 2); //周长
+        var percent = 70; //进度
+        var pct = ((100 - percent) / 100) * c;
+        $circle.style.strokeDashoffset = pct;
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>元素沿路径运动动画</title>
+  </head>
+  <body>
+    <svg
+      width="219px"
+      height="439px"
+      viewBox="0 0 219 439"
+      version="1.1"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+    >
+      <g stroke="#979797" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path
+          id="motion-path"
+          d="M200.573028,40 C233.415323,96.083042 217.011643,153.83095 151.36199,213.243722 C85.7123361,272.656495 70.284992,346.241921 105.079957,434"
+        ></path>
+        <rect
+          width="15"
+          height="15"
+          fill="hotpink"
+          transform="translate(-7,-7)"
+        >
+          <animateMotion
+            dur="5s"
+            repeatCount="indefinite"
+            rotate="auto"
+            calcMode="linear"
+            keyTimes="0;0.2;0.8;1"
+            keyPoints="0;0.33;0.66;1"
+          >
+            <mpath xlink:href="#motion-path" />
+          </animateMotion>
+        </rect>
+      </g>
+    </svg>
+  </body>
+</html>

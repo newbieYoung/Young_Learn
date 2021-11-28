@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sprite frame animation</title>
+    <style>
+      body,
+      html {
+        background-color: #fff;
+        margin: 0px;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+    </style>
+    <!-- three.js -->
+    <script src="../node_modules/three/build/three.js"></script>
+  </head>
+  <body>
+    <div id="retina"></div>
+    <script>
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true, //抗锯齿开启
+      });
+      renderer.setSize(width, height); //设置渲染器宽度和高度
+      renderer.setClearColor("#ffffff", 1.0); //设置背景颜色
+      renderer.setPixelRatio(window.devicePixelRatio); //设置设备像素比
+      document.getElementById("retina").appendChild(renderer.domElement); //把渲染器放置到页面中
+
+      const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
+      camera.position.set(200, 400, 600); //设置相机位置
+      camera.up.set(0, 1, 0); //设置相机正方向
+      camera.lookAt(new THREE.Vector3(0, 0, 0)); //设置相机视点
+
+      // shape
+      const group = new THREE.Group();
+      const shape = new THREE.Shape();
+      shape.moveTo(50, 10).absarc(10, 10, 40, 0, Math.PI * 2, false);
+      const holes = new THREE.Path()
+        .moveTo(20, 10)
+        .absarc(10, 10, 10, 0, Math.PI * 2, true);
+      shape.holes.push(holes);
+
+      let mesh = new THREE.Mesh(
+        new THREE.ShapeGeometry(shape),
+        new THREE.MeshBasicMaterial({
+          color: new THREE.Color(0xff0000),
+        })
+      );
+      group.add(mesh);
+      group.lookAt(camera.position); // face camera
+      group.scale.set(2, 2, 1);
+
+      console.log(mesh);
+      console.log(shape);
+      const scene = new THREE.Scene();
+      scene.add(group);
+
+      setTimeout(function () {
+        shape.moveTo(80, 100);
+        console.log(shape);
+      }, 2000);
+
+      function render() {
+        renderer.clear();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+      }
+      render();
+    </script>
+  </body>
+</html>

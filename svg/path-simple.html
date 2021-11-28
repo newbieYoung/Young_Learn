@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>simple path</title>
+  </head>
+  <body>
+    <svg
+      width="400px"
+      height="400px"
+      version="1.1"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <!-- M10 10 移动到（10，10）；
+             H 90 X轴移动到90，（90，10）
+             V 90 Y轴移动到90，（90，90）
+             H 10 X轴移动到10，（10，90）
+             L 10 10 在当前点和（10，10）之间连线。-->
+      <path d="M10 10 H 90 V 90 H 10 L 10 10" />
+
+      <!-- 大写C和小写c都表示三次贝塞尔曲线；
+             但是大写C中的都是绝对坐标；
+             小写c中的都是相对坐标且都是相对于上一个指令的终点。-->
+      <path d="M20 180 c 30 -60, 130 -20, 180 40" />
+      <path d="M20 130 C 50 70, 150 110, 200 170c 30 -60, 130 -20, 180 40" />
+
+      <!-- Points -->
+      <circle cx="10" cy="10" r="2" fill="red" />
+      <circle cx="90" cy="90" r="2" fill="green" />
+      <circle cx="90" cy="10" r="2" fill="pink" />
+      <circle cx="10" cy="90" r="2" fill="yellow" />
+    </svg>
+  </body>
+</html>

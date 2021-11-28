@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>蒙版-动态视频文字</title>
+    <style>
+      .demo0 {
+        width: 887px;
+        height: 664px;
+        position: relative;
+        border: 1px solid #aaa;
+      }
+      .demo0 video {
+        width: 100%;
+      }
+
+      /* 定义好蒙版，黑色完全透明、白色完全不透明 */
+      .demo0 svg {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      .demo0 svg text {
+        font-size: 200px;
+        font-weight: 600;
+      }
+      .demo0 svg rect {
+        fill: white;
+      }
+
+      /* 蒙版不会直接渲染，只会在引用的地方起作用，因此定义个矩形用来引用定义好的蒙版 */
+      .demo0 svg > rect {
+        -webkit-mask: url(#mask);
+        mask: url(#mask);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo0">
+      <video autoplay playsinline muted loop preload>
+        <source src="../media/video-1.mp4" />
+      </video>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 887 664">
+        <defs>
+          <mask id="mask" x="0" y="0" width="100%" height="100%">
+            <rect x="0" y="0" width="100%" height="100%" />
+            <text x="180" y="400">TEST</text>
+          </mask>
+        </defs>
+        <rect x="0" y="0" width="100%" height="100%" />
+      </svg>
+    </div>
+  </body>
+</html>
