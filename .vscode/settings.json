@@ -3,5 +3,8 @@
   "files.associations": {
     "__functional_03": "c",
     "functional": "c"
-  }
+  },
+  "cSpell.words": [
+    "linewidth"
+  ]
 }

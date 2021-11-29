@@ -22,6 +22,6 @@
   "homepage": "https://github.com/newbieYoung/Html_learn#readme",
   "dependencies": {
     "lottie-web": "^5.8.1",
-    "three": "^0.134.0"
+    "three": "^0.135.0"
   }
 }
