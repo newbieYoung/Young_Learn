@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>path stroke</title>
+    <style>
+      body,
+      html {
+        background-color: #fff;
+        margin: 0px;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+    </style>
+    <!-- three.js -->
+    <script src="../node_modules/three/build/three.js"></script>
+  </head>
+  <body>
+    <div id="retina"></div>
+    <script type="module">
+      import * as THREE from "../node_modules/three/build/three.module.js";
+      import { SVGLoader } from "../node_modules/three/examples/jsm/loaders/SVGLoader.js";
+
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true, //抗锯齿开启
+      });
+      renderer.setSize(width, height); //设置渲染器宽度和高度
+      renderer.setClearColor("#ffffff", 1.0); //设置背景颜色
+      renderer.setPixelRatio(window.devicePixelRatio); //设置设备像素比
+      document.getElementById("retina").appendChild(renderer.domElement); //把渲染器放置到页面中
+
+      const camera = new THREE.OrthographicCamera(
+        width / -2,
+        width / 2,
+        height / 2,
+        height / -2,
+        -500,
+        1000
+      );
+      camera.position.set(0, 0, 800);
+      camera.up.set(0, 1, 0); // 正方向
+      camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+      // 场景、灯光
+      const pointLight = new THREE.PointLight(0xffffff, 1, 2000);
+      pointLight.position.set(70, 112, 98);
+      const ambientLight = new THREE.AmbientLight(0x333333);
+      const geometry = new THREE.BoxGeometry(100, 100, 100);
+      const material = new THREE.MeshLambertMaterial({
+        color: new THREE.Color(0xff0000),
+      });
+      const scene = new THREE.Scene();
+      scene.add(pointLight);
+      scene.add(ambientLight);
+
+      // path stroke
+      const style = {
+        stroke: "#000000",
+        strokeLineCap: "round", // butt、round、square
+        strokeLineJoin: "round", // round、bevel、miter
+        strokeMiterLimit: 4,
+        strokeOpacity: 1,
+        strokeWidth: 10,
+      };
+      const path = new THREE.Shape();
+      path.moveTo(10, 10);
+      path.lineTo(50, 50);
+      path.lineTo(50, 10);
+      scene.add(
+        new THREE.Mesh(
+          SVGLoader.pointsToStroke(path.extractPoints().shape, style),
+          new THREE.MeshBasicMaterial({
+            color: new THREE.Color().setStyle(style.stroke),
+            opacity: style.strokeOpacity,
+            transparent: style.strokeOpacity < 1,
+            depthWrite: false,
+            depthTest: false,
+          })
+        )
+      );
+
+      function render() {
+        renderer.clear();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+      }
+      render();
+    </script>
+  </body>
+</html>
