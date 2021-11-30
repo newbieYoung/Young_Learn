@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>shape path hole</title>
+    <style>
+      body,
+      html {
+        background-color: #fff;
+        margin: 0px;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+    </style>
+    <!-- three.js -->
+    <script src="../node_modules/three/build/three.js"></script>
+  </head>
+  <body>
+    <div id="retina"></div>
+    <script type="module">
+      import * as THREE from "../node_modules/three/build/three.module.js";
+
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true, //抗锯齿开启
+      });
+      renderer.setSize(width, height); //设置渲染器宽度和高度
+      renderer.setClearColor("#ffffff", 1.0); //设置背景颜色
+      renderer.setPixelRatio(window.devicePixelRatio); //设置设备像素比
+      document.getElementById("retina").appendChild(renderer.domElement); //把渲染器放置到页面中
+
+      const camera = new THREE.OrthographicCamera(
+        width / -2,
+        width / 2,
+        height / 2,
+        height / -2,
+        -500,
+        1000
+      );
+      camera.position.set(0, 0, 800);
+      camera.up.set(0, 1, 0); // 正方向
+      camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+      // 场景、灯光
+      const pointLight = new THREE.PointLight(0xffffff, 1, 2000);
+      pointLight.position.set(70, 112, 98);
+      const ambientLight = new THREE.AmbientLight(0x333333);
+      const geometry = new THREE.BoxGeometry(100, 100, 100);
+      const material = new THREE.MeshLambertMaterial({
+        color: new THREE.Color(0xff0000),
+      });
+      const scene = new THREE.Scene();
+      scene.add(pointLight);
+      scene.add(ambientLight);
+
+      // O
+      const shape = new THREE.Shape();
+      shape.moveTo(55.95800018310547, 55.20800018310547);
+      shape.bezierCurveTo(
+        40.805999755859375,
+        70.0009994506836,
+        22.152999877929688,
+        77.39800262451172,
+        0,
+        77.39800262451172
+      );
+      shape.bezierCurveTo(
+        -22.156999588012695,
+        77.39800262451172,
+        -40.810001373291016,
+        70.0009994506836,
+        -55.95899963378906,
+        55.20800018310547
+      );
+      shape.bezierCurveTo(
+        -71.11100006103516,
+        40.41400146484375,
+        -78.68399810791016,
+        22.01300048828125,
+        -78.68399810791016,
+        0.0010000000474974513
+      );
+      shape.bezierCurveTo(
+        -78.68399810791016,
+        -22.009000778198242,
+        -71.11100006103516,
+        -40.41299819946289,
+        -55.95899963378906,
+        -55.207000732421875
+      );
+      shape.bezierCurveTo(
+        -40.810001373291016,
+        -70.0009994506836,
+        -22.156999588012695,
+        -77.39800262451172,
+        0,
+        -77.39800262451172
+      );
+      shape.bezierCurveTo(
+        22.152999877929688,
+        -77.39800262451172,
+        40.805999755859375,
+        -70.0009994506836,
+        55.95800018310547,
+        -55.207000732421875
+      );
+      shape.bezierCurveTo(
+        71.10700225830078,
+        -40.41299819946289,
+        78.68399810791016,
+        -22.009000778198242,
+        78.68399810791016,
+        0.0010000000474974513
+      );
+      shape.bezierCurveTo(
+        78.68399810791016,
+        22.01300048828125,
+        71.10700225830078,
+        40.41400146484375,
+        55.95800018310547,
+        55.20800018310547
+      );
+
+      const path = new THREE.Path();
+      path.moveTo(44.595001220703125, 0.10700000077486038);
+      path.bezierCurveTo(
+        44.595001220703125,
+        -13.255999565124512,
+        40.30699920654297,
+        -24.6560001373291,
+        31.731000900268555,
+        -34.0890007019043
+      );
+      path.bezierCurveTo(
+        23.155000686645508,
+        -43.52299880981445,
+        12.61299991607666,
+        -48.2400016784668,
+        0.10700000077486038,
+        -48.2400016784668
+      );
+      path.bezierCurveTo(
+        -12.402000427246094,
+        -48.2400016784668,
+        -22.940000534057617,
+        -43.52299880981445,
+        -31.516000747680664,
+        -34.0890007019043
+      );
+      path.bezierCurveTo(
+        -40.09199905395508,
+        -24.6560001373291,
+        -44.38100051879883,
+        -13.255999565124512,
+        -44.38100051879883,
+        0.10700000077486038
+      );
+      path.bezierCurveTo(
+        -44.38100051879883,
+        13.472999572753906,
+        -40.09199905395508,
+        24.836999893188477,
+        -31.516000747680664,
+        34.196998596191406
+      );
+      path.bezierCurveTo(
+        -22.940000534057617,
+        43.560001373291016,
+        -12.402000427246094,
+        48.24100112915039,
+        0.10700000077486038,
+        48.24100112915039
+      );
+      path.bezierCurveTo(
+        12.61299991607666,
+        48.24100112915039,
+        23.155000686645508,
+        43.560001373291016,
+        31.731000900268555,
+        34.196998596191406
+      );
+      path.bezierCurveTo(
+        40.30699920654297,
+        24.836999893188477,
+        44.595001220703125,
+        13.472999572753906,
+        44.595001220703125,
+        0.10700000077486038
+      );
+      shape.holes.push(path);
+
+      scene.add(
+        new THREE.Mesh(
+          new THREE.ShapeGeometry([shape]),
+          new THREE.MeshBasicMaterial({
+            color: new THREE.Color().setStyle("#000000"),
+            opacity: 1,
+            transparent: false,
+            depthWrite: false, // 2d
+            depthTest: false,
+          })
+        )
+      );
+
+      function render() {
+        renderer.clear();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+      }
+      render();
+    </script>
+  </body>
+</html>
