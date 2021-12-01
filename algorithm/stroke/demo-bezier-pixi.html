@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>bezier demo pixi</title>
+    <script src="../../node_modules/pixi.js/dist/browser/pixi.js"></script>
+  </head>
+  <body>
+    <script>
+      window.onload = function () {
+        const renderer = PIXI.autoDetectRenderer({
+          width: 256,
+          height: 256,
+          transparent: true,
+          antialias: true,
+          resolution: window.devicePixelRatio,
+        });
+        document.body.appendChild(renderer.view);
+
+        const stage = new PIXI.Container();
+
+        const path = new PIXI.Graphics();
+        path.lineStyle({
+          cap: "round",
+          join: "round",
+          width: 20,
+          color: 0xff0000,
+          miterLimit: 10,
+          alpha: 1,
+        });
+        path.moveTo(50, 50);
+
+        // 174 triangles (width 1, cap butt, join miter)
+        // 174 triangles (width 2, cap butt, join miter)
+        // 174 triangles (width 5, cap butt, join miter)
+
+        // 492 triangles (width 1, cap round, join round)
+        // 516 triangles (width 2, cap round, join round)
+        // 540 triangles (width 3, cap round, join round)
+        // 558 triangles (width 4, cap round, join round)
+        // 570 triangles (width 5, cap round, join round)
+        // 582 triangles (width 6, cap round, join round)
+        // 615 triangles (width 7, cap round, join round)
+        // 630 triangles (width 8, cap round, join round)
+        // 648 triangles (width 9, cap round, join round)
+        // 666 triangles (width 10, cap round, join round)
+        // 777 triangles (width 20, cap round, join round)
+        path.bezierCurveTo(100, 200, 200, 200, 240, 100);
+        path.endFill();
+
+        stage.addChild(path);
+
+        // let ticker = PIXI.Ticker.shared;
+        // ticker.start();
+        // ticker.add(function () {
+        //   renderer.render(stage);
+        // });
+        renderer.render(stage);
+      };
+    </script>
+  </body>
+</html>

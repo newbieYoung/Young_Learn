@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>bezier demo three</title>
+    <style>
+      body,
+      html {
+        background-color: #fff;
+        margin: 0px;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="retina"></div>
+    <script type="module">
+      import * as THREE from "../../node_modules/three/build/three.module.js";
+      import { SVGLoader } from "../../node_modules/three/examples/jsm/loaders/SVGLoader.js";
+      import * as BufferGeometryUtils from "../../node_modules/three/examples/jsm/utils/BufferGeometryUtils.js";
+      import { buildNonNativeLine } from "./buildNonNativeLine.js";
+
+      // buildNonNativeLine fast then SVGLoader.pointsToStroke
+      SVGLoader.pointsToStroke = function (points, style) {
+        const graphicsData = {
+          points: [],
+          lineStyle: {
+            alignment: 0.5,
+            cap: style.strokeLineCap,
+            join: style.strokeLineJoin,
+            miterLimit: style.strokeMiterLimit,
+            width: style.strokeWidth,
+          },
+        };
+        for (let i = 0; i < points.length; i++) {
+          graphicsData.points.push(points[i].x, points[i].y);
+        }
+        const graphicsGeometry = {
+          points: [],
+          indices: [],
+        };
+
+        buildNonNativeLine(graphicsData, graphicsGeometry);
+
+        const points3D = [];
+        for (let i = 0; i < graphicsGeometry.points.length; i += 2) {
+          points3D.push(
+            graphicsGeometry.points[i],
+            graphicsGeometry.points[i + 1],
+            0
+          );
+        }
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(points3D, 3)
+        );
+        geometry.index = new THREE.Uint16BufferAttribute(
+          graphicsGeometry.indices,
+          1
+        );
+
+        return geometry;
+      };
+
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true, //抗锯齿开启
+      });
+      renderer.setSize(width, height); //设置渲染器宽度和高度
+      renderer.setClearColor("#ffffff", 1.0); //设置背景颜色
+      renderer.setPixelRatio(window.devicePixelRatio); //设置设备像素比
+      document.getElementById("retina").appendChild(renderer.domElement); //把渲染器放置到页面中
+
+      const camera = new THREE.OrthographicCamera(
+        width / -2,
+        width / 2,
+        height / 2,
+        height / -2,
+        -500,
+        1000
+      );
+      camera.position.set(0, 0, 800);
+      camera.up.set(0, 1, 0); // 正方向
+      camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+      // 场景、灯光
+      const scene = new THREE.Scene();
+
+      // 3030 triangles
+      // path stroke
+      const style = {
+        stroke: "#ff0000",
+        strokeWidth: 4,
+        strokeLineCap: "butt", // butt、round、square
+        strokeLineJoin: "miter", // miter、round、bevel
+        strokeMiterLimit: 3,
+        strokeOpacity: 1,
+      };
+      const divisions = 6; // default 12
+      console.log(window.performance.now());
+
+      // Y
+      const y = new THREE.Shape();
+      y.moveTo(-24.382999420166016, 23.492000579833984);
+      y.lineTo(-84.1510009765625, -75.82499694824219);
+      y.bezierCurveTo(
+        -86.52999877929688,
+        -79.69100189208984,
+        -88.31400299072266,
+        -84.1500015258789,
+        -88.31400299072266,
+        -88.61100006103516
+      );
+      y.bezierCurveTo(
+        -88.31400299072266,
+        -105.26300048828125,
+        -73.14900207519531,
+        -110.91300201416016,
+        -63.63399887084961,
+        -110.91300201416016
+      );
+      y.bezierCurveTo(
+        -52.0369987487793,
+        -110.91300201416016,
+        -46.685001373291016,
+        -106.15499877929688,
+        -41.630001068115234,
+        -96.63899993896484
+      );
+      y.lineTo(0.8920000195503235, -18.43600082397461);
+      y.lineTo(43.117000579833984, -96.63899993896484);
+      y.bezierCurveTo(
+        48.76599884033203,
+        -107.34500122070312,
+        54.11800003051758,
+        -110.91300201416016,
+        64.22899627685547,
+        -110.91300201416016
+      );
+      y.bezierCurveTo(
+        73.14900207519531,
+        -110.91300201416016,
+        88.31400299072266,
+        -105.26300048828125,
+        88.31400299072266,
+        -88.61100006103516
+      );
+      y.bezierCurveTo(
+        88.31400299072266,
+        -84.1500015258789,
+        86.52999877929688,
+        -79.69100189208984,
+        84.1510009765625,
+        -75.82499694824219
+      );
+      y.lineTo(24.382999420166016, 23.492000579833984);
+      y.lineTo(24.382999420166016, 86.53099822998047);
+      y.bezierCurveTo(
+        24.382999420166016,
+        101.10099792480469,
+        14.868000030517578,
+        110.91300201416016,
+        0,
+        110.91300201416016
+      );
+      y.bezierCurveTo(
+        -14.868000030517578,
+        110.91300201416016,
+        -24.382999420166016,
+        101.10099792480469,
+        -24.382999420166016,
+        86.53099822998047
+      );
+      y.lineTo(-24.382999420166016, 23.492000579833984);
+      const yMesh = new THREE.Mesh(
+        SVGLoader.pointsToStroke(y.extractPoints(divisions).shape, style),
+        new THREE.MeshBasicMaterial({
+          color: new THREE.Color().setStyle(style.stroke),
+          opacity: style.strokeOpacity,
+          transparent: style.strokeOpacity < 1,
+          depthWrite: false,
+          depthTest: false,
+        })
+      );
+      yMesh.matrixAutoUpdate = false;
+      yMesh.matrix.copy(new THREE.Matrix4().makeTranslation(-350, 200, 0));
+
+      // A
+      const a1 = new THREE.Shape();
+      a1.moveTo(68.0459976196289, 15.120002746582031);
+      a1.bezierCurveTo(
+        72.20899963378906,
+        4.118003845214844,
+        79.94099426269531,
+        0.25099945068359375,
+        91.83499908447266,
+        0.25099945068359375
+      );
+      a1.lineTo(103.43099975585938, 0.25099945068359375);
+      a1.bezierCurveTo(
+        114.43299865722656,
+        0.25099945068359375,
+        124.2459945678711,
+        2.9280014038085938,
+        129.59799194335938,
+        18.093002319335938
+      );
+      a1.lineTo(188.47500610351562, 181.93499755859375);
+      a1.bezierCurveTo(
+        190.25900268554688,
+        186.69200134277344,
+        193.23300170898438,
+        195.31600952148438,
+        193.23300170898438,
+        200.6669921875
+      );
+      a1.bezierCurveTo(
+        193.23300170898438,
+        212.56201171875,
+        182.82598876953125,
+        222.07699584960938,
+        170.33700561523438,
+        222.07699584960938
+      );
+      a1.bezierCurveTo(
+        159.63198852539062,
+        222.07699584960938,
+        151.89999389648438,
+        218.2130126953125,
+        148.33200073242188,
+        208.69699096679688
+      );
+      a1.lineTo(135.84300231933594, 173.01499938964844);
+      a1.lineTo(57.34199905395508, 173.01499938964844);
+      a1.lineTo(44.55599594116211, 208.69699096679688);
+      a1.bezierCurveTo(
+        41.284996032714844,
+        218.2130126953125,
+        34.44499588012695,
+        222.07699584960938,
+        22.847999572753906,
+        222.07699584960938
+      );
+      a1.bezierCurveTo(
+        9.466995239257812,
+        222.07699584960938,
+        0.24900054931640625,
+        213.7519989013672,
+        0.24900054931640625,
+        200.6669921875
+      );
+      a1.bezierCurveTo(
+        0.24900054931640625,
+        195.31600952148438,
+        3.2229995727539062,
+        186.69200134277344,
+        5.006996154785156,
+        181.93499755859375
+      );
+      a1.lineTo(68.0459976196289, 15.120002746582031);
+
+      const a2 = new THREE.Shape();
+      a2.moveTo(97.4849973320961, 53.18000030517578);
+      a2.bezierCurveTo(
+        97.48500061035156,
+        53.18000030517578,
+        96.88999938964844,
+        53.18000030517578,
+        96.88999938964844,
+        53.18000030517578
+      );
+      a2.lineTo(68.0459976196289, 139.11500549316406);
+      a2.lineTo(125.13899993896484, 139.11500549316406);
+      a2.lineTo(97.48500061035156, 53.18000030517578);
+
+      const aMesh = new THREE.Mesh(
+        BufferGeometryUtils.mergeBufferGeometries([
+          SVGLoader.pointsToStroke(a1.extractPoints(divisions).shape, style),
+          SVGLoader.pointsToStroke(a2.extractPoints(divisions).shape, style),
+        ]),
+        new THREE.MeshBasicMaterial({
+          color: new THREE.Color().setStyle(style.stroke),
+          opacity: style.strokeOpacity,
+          transparent: style.strokeOpacity < 1,
+          depthWrite: false,
+          depthTest: false,
+        })
+      );
+      aMesh.matrixAutoUpdate = false;
+      aMesh.matrix.copy(new THREE.Matrix4().makeTranslation(-50, 0, 0));
+
+      // P1
+      const p11 = new THREE.Shape();
+      p11.moveTo(-88.61199951171875, -80.43499755859375);
+      p11.bezierCurveTo(
+        -88.61199951171875,
+        -102.14099884033203,
+        -77.31199645996094,
+        -108.9800033569336,
+        -60.064998626708984,
+        -108.9800033569336
+      );
+      p11.lineTo(14.569999694824219, -108.9800033569336);
+      p11.bezierCurveTo(
+        55.60499954223633,
+        -108.9800033569336,
+        88.61199951171875,
+        -88.76000213623047,
+        88.61199951171875,
+        -41.18299865722656
+      );
+      p11.bezierCurveTo(
+        88.61199951171875,
+        -2.2300000190734863,
+        61.553001403808594,
+        26.613000869750977,
+        14.27299976348877,
+        26.613000869750977
+      );
+      p11.lineTo(-39.845001220703125, 26.613000869750977);
+      p11.lineTo(-39.845001220703125, 84.5979995727539);
+      p11.bezierCurveTo(
+        -39.845001220703125,
+        99.16799926757812,
+        -49.361000061035156,
+        108.9800033569336,
+        -64.22899627685547,
+        108.9800033569336
+      );
+      p11.bezierCurveTo(
+        -79.09700012207031,
+        108.9800033569336,
+        -88.61199951171875,
+        99.16799926757812,
+        -88.61199951171875,
+        84.5979995727539
+      );
+      p11.lineTo(-88.61199951171875, -80.43499755859375);
+      const p12 = new THREE.Shape();
+      p12.moveTo(-38.845001220703125, -10.854000091552734);
+      p12.lineTo(12.649999618530273, -10.854000091552734);
+      p12.bezierCurveTo(
+        32.2760009765625,
+        -10.854000091552734,
+        46.84600067138672,
+        -22.746999740600586,
+        46.84600067138672,
+        -41.18299865722656
+      );
+      p12.bezierCurveTo(
+        46.84600067138672,
+        -62.59299850463867,
+        31.680999755859375,
+        -71.51399993896484,
+        7.5960001945495605,
+        -71.51399993896484
+      );
+      p12.lineTo(-38.845001220703125, -71.51399993896484);
+      p12.lineTo(-38.845001220703125, -10.854000091552734);
+      const p1Mesh = new THREE.Mesh(
+        BufferGeometryUtils.mergeBufferGeometries([
+          SVGLoader.pointsToStroke(p11.extractPoints(divisions).shape, style),
+          SVGLoader.pointsToStroke(p12.extractPoints(divisions).shape, style),
+        ]),
+        new THREE.MeshBasicMaterial({
+          color: new THREE.Color().setStyle(style.stroke),
+          opacity: style.strokeOpacity,
+          transparent: style.strokeOpacity < 1,
+          depthWrite: false,
+          depthTest: false,
+        })
+      );
+      p1Mesh.matrixAutoUpdate = false;
+      p1Mesh.matrix.copy(new THREE.Matrix4().makeTranslation(250, 200, 0));
+
+      // p2
+      const p21 = new THREE.Shape();
+      p21.moveTo(-88.61199951171875, -80.43499755859375);
+      p21.bezierCurveTo(
+        -88.61199951171875,
+        -102.14099884033203,
+        -77.31199645996094,
+        -108.9800033569336,
+        -60.064998626708984,
+        -108.9800033569336
+      );
+      p21.lineTo(14.569999694824219, -108.9800033569336);
+      p21.bezierCurveTo(
+        55.60499954223633,
+        -108.9800033569336,
+        88.61199951171875,
+        -88.76000213623047,
+        88.61199951171875,
+        -41.18299865722656
+      );
+      p21.bezierCurveTo(
+        88.61199951171875,
+        -2.2300000190734863,
+        61.553001403808594,
+        26.613000869750977,
+        14.27299976348877,
+        26.613000869750977
+      );
+      p21.lineTo(-39.845001220703125, 26.613000869750977);
+      p21.lineTo(-39.845001220703125, 84.5979995727539);
+      p21.bezierCurveTo(
+        -39.845001220703125,
+        99.16799926757812,
+        -49.36000061035156,
+        108.9800033569336,
+        -64.22799682617188,
+        108.9800033569336
+      );
+      p21.bezierCurveTo(
+        -79.09600067138672,
+        108.9800033569336,
+        -88.61199951171875,
+        99.16799926757812,
+        -88.61199951171875,
+        84.5979995727539
+      );
+      p21.lineTo(-88.61199951171875, -80.43499755859375);
+      const p22 = new THREE.Shape();
+      p22.moveTo(-39.845001220703125, -10.854000091552734);
+      p22.lineTo(5.650000095367432, -10.854000091552734);
+      p22.bezierCurveTo(
+        25.274999618530273,
+        -10.854000091552734,
+        39.84600067138672,
+        -22.746999740600586,
+        39.84600067138672,
+        -41.18299865722656
+      );
+      p22.bezierCurveTo(
+        39.84600067138672,
+        -62.59299850463867,
+        24.680999755859375,
+        -71.51399993896484,
+        0.5960000157356262,
+        -71.51399993896484
+      );
+      p22.lineTo(-39.845001220703125, -71.51399993896484);
+      p22.lineTo(-39.845001220703125, -10.854000091552734);
+      const p2Mesh = new THREE.Mesh(
+        BufferGeometryUtils.mergeBufferGeometries([
+          SVGLoader.pointsToStroke(p21.extractPoints(divisions).shape, style),
+          SVGLoader.pointsToStroke(p22.extractPoints(divisions).shape, style),
+        ]),
+        new THREE.MeshBasicMaterial({
+          color: new THREE.Color().setStyle(style.stroke),
+          opacity: style.strokeOpacity,
+          transparent: style.strokeOpacity < 1,
+          depthWrite: false,
+          depthTest: false,
+        })
+      );
+      p2Mesh.matrixAutoUpdate = false;
+      p2Mesh.matrix.copy(new THREE.Matrix4().makeTranslation(450, 200, 0));
+
+      // H
+      const h = new THREE.Shape();
+      h.moveTo(-93.0719985961914, -86.52999877929688);
+      h.bezierCurveTo(
+        -93.0719985961914,
+        -101.10099792480469,
+        -83.55699920654297,
+        -110.91300201416016,
+        -68.68900299072266,
+        -110.91300201416016
+      );
+      h.bezierCurveTo(
+        -53.82099914550781,
+        -110.91300201416016,
+        -44.305999755859375,
+        -101.10099792480469,
+        -44.305999755859375,
+        -86.52999877929688
+      );
+      h.lineTo(-44.305999755859375, -25.8700008392334);
+      h.lineTo(44.305999755859375, -25.8700008392334);
+      h.lineTo(44.305999755859375, -86.52999877929688);
+      h.bezierCurveTo(
+        44.305999755859375,
+        -101.10099792480469,
+        53.82099914550781,
+        -110.91300201416016,
+        68.68900299072266,
+        -110.91300201416016
+      );
+      h.bezierCurveTo(
+        83.55699920654297,
+        -110.91300201416016,
+        93.0719985961914,
+        -101.10099792480469,
+        93.0719985961914,
+        -86.52999877929688
+      );
+      h.lineTo(93.0719985961914, 86.53099822998047);
+      h.bezierCurveTo(
+        93.0719985961914,
+        101.0999984741211,
+        83.55699920654297,
+        110.91300201416016,
+        68.68900299072266,
+        110.91300201416016
+      );
+      h.bezierCurveTo(
+        53.82099914550781,
+        110.91300201416016,
+        44.305999755859375,
+        101.0999984741211,
+        44.305999755859375,
+        86.53099822998047
+      );
+      h.lineTo(44.305999755859375, 15.164999961853027);
+      h.lineTo(-44.305999755859375, 15.164999961853027);
+      h.lineTo(-44.305999755859375, 86.53099822998047);
+      h.bezierCurveTo(
+        -44.305999755859375,
+        101.0999984741211,
+        -53.82099914550781,
+        110.91300201416016,
+        -68.68900299072266,
+        110.91300201416016
+      );
+      h.bezierCurveTo(
+        -83.55699920654297,
+        110.91300201416016,
+        -93.0719985961914,
+        101.0999984741211,
+        -93.0719985961914,
+        86.53099822998047
+      );
+      h.lineTo(-93.0719985961914, -86.52999877929688);
+      const hMesh = new THREE.Mesh(
+        SVGLoader.pointsToStroke(h.extractPoints(divisions).shape, style),
+        new THREE.MeshBasicMaterial({
+          color: new THREE.Color().setStyle(style.stroke),
+          opacity: style.strokeOpacity,
+          transparent: style.strokeOpacity < 1,
+          depthWrite: false,
+          depthTest: false,
+        })
+      );
+      hMesh.matrixAutoUpdate = false;
+      hMesh.matrix.copy(new THREE.Matrix4().makeTranslation(-150, 200, 0));
+      console.log(window.performance.now());
+
+      console.log(aMesh);
+      console.log(p1Mesh);
+      console.log(p2Mesh);
+      console.log(hMesh);
+      console.log(yMesh);
+      scene.add(aMesh);
+      scene.add(p1Mesh);
+      scene.add(p2Mesh);
+      scene.add(hMesh);
+      scene.add(yMesh);
+
+      function render() {
+        renderer.clear();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+      }
+      render();
+    </script>
+  </body>
+</html>

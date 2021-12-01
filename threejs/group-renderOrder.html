@@ -15,8 +15,6 @@
         overflow-y: auto;
       }
     </style>
-    <!-- three.js -->
-    <script src="../node_modules/three/build/three.js"></script>
   </head>
   <body>
     <div id="retina"></div>
@@ -46,16 +44,7 @@
       camera.lookAt(new THREE.Vector3(0, 0, 0));
 
       // 场景、灯光
-      const pointLight = new THREE.PointLight(0xffffff, 1, 2000);
-      pointLight.position.set(70, 112, 98);
-      const ambientLight = new THREE.AmbientLight(0x333333);
-      const geometry = new THREE.BoxGeometry(100, 100, 100);
-      const material = new THREE.MeshLambertMaterial({
-        color: new THREE.Color(0xff0000),
-      });
       const scene = new THREE.Scene();
-      scene.add(pointLight);
-      scene.add(ambientLight);
 
       const tri1 = new THREE.Shape();
       tri1.moveTo(0, 0);

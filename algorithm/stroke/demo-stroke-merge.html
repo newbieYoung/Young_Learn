@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>geometry merge stroke</title>
+    <style>
+      body,
+      html {
+        background-color: #fff;
+        margin: 0px;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="retina"></div>
+    <script type="module">
+      import * as THREE from "../../node_modules/three/build/three.module.js";
+      import { SVGLoader } from "../../node_modules/three/examples/jsm/loaders/SVGLoader.js";
+      import * as BufferGeometryUtils from "../../node_modules/three/examples/jsm/utils/BufferGeometryUtils.js";
+      import { buildNonNativeLine } from "./buildNonNativeLine.js";
+
+      // buildNonNativeLine fast then SVGLoader.pointsToStroke
+      SVGLoader.pointsToStroke = function (points, style) {
+        const graphicsData = {
+          points: [],
+          lineStyle: {
+            alignment: 0.5,
+            cap: style.strokeLineCap,
+            join: style.strokeLineJoin,
+            miterLimit: style.strokeMiterLimit,
+            width: style.strokeWidth,
+          },
+        };
+        for (let i = 0; i < points.length; i++) {
+          graphicsData.points.push(points[i].x, points[i].y);
+        }
+        const graphicsGeometry = {
+          points: [],
+          indices: [],
+        };
+
+        buildNonNativeLine(graphicsData, graphicsGeometry);
+
+        const points3D = [];
+        for (let i = 0; i < graphicsGeometry.points.length; i += 2) {
+          points3D.push(
+            graphicsGeometry.points[i],
+            graphicsGeometry.points[i + 1],
+            0
+          );
+        }
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(points3D, 3)
+        );
+        geometry.index = new THREE.Uint16BufferAttribute(
+          graphicsGeometry.indices,
+          1
+        );
+
+        return geometry;
+      };
+
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true, //抗锯齿开启
+      });
+      renderer.setSize(width, height); //设置渲染器宽度和高度
+      renderer.setClearColor("#ffffff", 1.0); //设置背景颜色
+      renderer.setPixelRatio(window.devicePixelRatio); //设置设备像素比
+      document.getElementById("retina").appendChild(renderer.domElement); //把渲染器放置到页面中
+
+      const camera = new THREE.OrthographicCamera(
+        width / -2,
+        width / 2,
+        height / 2,
+        height / -2,
+        -500,
+        1000
+      );
+      camera.position.set(0, 0, 800);
+      camera.up.set(0, 1, 0); // 正方向
+      camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+      // 场景、灯光
+      const scene = new THREE.Scene();
+      const divisions = 6; // default 12
+
+      // path stroke
+      const style = {
+        stroke: "#ff0000",
+        strokeWidth: 5,
+        strokeLineCap: "round", // butt、round、square
+        strokeLineJoin: "round", // miter、round、bevel
+        strokeMiterLimit: 10,
+        strokeOpacity: 1,
+      };
+
+      const commands = [
+        "st_5_round_round_10",
+        "path",
+        "m(68,15)",
+        "c(72,4,79,0,91,0)",
+        "l(103,0)",
+        "c(114,0,124,2,129,18)",
+        "l(188,181)",
+        "c(190,186,193,195,193,200)",
+        "c(193,212,182,222,170,222)",
+        "c(159,222,151,218,148,208)",
+        "l(135,173)",
+        "l(57,173)",
+        "l(44,208)",
+        "c(41,218,34,222,22,222)",
+        "c(9,222,0,213,0,200)",
+        "c(0,195,3,186,5,181)",
+        "l(68,15)",
+        "st_5_round_round_10",
+        "path",
+        "m(97,53)",
+        "c(97,53,96,53,96,53)",
+        "l(68,139)",
+        "l(125,139)",
+        "l(97,53)",
+      ];
+
+      function subdivide(commands) {
+        let style;
+        let movePoint;
+        const buffers = [];
+        for (let i = 0; i < commands.length; i++) {
+          const command = commands[i];
+          if (command.indexOf("st_") == 0) {
+            const arr = command.split("_");
+            style = {
+              strokeWidth: parseFloat(arr[1]),
+              strokeLineCap: arr[2],
+              strokeLineJoin: arr[3],
+              strokeMiterLimit: parseFloat(arr[4]),
+            };
+          } else if (command[0] == "m") {
+            movePoint = command.substring(2, command.length - 1).split(",");
+          } else if (command[0] == "l") {
+            const linePoint = command
+              .substring(2, command.length - 1)
+              .split(",");
+            const path = new THREE.Shape();
+            path.moveTo(parseFloat(movePoint[0]), parseFloat(movePoint[1]));
+            path.lineTo(parseFloat(linePoint[0]), parseFloat(linePoint[1]));
+            buffers.push(
+              SVGLoader.pointsToStroke(
+                path.extractPoints(divisions).shape,
+                style
+              )
+            );
+            movePoint = linePoint;
+          } else if (command[0] == "c") {
+            const bezierPoint = command
+              .substring(2, command.length - 1)
+              .split(",");
+            const path = new THREE.Shape();
+            path.moveTo(parseFloat(movePoint[0]), parseFloat(movePoint[1]));
+            path.bezierCurveTo(
+              parseFloat(bezierPoint[0]),
+              parseFloat(bezierPoint[1]),
+              parseFloat(bezierPoint[2]),
+              parseFloat(bezierPoint[3]),
+              parseFloat(bezierPoint[4]),
+              parseFloat(bezierPoint[5])
+            );
+            buffers.push(
+              SVGLoader.pointsToStroke(
+                path.extractPoints(divisions).shape,
+                style
+              )
+            );
+            movePoint = [bezierPoint[4], bezierPoint[5]];
+          }
+        }
+
+        return buffers;
+      }
+
+      // 普通绘制
+      console.log(window.performance.now());
+      const a1 = new THREE.Shape();
+      a1.moveTo(68, 15);
+      a1.bezierCurveTo(72, 4, 79, 0, 91, 0);
+      a1.lineTo(103, 0);
+      a1.bezierCurveTo(114, 0, 124, 2, 129, 18);
+      a1.lineTo(188, 181);
+      a1.bezierCurveTo(190, 186, 193, 195, 193, 200);
+      a1.bezierCurveTo(193, 212, 182, 222, 170, 222);
+      a1.bezierCurveTo(159, 222, 151, 218, 148, 208);
+      a1.lineTo(135, 173);
+      a1.lineTo(57, 173);
+      a1.lineTo(44, 208);
+      a1.bezierCurveTo(41, 218, 34, 222, 22, 222);
+      a1.bezierCurveTo(9, 222, 0, 213, 0, 200);
+      a1.bezierCurveTo(0, 195, 3, 186, 5, 181);
+      a1.lineTo(68, 15);
+      const a2 = new THREE.Shape();
+      a2.moveTo(97, 53);
+      a2.bezierCurveTo(97, 53, 96, 53, 96, 53);
+      a2.lineTo(68, 139);
+      a2.lineTo(125, 139);
+      a2.lineTo(97, 53);
+      const aMesh = new THREE.Mesh(
+        BufferGeometryUtils.mergeBufferGeometries([
+          SVGLoader.pointsToStroke(a1.extractPoints(divisions).shape, style),
+          SVGLoader.pointsToStroke(a2.extractPoints(divisions).shape, style),
+        ]),
+        new THREE.MeshBasicMaterial({
+          color: new THREE.Color().setStyle(style.stroke),
+          opacity: style.strokeOpacity,
+          transparent: style.strokeOpacity < 1,
+          depthWrite: false,
+          depthTest: false,
+        })
+      );
+      console.log(window.performance.now());
+      scene.add(aMesh);
+
+      // 细分绘制
+      console.log(window.performance.now());
+      const buffers = subdivide(commands);
+      const subMesh = new THREE.Mesh(
+        BufferGeometryUtils.mergeBufferGeometries(buffers),
+        new THREE.MeshBasicMaterial({
+          color: new THREE.Color().setStyle(style.stroke),
+          opacity: style.strokeOpacity,
+          transparent: style.strokeOpacity < 1,
+          depthWrite: false,
+          depthTest: false,
+        })
+      );
+      subMesh.matrixAutoUpdate = false;
+      subMesh.matrix.copy(new THREE.Matrix4().makeTranslation(-200, 0, 0));
+      console.log(window.performance.now());
+      scene.add(subMesh);
+
+      function render() {
+        renderer.clear();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+      }
+      render();
+    </script>
+  </body>
+</html>

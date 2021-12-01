@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>path stroke</title>
+    <title>bezier demo three</title>
     <style>
       body,
       html {
@@ -19,8 +19,8 @@
   <body>
     <div id="retina"></div>
     <script type="module">
-      import * as THREE from "../node_modules/three/build/three.module.js";
-      import { SVGLoader } from "../node_modules/three/examples/jsm/loaders/SVGLoader.js";
+      import * as THREE from "../../node_modules/three/build/three.module.js";
+      import { SVGLoader } from "../../node_modules/three/examples/jsm/loaders/SVGLoader.js";
 
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -49,17 +49,26 @@
 
       // path stroke
       const style = {
-        stroke: "#000000",
-        strokeLineCap: "round", // butt、round、square
-        strokeLineJoin: "round", // round、bevel、miter
-        strokeMiterLimit: 4,
-        strokeOpacity: 1,
+        stroke: "#ff0000",
         strokeWidth: 10,
+        strokeLineCap: "round", // butt、round、square
+        strokeLineJoin: "round", // miter、round、bevel
+        strokeMiterLimit: 10,
+        strokeOpacity: 1,
       };
+
       const path = new THREE.Shape();
-      path.moveTo(10, 10);
-      path.lineTo(50, 50);
-      path.lineTo(50, 10);
+      path.moveTo(50, 50);
+
+      // 72 triangles (width 1, cap butt, join miter)
+      // 72 triangles (width 2, cap butt, join miter)
+      // 72 triangles (width 5, cap butt, join miter)
+
+      // 606 triangles (width 1, cap round, join round)
+      // 606 triangles (width 5, cap round, join round)
+      // 606 triangles (width 10, cap round, join round)
+      path.bezierCurveTo(100, 200, 200, 200, 240, 100);
+      console.log(path.extractPoints());
       scene.add(
         new THREE.Mesh(
           SVGLoader.pointsToStroke(path.extractPoints().shape, style),

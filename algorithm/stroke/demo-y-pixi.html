@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>y demo pixi</title>
+    <script src="../../node_modules/pixi.js/dist/browser/pixi.js"></script>
+    <style>
+      canvas {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      window.onload = function () {
+        const renderer = PIXI.autoDetectRenderer({
+          width: 1067,
+          height: 600,
+          transparent: true,
+          antialias: true,
+          resolution: window.devicePixelRatio,
+        });
+        document.body.appendChild(renderer.view);
+
+        const stage = new PIXI.Container();
+
+        // path stroke
+        const style = {
+          cap: "butt",
+          join: "miter",
+          width: 4,
+          color: 0xff0000,
+          miterLimit: 3,
+          alpha: 1,
+        };
+        console.log(window.performance.now());
+
+        // Y
+        const y = new PIXI.Graphics();
+        y.lineStyle(style);
+        y.moveTo(-24.382999420166016, 23.492000579833984);
+        y.lineTo(-84.1510009765625, -75.82499694824219);
+        y.bezierCurveTo(
+          -86.52999877929688,
+          -79.69100189208984,
+          -88.31400299072266,
+          -84.1500015258789,
+          -88.31400299072266,
+          -88.61100006103516
+        );
+        y.bezierCurveTo(
+          -88.31400299072266,
+          -105.26300048828125,
+          -73.14900207519531,
+          -110.91300201416016,
+          -63.63399887084961,
+          -110.91300201416016
+        );
+        y.bezierCurveTo(
+          -52.0369987487793,
+          -110.91300201416016,
+          -46.685001373291016,
+          -106.15499877929688,
+          -41.630001068115234,
+          -96.63899993896484
+        );
+        y.lineTo(0.8920000195503235, -18.43600082397461);
+        y.lineTo(43.117000579833984, -96.63899993896484);
+        y.bezierCurveTo(
+          48.76599884033203,
+          -107.34500122070312,
+          54.11800003051758,
+          -110.91300201416016,
+          64.22899627685547,
+          -110.91300201416016
+        );
+        y.bezierCurveTo(
+          73.14900207519531,
+          -110.91300201416016,
+          88.31400299072266,
+          -105.26300048828125,
+          88.31400299072266,
+          -88.61100006103516
+        );
+        y.bezierCurveTo(
+          88.31400299072266,
+          -84.1500015258789,
+          86.52999877929688,
+          -79.69100189208984,
+          84.1510009765625,
+          -75.82499694824219
+        );
+        y.lineTo(24.382999420166016, 23.492000579833984);
+        y.lineTo(24.382999420166016, 86.53099822998047);
+        y.bezierCurveTo(
+          24.382999420166016,
+          101.10099792480469,
+          14.868000030517578,
+          110.91300201416016,
+          0,
+          110.91300201416016
+        );
+        y.bezierCurveTo(
+          -14.868000030517578,
+          110.91300201416016,
+          -24.382999420166016,
+          101.10099792480469,
+          -24.382999420166016,
+          86.53099822998047
+        );
+        y.lineTo(-24.382999420166016, 23.492000579833984);
+        y.endFill();
+        y.transform.setFromMatrix(new PIXI.Matrix(1, 0, 0, 1, 400, 200));
+        console.log(window.performance.now());
+
+        console.log(y);
+        stage.addChild(y);
+
+        let ticker = PIXI.Ticker.shared;
+        ticker.start();
+        ticker.add(function () {
+          renderer.render(stage);
+        });
+      };
+    </script>
+  </body>
+</html>
