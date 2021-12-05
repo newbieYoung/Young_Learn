@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>rect</title>
+    <script type="text/javascript" src="./sim-tools.js"></script>
+  </head>
+  <body>
+    <canvas id="webgl" width="600" height="600"></canvas>
+    <!-- 片段着色器程序 -->
+    <script id="shader-fs" type="x-shader/x-fragment">
+      precision mediump float;
+      uniform vec4 u_fragColor;
+         void main() {
+             gl_FragColor = u_fragColor;
+         }
+    </script>
+    <!-- 顶点着色器程序 -->
+    <script id="shader-vs" type="x-shader/x-vertex">
+      attribute vec4 a_position;
+         void main() {
+         	gl_Position = a_position;
+         }
+    </script>
+    <script type="text/javascript">
+      var canvas = document.querySelector("#webgl");
+      // antialias true 开启 webgl 抗锯齿功能
+      var gl = canvas.getContext("experimental-webgl", {
+        antialias: true,
+      });
+      var shaderProgram = initShaders(gl);
+      var num = initVertexBuffers(gl, shaderProgram);
+      var u_fragColor = gl.getUniformLocation(shaderProgram, "u_fragColor");
+      gl.clearColor(0.9, 0.9, 0.9, 1.0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      gl.uniform4f(u_fragColor, 1.0, 0.0, 0.0, 1.0);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, num);
+
+      // 初始化顶点位置
+      function initVertexBuffers(gl, shaderProgram) {
+        // 矩形
+        var vertices = new Float32Array([
+          -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5,
+        ]);
+        var num = 4;
+        // 创建缓冲区对象
+        var vertexBuffer = gl.createBuffer();
+        // 将缓冲区对象绑定到目标
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        // 向缓冲区对象中写入数据
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+        var a_position = gl.getAttribLocation(shaderProgram, "a_position");
+        // 将缓冲区对象分配给 a_position 变量
+        gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0);
+        // 连接 a_position 变量与分配给它的缓冲区对象
+        gl.enableVertexAttribArray(a_position);
+        return num;
+      }
+    </script>
+  </body>
+</html>

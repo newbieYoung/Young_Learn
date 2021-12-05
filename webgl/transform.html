@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>transform</title>
+    <script type="text/javascript" src="./sim-tools.js"></script>
+  </head>
+  <body>
+    <canvas id="webgl" width="400" height="400"></canvas>
+    <!-- 片段着色器程序 -->
+    <script id="shader-fs" type="x-shader/x-fragment">
+      precision mediump float;
+      uniform vec4 u_fragColor;
+      void main() {
+          gl_FragColor = u_fragColor;
+      }
+    </script>
+    <!-- 顶点着色器程序 -->
+    <script id="shader-vs" type="x-shader/x-vertex">
+       attribute vec4 a_position;
+      uniform vec4 u_translation;
+      uniform float u_CosB,u_SinB;
+      uniform mat4 u_Matrix;
+      void main() {
+          // gl_Position = a_position;
+          // 平移
+          // gl_Position = a_position+u_translation;
+          // 旋转
+          // gl_Position.x = a_position.x*u_CosB - a_position.y*u_SinB;
+          // gl_Position.y = a_position.x*u_SinB + a_position.y*u_CosB;
+          // gl_Position.z = a_position.z;
+          // gl_Position.w = 1.0;
+          // 矩阵变换
+          gl_Position = u_Matrix*a_position;
+      }
+    </script>
+    <script type="text/javascript">
+      var canvas = document.querySelector("#webgl");
+      var gl = canvas.getContext("webgl");
+      var shaderProgram = initShaders(gl);
+
+      var num = initVertexBuffers(gl, shaderProgram);
+
+      var u_fragColor = gl.getUniformLocation(shaderProgram, "u_fragColor");
+      var u_translation = gl.getUniformLocation(shaderProgram, "u_translation");
+      var u_CosB = gl.getUniformLocation(shaderProgram, "u_CosB");
+      var u_SinB = gl.getUniformLocation(shaderProgram, "u_SinB");
+      var u_Matrix = gl.getUniformLocation(shaderProgram, "u_Matrix");
+
+      var angle = 90.0;
+      var radian = (Math.PI * angle) / 180.0;
+      var cosB = Math.cos(radian);
+      var sinB = Math.sin(radian);
+      // 旋转矩阵
+      // var uMatrix = new Float32Array([
+      // 	cosB,sinB,0.0,0.0,
+      // 	-sinB,cosB,0.0,0.0,
+      // 	0.0,0.0,1.0,0.0,
+      // 	0.0,0.0,0.0,1.0
+      // ]);
+      // 平移矩阵
+      // var uMatrix = new Float32Array([
+      // 	1.0,0.0,0.0,0.0,
+      // 	0.0,1.0,0.0,0.0,
+      // 	0.0,0.0,1.0,0.0,
+      // 	0.5,0.5,0.0,1.0
+      // ]);
+      // 缩放矩阵
+      var uMatrix = new Float32Array([
+        1.0, 0.0, 0.0, 0.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0,
+      ]);
+
+      gl.uniform4f(u_fragColor, 1.0, 0.0, 0.0, 1.0);
+      gl.uniform4f(u_translation, 0.5, 0.5, 0.0, 0.0);
+      gl.uniform1f(u_CosB, cosB);
+      gl.uniform1f(u_SinB, sinB);
+      gl.uniformMatrix4fv(u_Matrix, false, uMatrix);
+
+      gl.clearColor(0.0, 0.0, 1.0, 1.0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      gl.drawArrays(gl.TRIANGLES, 0, num);
+
+      // 初始化顶点位置
+      function initVertexBuffers(gl, shaderProgram) {
+        // 三角形
+        var vertices = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]);
+        var num = 3;
+        // 创建缓冲区对象
+        var vertexBuffer = gl.createBuffer();
+        // 将缓冲区对象绑定到目标
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        // 向缓冲区对象中写入数据
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+        var a_position = gl.getAttribLocation(shaderProgram, "a_position");
+        // 将缓冲区对象分配给 a_position 变量
+        gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0);
+        // 连接 a_position 变量与分配给它的缓冲区对象
+        gl.enableVertexAttribArray(a_position);
+        return num;
+      }
+    </script>
+  </body>
+</html>
