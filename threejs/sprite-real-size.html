@@ -93,9 +93,9 @@
           );
           const devicePixelRatio = renderer.getPixelRatio();
           const scale =
-            ((1 / Math.tan((camera.fov / 2 / 180) * Math.PI)) * 0.84) /
-            ((window.innerHeight * devicePixelRatio) /
-              renderer.domElement.height);
+            1 /
+            Math.tan((camera.fov / 2 / 180) * Math.PI) /
+            ((1200 * devicePixelRatio) / renderer.domElement.height); // 1200 ?
           finalMatrix
             .multiply(transMat)
             .scale(

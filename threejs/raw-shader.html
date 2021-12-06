@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>raw shader</title>
+    <style>
+      body,
+      html {
+        background-color: #fff;
+        margin: 0px;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+    </style>
+
+    <!-- three.js -->
+    <script src="../node_modules/three/build/three.js"></script>
+  </head>
+  <body>
+    <div id="retina"></div>
+    <!-- 片段着色器程序 -->
+    <script id="shader-fs" type="x-shader/x-fragment">
+      precision mediump float;
+      varying vec2 vTexCoord;
+      uniform sampler2D uSampler; // 纹理取样器
+      void main() {
+        vec4 color = texture2D(uSampler, vTexCoord);
+        gl_FragColor = color;
+      }
+    </script>
+    <!-- 顶点着色器程序 -->
+    <script id="shader-vs" type="x-shader/x-vertex">
+      uniform mat4 modelMatrix; // three.js 模型矩阵
+      attribute vec4 position;
+      attribute vec2 texCoord; // 纹理坐标
+
+      // attribute mat4 matrix; // 变换矩阵
+      attribute vec4 mat_0;
+      attribute vec4 mat_1;
+      attribute vec4 mat_2;
+      attribute vec4 mat_3;
+
+      varying vec2 vTexCoord;
+      void main() {
+        mat4 matrix = mat4(
+          mat_0.x, mat_0.y, mat_0.z, mat_0.w,
+          mat_1.x, mat_1.y, mat_1.z, mat_1.w,
+          mat_2.x, mat_2.y, mat_2.z, mat_2.w,
+          mat_3.x, mat_3.y, mat_3.z, mat_3.w);
+        gl_Position = matrix * modelMatrix * position;
+        vTexCoord = texCoord;
+      }
+    </script>
+    <script>
+      // 渲染器
+      const width = 1067;
+      const height = 600;
+      console.log(width + " " + height);
+      console.log(window.innerWidth + " " + window.innerHeight);
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+      });
+      renderer.setSize(width, height);
+      renderer.setClearColor("#ffffff", 1.0);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      document.getElementById("retina").appendChild(renderer.domElement);
+
+      // 相机
+      const camera = new THREE.OrthographicCamera(
+        width / -2,
+        width / 2,
+        height / 2,
+        height / -2,
+        -500,
+        1000
+      );
+      camera.position.set(0, 0, 0);
+      camera.up.set(0, 1, 0); //正方向
+      camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+      // 场景、灯光、正方体
+      const scene = new THREE.Scene();
+
+      const manager = new THREE.LoadingManager();
+      manager.onLoad = function () {
+        console.log("Loading complete!");
+      };
+      manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+        console.log(
+          "Loading file: " +
+            url +
+            ".\nLoaded " +
+            itemsLoaded +
+            " of " +
+            itemsTotal +
+            " files."
+        );
+      };
+
+      const texture = new THREE.TextureLoader(manager).load("../img/img_0.png");
+
+      const geometry = new THREE.BufferGeometry();
+      // matrix
+      const mat4 = new THREE.Matrix4();
+      // mat4.makeScale(0.5, 0.5, 1);
+      mat4.makeTranslation(1, 0, 0);
+
+      // chrome 正常
+      // 但是 https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glVertexAttribPointer.xml 中写着 attribute size 只能是 1、2、3、4
+      // let matrix = [];
+      // for (let i = 0; i < 4; i++) {
+      //   matrix = matrix.concat(mat4.elements);
+      // }
+      // geometry.setAttribute("matrix", new THREE.Float32BufferAttribute(matrix, 16));
+
+      let matrix = [[], [], [], []];
+      for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+          matrix[j].push(
+            mat4.elements[j * 4 + 0],
+            mat4.elements[j * 4 + 1],
+            mat4.elements[j * 4 + 2],
+            mat4.elements[j * 4 + 3]
+          );
+        }
+      }
+      for (let i = 0; i < 4; i++) {
+        geometry.setAttribute(
+          `mat_${i}`,
+          new THREE.Float32BufferAttribute(matrix[i], 4)
+        );
+      }
+
+      // position
+      const position = [
+        -1.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, 1.0, 0.0, 1.0, -1.0, 0.0,
+      ];
+      geometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(position, 3)
+      );
+      // uv
+      const texCoord = [0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0];
+      geometry.setAttribute(
+        "texCoord",
+        new THREE.Float32BufferAttribute(texCoord, 2)
+      );
+      // index
+      geometry.index = new THREE.Uint16BufferAttribute([0, 1, 2, 3, 2, 1], 1);
+
+      const material = new THREE.RawShaderMaterial({
+        uniforms: {
+          uSampler: {
+            type: "t",
+            value: texture,
+          },
+        },
+        vertexShader: document.getElementById("shader-vs").textContent,
+        fragmentShader: document.getElementById("shader-fs").textContent,
+        transparent: true,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(-100 / width, 0, 0); // modelMatrix
+      scene.add(mesh);
+
+      // 渲染
+      function render() {
+        renderer.clear();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+      }
+      render();
+    </script>
+  </body>
+</html>

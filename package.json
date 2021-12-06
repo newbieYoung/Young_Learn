@@ -23,6 +23,7 @@
   "dependencies": {
     "lottie-web": "^5.8.1",
     "pixi.js": "^6.2.0",
+    "point-in-polygon": "^1.1.0",
     "three": "^0.135.0"
   }
 }
