@@ -22,8 +22,10 @@
     <div id="retina"></div>
     <script>
       // 渲染器
-      const width = 1067;
-      const height = 600;
+      //const width = 1067;
+      //const height = 600;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
       console.log(width + " " + height);
       console.log(window.innerWidth + " " + window.innerHeight);
       const renderer = new THREE.WebGLRenderer({
@@ -35,21 +37,21 @@
       document.getElementById("retina").appendChild(renderer.domElement);
 
       // 相机
-      //   const camera = new THREE.OrthographicCamera(
-      //     width / -2,
-      //     width / 2,
-      //     height / 2,
-      //     height / -2,
-      //     -500,
-      //     1000
-      //   );
-      //   camera.position.set(0, 0, 0);
-      //   camera.up.set(0, 1, 0); //正方向
-      //   camera.lookAt(new THREE.Vector3(0, 0, 0));
-      const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
-      camera.position.set(200, 400, 600);
-      camera.up.set(0, 1, 0);
-      camera.lookAt(new THREE.Vector3(0, 0, 0));
+      const position = new THREE.Vector3(200, 300, 400); // 位置
+      const up = new THREE.Vector3(0, 1, 0); // 正方向
+      const origin = new THREE.Vector3(100, 200, 300); // 焦点
+      const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000); // 透视
+      // const camera = new THREE.OrthographicCamera(
+      //   width / -2,
+      //   width / 2,
+      //   height / 2,
+      //   height / -2,
+      //   -500,
+      //   1000
+      // ); // 正交
+      camera.position.copy(position);
+      camera.up.copy(up);
+      camera.lookAt(origin);
 
       // 场景、灯光、正方体
       const scene = new THREE.Scene();
@@ -76,37 +78,74 @@
           const sprite = new THREE.Sprite(
             new THREE.SpriteMaterial({ map: texture, depthTest: false })
           );
-
-          // OrthographicCamera scale
-          // sprite.scale.set(image.width, image.height, 1);
-
-          // PerspectiveCamera scale
-          camera.updateMatrixWorld();
-          const finalMatrix = new THREE.Matrix4().copy(
-            camera.matrixWorldInverse
-          );
-          finalMatrix.invert();
-          const transMat = new THREE.Matrix4().makeTranslation(
-            0, // sprite translateXY
-            0,
-            -camera.position.z
-          );
-          const devicePixelRatio = renderer.getPixelRatio();
-          const scale =
-            1 /
-            Math.tan((camera.fov / 2 / 180) * Math.PI) /
-            ((1200 * devicePixelRatio) / renderer.domElement.height); // 1200 ?
-          finalMatrix
-            .multiply(transMat)
-            .scale(
-              new THREE.Vector3(image.width / scale, image.height / scale, 1)
-            );
+          const ignoreMat = ignore3dCameraMatrix(camera, origin, width, height);
+          const scaleMat = new THREE.Matrix4();
+          scaleMat.makeScale(image.width, image.height, 1);
+          ignoreMat.multiply(scaleMat);
           sprite.matrixAutoUpdate = false;
-          sprite.matrix.copy(finalMatrix);
+          sprite.matrix.copy(ignoreMat);
 
           scene.add(sprite);
         }
       );
+
+      // 忽略透视投影、相机位置影响
+      var ignore3dCameraMatrix = (function () {
+        // camera1 转换为 camera2
+        function changeCameraMatrix(camera1, camera2) {
+          camera1.updateMatrixWorld();
+          camera2.updateMatrixWorld();
+          const cProj = new THREE.Matrix4().copy(camera1.projectionMatrix);
+          const cWorldInverse = new THREE.Matrix4().copy(
+            camera1.matrixWorldInverse
+          );
+          cProj.multiply(cWorldInverse).invert();
+          const orcProj = new THREE.Matrix4().copy(camera2.projectionMatrix);
+          const orcWorldInverse = new THREE.Matrix4().copy(
+            camera2.matrixWorldInverse
+          );
+          orcProj.multiply(orcWorldInverse);
+          cProj.multiply(orcProj);
+          return cProj;
+        }
+
+        return function (camera, lootAt, width, height) {
+          const matrix = new THREE.Matrix4();
+          // orthographic
+          const orCamera = new THREE.OrthographicCamera(
+            width / -2,
+            width / 2,
+            height / 2,
+            height / -2,
+            -500,
+            1000
+          );
+          orCamera.position.copy(camera.position);
+          orCamera.up.copy(camera.up);
+          if (camera.type == "PerspectiveCamera") {
+            orCamera.lookAt(camera.position);
+            matrix.multiply(changeCameraMatrix(camera, orCamera));
+          } else {
+            orCamera.lookAt(lootAt);
+          }
+          // origin
+          const origin = new THREE.Vector3(0, 0, 0);
+          const originCamera = new THREE.OrthographicCamera(
+            width / -2,
+            width / 2,
+            height / 2,
+            height / -2,
+            -500,
+            1000
+          );
+          originCamera.position.copy(origin);
+          originCamera.up.copy(camera.up);
+          originCamera.lookAt(origin);
+          matrix.multiply(changeCameraMatrix(orCamera, originCamera));
+
+          return matrix;
+        };
+      })();
 
       // 渲染
       function render() {

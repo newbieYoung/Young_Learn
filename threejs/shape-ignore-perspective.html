@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>shape ignore perspective</title>
+    <style>
+      body,
+      html {
+        background-color: #fff;
+        margin: 0px;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="retina"></div>
+    <script type="module">
+      import * as THREE from "../../node_modules/three/build/three.module.js";
+      import { SVGLoader } from "../../node_modules/three/examples/jsm/loaders/SVGLoader.js";
+      import * as BufferGeometryUtils from "../../node_modules/three/examples/jsm/utils/BufferGeometryUtils.js";
+      import { buildNonNativeLine } from "../algorithm/stroke/buildNonNativeLine.js";
+
+      // buildNonNativeLine fast then SVGLoader.pointsToStroke
+      SVGLoader.pointsToStroke = function (points, style) {
+        const graphicsData = {
+          points: [],
+          lineStyle: {
+            alignment: 0.5,
+            cap: style.strokeLineCap,
+            join: style.strokeLineJoin,
+            miterLimit: style.strokeMiterLimit,
+            width: style.strokeWidth,
+          },
+        };
+        for (let i = 0; i < points.length; i++) {
+          graphicsData.points.push(points[i].x, points[i].y);
+        }
+        const graphicsGeometry = {
+          points: [],
+          indices: [],
+        };
+
+        buildNonNativeLine(graphicsData, graphicsGeometry);
+
+        const points3D = [];
+        for (let i = 0; i < graphicsGeometry.points.length; i += 2) {
+          points3D.push(
+            graphicsGeometry.points[i],
+            graphicsGeometry.points[i + 1],
+            0
+          );
+        }
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(points3D, 3)
+        );
+        geometry.index = new THREE.Uint16BufferAttribute(
+          graphicsGeometry.indices,
+          1
+        );
+
+        return geometry;
+      };
+
+      //const width = window.innerWidth;
+      //const height = window.innerHeight;
+      const width = 1067;
+      const height = 600;
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true, //抗锯齿开启
+      });
+      renderer.setSize(width, height); //设置渲染器宽度和高度
+      renderer.setClearColor("#ffffff", 1.0); //设置背景颜色
+      renderer.setPixelRatio(window.devicePixelRatio); //设置设备像素比
+      document.getElementById("retina").appendChild(renderer.domElement); //把渲染器放置到页面中
+
+      // 相机
+      const position = new THREE.Vector3(200, 300, 400); // 位置
+      const up = new THREE.Vector3(0, 1, 0); // 正方向
+      const origin = new THREE.Vector3(100, 200, 300); // 焦点
+      const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000); // 透视
+      // const camera = new THREE.OrthographicCamera(
+      //   width / -2,
+      //   width / 2,
+      //   height / 2,
+      //   height / -2,
+      //   -500,
+      //   1000
+      // ); // 正交
+      camera.position.copy(position);
+      camera.up.copy(up);
+      camera.lookAt(origin);
+
+      // 场景、灯光
+      const scene = new THREE.Scene();
+
+      // path stroke
+      const style = {
+        stroke: "#ff0000",
+        strokeWidth: 4,
+        strokeLineCap: "butt", // butt、round、square
+        strokeLineJoin: "miter", // miter、round、bevel
+        strokeMiterLimit: 3,
+        strokeOpacity: 1,
+      };
+      const divisions = 6; // default 12
+
+      // Y
+      const y = new THREE.Shape();
+      y.moveTo(-24.382999420166016, 23.492000579833984);
+      y.lineTo(-84.1510009765625, -75.82499694824219);
+      y.bezierCurveTo(
+        -86.52999877929688,
+        -79.69100189208984,
+        -88.31400299072266,
+        -84.1500015258789,
+        -88.31400299072266,
+        -88.61100006103516
+      );
+      y.bezierCurveTo(
+        -88.31400299072266,
+        -105.26300048828125,
+        -73.14900207519531,
+        -110.91300201416016,
+        -63.63399887084961,
+        -110.91300201416016
+      );
+      y.bezierCurveTo(
+        -52.0369987487793,
+        -110.91300201416016,
+        -46.685001373291016,
+        -106.15499877929688,
+        -41.630001068115234,
+        -96.63899993896484
+      );
+      y.lineTo(0.8920000195503235, -18.43600082397461);
+      y.lineTo(43.117000579833984, -96.63899993896484);
+      y.bezierCurveTo(
+        48.76599884033203,
+        -107.34500122070312,
+        54.11800003051758,
+        -110.91300201416016,
+        64.22899627685547,
+        -110.91300201416016
+      );
+      y.bezierCurveTo(
+        73.14900207519531,
+        -110.91300201416016,
+        88.31400299072266,
+        -105.26300048828125,
+        88.31400299072266,
+        -88.61100006103516
+      );
+      y.bezierCurveTo(
+        88.31400299072266,
+        -84.1500015258789,
+        86.52999877929688,
+        -79.69100189208984,
+        84.1510009765625,
+        -75.82499694824219
+      );
+      y.lineTo(24.382999420166016, 23.492000579833984);
+      y.lineTo(24.382999420166016, 86.53099822998047);
+      y.bezierCurveTo(
+        24.382999420166016,
+        101.10099792480469,
+        14.868000030517578,
+        110.91300201416016,
+        0,
+        110.91300201416016
+      );
+      y.bezierCurveTo(
+        -14.868000030517578,
+        110.91300201416016,
+        -24.382999420166016,
+        101.10099792480469,
+        -24.382999420166016,
+        86.53099822998047
+      );
+      y.lineTo(-24.382999420166016, 23.492000579833984);
+      const yMesh = new THREE.Mesh(
+        SVGLoader.pointsToStroke(y.extractPoints(divisions).shape, style),
+        new THREE.MeshBasicMaterial({
+          color: new THREE.Color().setStyle(style.stroke),
+          opacity: style.strokeOpacity,
+          transparent: style.strokeOpacity < 1,
+          depthWrite: false,
+          depthTest: false,
+        })
+      );
+
+      // 忽略透视投影、相机位置影响
+      var ignore3dCameraMatrix = (function () {
+        // camera1 转换为 camera2
+        function changeCameraMatrix(camera1, camera2) {
+          camera1.updateMatrixWorld();
+          camera2.updateMatrixWorld();
+          const cProj = new THREE.Matrix4().copy(camera1.projectionMatrix);
+          const cWorldInverse = new THREE.Matrix4().copy(
+            camera1.matrixWorldInverse
+          );
+          cProj.multiply(cWorldInverse).invert();
+          const orcProj = new THREE.Matrix4().copy(camera2.projectionMatrix);
+          const orcWorldInverse = new THREE.Matrix4().copy(
+            camera2.matrixWorldInverse
+          );
+          orcProj.multiply(orcWorldInverse);
+          cProj.multiply(orcProj);
+          return cProj;
+        }
+
+        return function (camera, lootAt, width, height) {
+          const matrix = new THREE.Matrix4();
+          // orthographic
+          const orCamera = new THREE.OrthographicCamera(
+            width / -2,
+            width / 2,
+            height / 2,
+            height / -2,
+            -500,
+            1000
+          );
+          orCamera.position.copy(camera.position);
+          orCamera.up.copy(camera.up);
+          if (camera.type == "PerspectiveCamera") {
+            orCamera.lookAt(camera.position);
+            matrix.multiply(changeCameraMatrix(camera, orCamera));
+          } else {
+            orCamera.lookAt(lootAt);
+          }
+          // origin
+          const origin = new THREE.Vector3(0, 0, 0);
+          const originCamera = new THREE.OrthographicCamera(
+            width / -2,
+            width / 2,
+            height / 2,
+            height / -2,
+            -500,
+            1000
+          );
+          originCamera.position.copy(origin);
+          originCamera.up.copy(camera.up);
+          originCamera.lookAt(origin);
+          matrix.multiply(changeCameraMatrix(orCamera, originCamera));
+
+          return matrix;
+        };
+      })();
+
+      yMesh.matrixAutoUpdate = false;
+      const ignoreMat = ignore3dCameraMatrix(camera, origin, width, height);
+      yMesh.matrix.copy(ignoreMat);
+      scene.add(yMesh);
+
+      function render() {
+        renderer.clear();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+      }
+      render();
+    </script>
+  </body>
+</html>
