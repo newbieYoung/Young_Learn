@@ -339,10 +339,11 @@ class TileMap {
    * @returns
    */
   _viewportToMap(point) {
+    const scale = this.mesh.scale;
     const row = this.mapGrid.row;
     const column = this.mapGrid.column;
-    const itemWidth = this.size.width / column;
-    const itemHeight = this.size.height / row;
+    const itemWidth = (this.size.width * scale.x) / column;
+    const itemHeight = (this.size.height * scale.y) / row;
     const center = new THREE.Vector2(
       this.mesh.position.x,
       this.mesh.position.y
@@ -351,12 +352,13 @@ class TileMap {
       point.x - this.viewport.width / 2,
       this.viewport.height / 2 - point.y
     );
+    const lastColumn = this.mapGrid.column - 1;
+    const lastRow = this.mapGrid.row - 1;
+    const lastOffset = this.offset(lastRow, lastColumn, itemWidth, itemHeight);
     current.sub(center);
     const currentInd = new THREE.Vector2(
-      column / 2 +
-        (current.x - this.mesh.material.uniforms.uOffsetX.value) / itemWidth,
-      row / 2 -
-        (current.y - this.mesh.material.uniforms.uOffsetY.value) / itemHeight
+      column / 2 + (current.x + lastOffset.x / 2) / itemWidth,
+      row / 2 - (current.y + lastOffset.y / 2) / itemHeight
     );
 
     return currentInd;
@@ -368,19 +370,21 @@ class TileMap {
    * @returns
    */
   _mapToViewport(point) {
+    const scale = this.mesh.scale;
     const row = this.mapGrid.row;
     const column = this.mapGrid.column;
-    const itemWidth = this.size.width / column;
-    const itemHeight = this.size.height / row;
+    const itemWidth = (this.size.width * scale.x) / column;
+    const itemHeight = (this.size.height * scale.y) / row;
     const center = new THREE.Vector2(
       this.mesh.position.x,
       this.mesh.position.y
     );
+    const lastColumn = this.mapGrid.column - 1;
+    const lastRow = this.mapGrid.row - 1;
+    const lastOffset = this.offset(lastRow, lastColumn, itemWidth, itemHeight);
     const current = new THREE.Vector2(
-      (point.x - column / 2) * itemWidth +
-        this.mesh.material.uniforms.uOffsetX.value,
-      (row / 2 - point.y) * itemHeight +
-        this.mesh.material.uniforms.uOffsetY.value
+      (point.x - column / 2) * itemWidth - lastOffset.x / 2,
+      (row / 2 - point.y) * itemHeight - lastOffset.y / 2
     ).add(center);
     return new THREE.Vector2(
       current.x + this.viewport.width / 2,
@@ -556,17 +560,27 @@ class TileMap {
             
             varying vec2 vTexCoord;
             void main() {
+              // tilemap scale
+              // 模拟缩放 viewport，避免重新生成 geometry
+              float scaleX = modelMatrix[0][0];
+              float scaleY = modelMatrix[1][1];
+              float width = uWidth / scaleX;
+              float height = uHeight / scaleY;
+              vec4 pos = vec4(position.x * scaleX, position.y * scaleY, position.z, position.w);
+              
               mat4 matrix = mat4(
                 mat_0.x, mat_0.y, mat_0.z, mat_0.w,
                 mat_1.x, mat_1.y, mat_1.z, mat_1.w,
                 mat_2.x, mat_2.y, mat_2.z, mat_2.w,
-                mat_3.x, mat_3.y, mat_3.z, mat_3.w);
-              // 格式化模型矩阵
-              mat4 normalizedMat = mat4(modelMatrix[0][0], modelMatrix[0][1], modelMatrix[0][2], modelMatrix[0][3],
-                modelMatrix[1][0], modelMatrix[1][1], modelMatrix[1][2], modelMatrix[1][3],
+                mat_3.x * scaleX, mat_3.y * scaleY, mat_3.z, mat_3.w);
+              
+                // 格式化模型矩阵
+              mat4 normalizedMat = mat4(1.0, modelMatrix[0][1], modelMatrix[0][2], modelMatrix[0][3],
+                modelMatrix[1][0], 1.0, modelMatrix[1][2], modelMatrix[1][3],
                 modelMatrix[2][0], modelMatrix[2][1], modelMatrix[2][2], modelMatrix[2][3],
-                (modelMatrix[3][0] + uOffsetX) / uWidth, (modelMatrix[3][1] + uOffsetY) / uHeight, modelMatrix[3][2], modelMatrix[3][3]);
-              gl_Position = matrix * normalizedMat * position;
+                (modelMatrix[3][0] / scaleX + uOffsetX) / width, (modelMatrix[3][1] / scaleY + uOffsetY) / height, modelMatrix[3][2], modelMatrix[3][3]);
+              
+              gl_Position = matrix * normalizedMat * pos;
               vTexCoord = texCoord;
             }
         `,

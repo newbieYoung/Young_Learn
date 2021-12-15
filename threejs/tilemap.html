@@ -121,7 +121,8 @@
           };
         },
       });
-      console.log(tilemap);
+      tilemap.mesh.scale.set(0.5, 0.7, 1);
+      tilemap.mesh.position.set(-20, -33, 0);
       scene.add(tilemap.mesh);
 
       // 事件监听
