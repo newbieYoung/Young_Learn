@@ -79,13 +79,23 @@
             new THREE.SpriteMaterial({ map: texture, depthTest: false })
           );
           const ignoreMat = ignore3dCameraMatrix(camera, origin, width, height);
+          const spriteMat = new THREE.Matrix4().copy(ignoreMat);
           const scaleMat = new THREE.Matrix4();
           scaleMat.makeScale(image.width, image.height, 1);
-          ignoreMat.multiply(scaleMat);
+          spriteMat.multiply(scaleMat);
           sprite.matrixAutoUpdate = false;
-          sprite.matrix.copy(ignoreMat);
+          sprite.matrix.copy(spriteMat);
 
-          scene.add(sprite);
+          // ignore3dCameraMatrix 对象外层容器变化矩阵处理
+          const group = new THREE.Group();
+          const groupMat = new THREE.Matrix4().copy(ignoreMat);
+          const tranMat = new THREE.Matrix4().makeTranslation(-100,0,0); // 偏移
+          groupMat.multiply(tranMat).multiply(new THREE.Matrix4().copy(ignoreMat).invert());
+          group.matrixAutoUpdate = false;
+          group.matrix.copy(groupMat);
+          group.add(sprite);
+
+          scene.add(group);
         }
       );
 
