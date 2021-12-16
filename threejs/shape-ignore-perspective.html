@@ -80,18 +80,18 @@
       document.getElementById("retina").appendChild(renderer.domElement); //把渲染器放置到页面中
 
       // 相机
-      const position = new THREE.Vector3(200, 300, 400); // 位置
+      const position = new THREE.Vector3(100, 200, 300); // 位置
       const up = new THREE.Vector3(0, 1, 0); // 正方向
-      const origin = new THREE.Vector3(100, 200, 300); // 焦点
-      const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000); // 透视
-      // const camera = new THREE.OrthographicCamera(
-      //   width / -2,
-      //   width / 2,
-      //   height / 2,
-      //   height / -2,
-      //   -500,
-      //   1000
-      // ); // 正交
+      const origin = new THREE.Vector3(0, 0, 0); // 焦点
+      // const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000); // 透视
+      const camera = new THREE.OrthographicCamera(
+        width / -2,
+        width / 2,
+        height / 2,
+        height / -2,
+        -500,
+        1000
+      ); // 正交
       camera.position.copy(position);
       camera.up.copy(up);
       camera.lookAt(origin);
@@ -254,8 +254,32 @@
 
       yMesh.matrixAutoUpdate = false;
       const ignoreMat = ignore3dCameraMatrix(camera, origin, width, height);
+      const mat = new THREE.Matrix4().makeTranslation(88,111,0);
+      // yMesh.matrix.copy(mat);
+
+      const p1 = new THREE.Matrix4()
+        .makeScale(0.55, -0.55, 1)
+        .multiply(
+          new THREE.Matrix4().makeTranslation(-537 / 0.55, -348 / 0.55, 0)
+        );
+      // const g1 = new THREE.Group();
+      // g1.matrixAutoUpdate = false;
+      // g1.matrix.copy(p1);
+
+      const p2 = new THREE.Matrix4().makeTranslation(1306, 513, 0); // 1306 513
+      // const g2 = new THREE.Group();
+      // g2.matrixAutoUpdate = false;
+      // g2.matrix.copy(p2);
+
+      // g2.add(yMesh);
+      // g1.add(g2);
+      // scene.add(g1);
+
+      p1.multiply(p2).multiply(mat); // ignore3dCameraMatrix 需要左乘
+      ignoreMat.multiply(p1);
       yMesh.matrix.copy(ignoreMat);
       scene.add(yMesh);
+      
 
       function render() {
         renderer.clear();

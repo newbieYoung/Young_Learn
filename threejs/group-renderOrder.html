@@ -55,7 +55,7 @@
         new THREE.MeshBasicMaterial({
           color: new THREE.Color().setStyle("#000000"),
           opacity: 1,
-          transparent: false,
+          transparent: true,
           depthWrite: false, // 2d
           depthTest: false,
         })
@@ -72,7 +72,7 @@
         new THREE.MeshBasicMaterial({
           color: new THREE.Color().setStyle("#0000ff"),
           opacity: 1,
-          transparent: false,
+          transparent: true,
           depthWrite: false, // 2d
           depthTest: false,
         })
@@ -91,13 +91,26 @@
         new THREE.MeshBasicMaterial({
           color: new THREE.Color().setStyle("#00ff00"),
           opacity: 1,
-          transparent: false,
+          transparent: true,
           depthWrite: false, // 2d
           depthTest: false,
         })
       );
       mesh3.renderOrder = 2;
 
+      // spriteMaterial 默认透明，而 three.js 中 透明材质和非透明材质是分开渲染的，因此 renderOrder 相互之间没有效果
+      // 如果要想 sprite 和 mesh 之间 renderOrder 生效则需要统一设置为透明或者非透明
+      const sprite = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: new THREE.TextureLoader().load("../img/img_0.png"),
+          depthTest: false,
+          depthTest: false,
+        })
+      );
+      sprite.scale.set(62, 52, 1);
+      sprite.renderOrder = -1;
+
+      scene.add(sprite);
       scene.add(mesh1);
       scene.add(group);
       scene.add(mesh3);
