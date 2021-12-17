@@ -121,9 +121,11 @@
           };
         },
       });
-      tilemap.mesh.scale.set(0.5, 0.7, 1);
-      tilemap.mesh.position.set(-20, -33, 0);
+      tilemap.mesh.scale.set(0.5, 1, 1);
+      tilemap.mesh.position.set(-20, 0, 0);
       scene.add(tilemap.mesh);
+      scene.scale.set(1, 0.7, 1);
+      scene.position.set(0, -33, 0);
 
       // 事件监听
       renderer.domElement.addEventListener(
@@ -138,6 +140,7 @@
           const map = tilemap.touchCast(point);
           console.log(window.performance.now());
           console.log(map);
+          console.log(tilemap.getRectViewportPoints(map.row, map.column));
           tilemap.updateGrids([
             {
               row: map.row,

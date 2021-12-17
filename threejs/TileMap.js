@@ -317,6 +317,55 @@ class TileMap {
    * @returns
    */
   _getMapCenter(r, c) {
+    const leftTop = this._getMapLeftTop(r, c);
+    const center = this.center(r, c);
+    return new THREE.Vector2(leftTop.x + center.x, leftTop.y + center.y);
+  }
+
+  /**
+   * 拆解世界坐标系变换矩阵
+   */
+  _splitWorldMatrix() {
+    this.mesh.updateMatrixWorld();
+    const mProps = this.mesh.matrixWorld.elements;
+    let scaleX = Math.sqrt(Math.pow(mProps[0], 2) + Math.pow(mProps[1], 2));
+    let scaleY = Math.sqrt(Math.pow(mProps[4], 2) + Math.pow(mProps[5], 2));
+    let rotate = Math.asin(mProps[1] / scaleX);
+    // 拆解矩阵，判断缩放正负
+    if (
+      (mProps[0] * mProps[1] > 0 &&
+        (rotate % Math.PI < 0 || rotate % Math.PI > Math.PI / 2)) ||
+      (mProps[0] * mProps[1] < 0 &&
+        rotate > 0 &&
+        (rotate % Math.PI < Math.PI / 2 || rotate % Math.PI > Math.PI))
+    ) {
+      scaleX *= -1;
+    }
+    if (mProps[0] * mProps[1] === 0 && scaleX !== 0) {
+      if (Math.sin(rotate % Math.PI) === 0) {
+        scaleX = mProps[0] / Math.cos(rotate);
+      } else if (Math.sin(Math.PI - (rotate % Math.PI)) === 1) {
+        scaleX = mProps[1] / Math.sin(rotate);
+      }
+    }
+    rotate = Math.asin(mProps[1] / scaleX);
+    scaleY = mProps[5] / Math.cos(rotate);
+    const posX = mProps[12];
+    const posY = mProps[13];
+
+    return {
+      scale: new THREE.Vector3(scaleX, scaleY, 1),
+      position: new THREE.Vector3(posX, posY, 0),
+    };
+  }
+
+  /**
+   * 计算瓦片左上坐标
+   * @param {*} r
+   * @param {*} c
+   * @returns
+   */
+  _getMapLeftTop(r, c) {
     const row = this.mapGrid.row;
     const column = this.mapGrid.column;
     const itemWidth = this.size.width / column;
@@ -326,11 +375,7 @@ class TileMap {
       x: offset.x / itemWidth,
       y: -offset.y / itemHeight,
     };
-    const center = this.center(r, c);
-    return new THREE.Vector2(
-      c + center.x + normalizedOffset.x,
-      r + center.y + normalizedOffset.y
-    );
+    return new THREE.Vector2(c + normalizedOffset.x, r + normalizedOffset.y);
   }
 
   /**
@@ -339,15 +384,12 @@ class TileMap {
    * @returns
    */
   _viewportToMap(point) {
-    const scale = this.mesh.scale;
+    const { scale, position } = this._splitWorldMatrix();
     const row = this.mapGrid.row;
     const column = this.mapGrid.column;
     const itemWidth = (this.size.width * scale.x) / column;
     const itemHeight = (this.size.height * scale.y) / row;
-    const center = new THREE.Vector2(
-      this.mesh.position.x,
-      this.mesh.position.y
-    );
+    const center = new THREE.Vector2(position.x, position.y);
     const current = new THREE.Vector2(
       point.x - this.viewport.width / 2,
       this.viewport.height / 2 - point.y
@@ -370,15 +412,12 @@ class TileMap {
    * @returns
    */
   _mapToViewport(point) {
-    const scale = this.mesh.scale;
+    const { scale, position } = this._splitWorldMatrix();
     const row = this.mapGrid.row;
     const column = this.mapGrid.column;
     const itemWidth = (this.size.width * scale.x) / column;
     const itemHeight = (this.size.height * scale.y) / row;
-    const center = new THREE.Vector2(
-      this.mesh.position.x,
-      this.mesh.position.y
-    );
+    const center = new THREE.Vector2(position.x, position.y);
     const lastColumn = this.mapGrid.column - 1;
     const lastRow = this.mapGrid.row - 1;
     const lastOffset = this.offset(lastRow, lastColumn, itemWidth, itemHeight);
@@ -390,6 +429,25 @@ class TileMap {
       current.x + this.viewport.width / 2,
       this.viewport.height / 2 - current.y
     );
+  }
+
+  /**
+   * 计算瓦片四个顶点屏幕坐标
+   * @param {*} r
+   * @param {*} c
+   * @returns
+   */
+  getRectViewportPoints(r, c) {
+    const leftTop = this._getMapLeftTop(r, c);
+    const rightTop = new THREE.Vector2(leftTop.x + 1, leftTop.y);
+    const rightBottom = new THREE.Vector2(leftTop.x + 1, leftTop.y + 1);
+    const leftBottom = new THREE.Vector2(leftTop.x, leftTop.y + 1);
+    return [
+      this._mapToViewport(leftTop),
+      this._mapToViewport(rightTop),
+      this._mapToViewport(rightBottom),
+      this._mapToViewport(leftBottom),
+    ];
   }
 
   /**
