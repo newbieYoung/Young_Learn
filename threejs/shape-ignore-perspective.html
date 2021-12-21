@@ -254,7 +254,8 @@
 
       yMesh.matrixAutoUpdate = false;
       const ignoreMat = ignore3dCameraMatrix(camera, origin, width, height);
-      const mat = new THREE.Matrix4().makeTranslation(88,111,0);
+
+      const mat = new THREE.Matrix4().makeTranslation(88, 111, 0);
       // yMesh.matrix.copy(mat);
 
       const p1 = new THREE.Matrix4()
@@ -276,10 +277,8 @@
       // scene.add(g1);
 
       p1.multiply(p2).multiply(mat); // ignore3dCameraMatrix 需要左乘
-      ignoreMat.multiply(p1);
-      yMesh.matrix.copy(ignoreMat);
+      yMesh.matrix.copy(ignoreMat.clone().multiply(p1));
       scene.add(yMesh);
-      
 
       function render() {
         renderer.clear();

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>sprite real size</title>
+    <title>stencil mesh mask</title>
     <style>
       body,
       html {
@@ -41,20 +41,25 @@
       const up = new THREE.Vector3(0, 1, 0); // 正方向
       const origin = new THREE.Vector3(100, 200, 300); // 焦点
       const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000); // 透视
-      // const camera = new THREE.OrthographicCamera(
-      //   width / -2,
-      //   width / 2,
-      //   height / 2,
-      //   height / -2,
-      //   -500,
-      //   1000
-      // ); // 正交
+      //   const camera = new THREE.OrthographicCamera(
+      //     width / -2,
+      //     width / 2,
+      //     height / 2,
+      //     height / -2,
+      //     -500,
+      //     1000
+      //   ); // 正交
       camera.position.copy(position);
       camera.up.copy(up);
       camera.lookAt(origin);
 
       // 场景、灯光、正方体
       const scene = new THREE.Scene();
+      const pointLight = new THREE.PointLight(0xffffff, 1, 2000);
+      pointLight.position.set(70, 112, 98);
+      const ambientLight = new THREE.AmbientLight(0x333333);
+      scene.add(pointLight);
+      scene.add(ambientLight);
 
       const manager = new THREE.LoadingManager();
       manager.onProgress = function (url, itemsLoaded, itemsTotal) {
@@ -72,34 +77,50 @@
         console.log("Loading complete!");
         const ignoreMat = ignore3dCameraMatrix(camera, origin, width, height);
 
-        const image = texture.image;
-        const sprite = new THREE.Sprite(
-          new THREE.SpriteMaterial({ map: texture, depthTest: false })
+        const demo1 = new THREE.Object3D();
+        const mask = new THREE.Mesh(
+          new THREE.PlaneGeometry(1, 1, 1),
+          new THREE.MeshPhongMaterial({
+            color: 0xff0000,
+            colorWrite: false, // watch out
+            flatShading: true,
+            stencilWrite: true,
+            stencilRef: 1,
+            stencilZPass: THREE.ReplaceStencilOp,
+          })
         );
-        sprite.matrixAutoUpdate = false;
-        sprite.matrix.copy(
+        mask.matrixAutoUpdate = false;
+        mask.matrix.copy(
           ignoreMat
             .clone()
-            .multiply(
-              new THREE.Matrix4().makeScale(image.width, image.height, 1)
-            )
+            .multiply(new THREE.Matrix4().makeTranslation(-30, -30, 0))
+            .multiply(new THREE.Matrix4().makeScale(100, 100, 1))
         );
+        demo1.add(mask);
 
-        // ignore3dCameraMatrix 对象外层容器变化矩阵处理
-        const group = new THREE.Group();
-        group.matrixAutoUpdate = false;
-        group.matrix.copy(
-          ignoreMat
-            .clone()
-            .multiply(new THREE.Matrix4().makeTranslation(-100, 0, 0)) // 偏移
-            .multiply(new THREE.Matrix4().copy(ignoreMat).invert())
+        const sprite1 = new THREE.Sprite(
+          new THREE.SpriteMaterial({
+            map: spriteTexture,
+            depthTest: false, // watch out
+            transparent: true,
+            stencilWrite: true,
+            stencilRef: 1,
+            stencilFunc: THREE.EqualStencilFunc,
+          })
         );
-        group.add(sprite);
+        sprite1.matrixAutoUpdate = false;
+        sprite1.matrix.copy(
+          ignoreMat.clone().multiply(new THREE.Matrix4().makeScale(100, 100, 1))
+        );
+        demo1.add(sprite1);
 
-        scene.add(group);
+        scene.add(demo1);
+        renderer.render(scene, camera);
       };
 
-      const texture = new THREE.TextureLoader(manager).load("../img/img_0.png");
+      const spriteTexture = new THREE.TextureLoader(manager).load(
+        "../img/img_0.png"
+      );
 
       // 忽略透视投影、相机位置影响
       var ignore3dCameraMatrix = (function () {
@@ -165,7 +186,7 @@
         renderer.render(scene, camera);
         requestAnimationFrame(render);
       }
-      render();
+      // render();
     </script>
   </body>
 </html>
