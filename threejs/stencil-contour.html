@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>stencil</title>
+    <style>
+      body,
+      html {
+        background-color: #fff;
+        margin: 0px;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="retina"></div>
+    <script type="module">
+      import * as THREE from "../node_modules/three/build/three.module.js";
+
+      // 渲染器
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+      });
+      renderer.setSize(width, height);
+      renderer.setClearColor("#ffffff", 1.0);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      document.getElementById("retina").appendChild(renderer.domElement);
+
+      // 相机
+      const position = new THREE.Vector3(300, 400, 500); // 位置
+      const up = new THREE.Vector3(0, 1, 0); // 正方向
+      const origin = new THREE.Vector3(0, 0, 0); // 焦点
+      const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000); // 透视
+      // const camera = new THREE.OrthographicCamera(
+      //   width / -2,
+      //   width / 2,
+      //   height / 2,
+      //   height / -2,
+      //   -500,
+      //   1000
+      // ); // 正交
+      camera.position.copy(position);
+      camera.up.copy(up);
+      camera.lookAt(origin);
+
+      // 场景、灯光、正方体
+      const pointLight = new THREE.PointLight(0xffffff, 1, 2000);
+      pointLight.position.set(70, 112, 98);
+      const ambientLight = new THREE.AmbientLight(0x333333);
+      const geometry = new THREE.BoxGeometry(100, 100, 100);
+      const material = new THREE.MeshLambertMaterial({
+        color: new THREE.Color(0x00ff00),
+        stencilWrite: true,
+        stencilRef: 1,
+        stencilZPass: THREE.ReplaceStencilOp,
+      });
+      const cube = new THREE.Mesh(geometry, material);
+      cube.position.set(0, 0, 0);
+      const scene = new THREE.Scene();
+      scene.add(pointLight);
+      scene.add(ambientLight);
+      scene.add(cube);
+
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      let maskMesh = null;
+      window.addEventListener("click", (e) => {
+        const { offsetX, offsetY } = e;
+        const { innerWidth, innerHeight } = window;
+        mouse.x = (offsetX / innerWidth) * 2 - 1;
+        mouse.y = -(offsetY / innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const objects = raycaster.intersectObjects(scene.children);
+        if (maskMesh) {
+          scene.remove(maskMesh);
+        }
+        if (objects.length) {
+          const geometry = objects[0].object.geometry;
+          const maskMaterial = new THREE.MeshBasicMaterial({
+            color: "#ffff00",
+            stencilWrite: true,
+            stencilRef: 1,
+            stencilFunc: THREE.NotEqualStencilFunc,
+          });
+          maskMesh = new THREE.Mesh(geometry, maskMaterial);
+          maskMesh.position.copy(objects[0].object.position);
+          maskMesh.scale.set(1.1, 1.1, 1.1);
+          maskMesh.renderOrder = 1;
+          scene.add(maskMesh);
+        }
+      });
+
+      // 渲染
+      function render() {
+        renderer.clear();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+      }
+      render();
+    </script>
+  </body>
+</html>
