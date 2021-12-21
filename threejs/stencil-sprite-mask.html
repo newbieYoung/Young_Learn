@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stencil mesh mask</title>
+    <title>stencil sprite mask</title>
     <style>
       body,
       html {
@@ -77,43 +77,62 @@
         console.log("Loading complete!");
         const ignoreMat = ignore3dCameraMatrix(camera, origin, width, height);
 
-        const mask = new THREE.Mesh(
-          new THREE.PlaneGeometry(1, 1, 1),
-          new THREE.MeshPhongMaterial({
-            color: 0xff0000,
+        const demo1 = new THREE.Object3D();
+        const mask = new THREE.Sprite(
+          new THREE.SpriteMaterial({
+            map: maskTexture,
             colorWrite: false, // watch out
+            transparent: true,
+            alphaTest: 1, // watch out
+            // gl.stencilFunc(gl.ALWAYS, 1, 0xff);
             stencilWrite: true,
+            stencilFunc: THREE.AlwaysStencilFunc,
             stencilRef: 1,
+            // stencilFuncMask: 0xff,
+            // gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
+            stencilFail: THREE.KeepStencilOp,
+            stencilZFail: THREE.KeepStencilOp,
             stencilZPass: THREE.ReplaceStencilOp,
+            // gl.stencilMask(0xff);
+            // stencilWriteMask: 0xff,
           })
         );
         mask.matrixAutoUpdate = false;
         mask.matrix.copy(
           ignoreMat
             .clone()
-            .multiply(new THREE.Matrix4().makeTranslation(-20, -30, 0))
-            .multiply(new THREE.Matrix4().makeScale(100, 100, 1))
+            .multiply(new THREE.Matrix4().makeTranslation(-60, -60, 0))
+            .multiply(new THREE.Matrix4().makeScale(200, 200, 1))
         );
-        scene.add(mask);
+        demo1.add(mask);
 
         const sprite1 = new THREE.Sprite(
           new THREE.SpriteMaterial({
             map: spriteTexture,
             transparent: true,
+            // gl.stencilFunc(gl.EQUAL, 1, 0xFF);
             stencilWrite: true,
+            stencilFunc: THREE.EqualStencilFunc, // THREE.NotEqualStencilFunc
             stencilRef: 1,
-            stencilFunc: THREE.NotEqualStencilFunc, // THREE.NotEqualStencilFunc
+            // stencilFuncMask: 0xff,
+            // gl.stencilMask(0x00);
+            // stencilWriteMask: 0x00,
           })
         );
         sprite1.matrixAutoUpdate = false;
         sprite1.matrix.copy(
           ignoreMat.clone().multiply(new THREE.Matrix4().makeScale(200, 200, 1))
         );
-        scene.add(sprite1);
+        demo1.add(sprite1);
 
+        scene.add(demo1);
+        renderer.render(scene, camera);
       };
 
       const spriteTexture = new THREE.TextureLoader(manager).load(
+        "../img/lena.jpg"
+      );
+      const maskTexture = new THREE.TextureLoader(manager).load(
         "../img/img_0.png"
       );
 
@@ -181,7 +200,7 @@
         renderer.render(scene, camera);
         requestAnimationFrame(render);
       }
-      render();
+      // render();
     </script>
   </body>
 </html>

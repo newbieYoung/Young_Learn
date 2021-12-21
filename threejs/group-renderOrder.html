@@ -78,6 +78,7 @@
         })
       );
       // group 子对象如果没有显示设置 renderOrder 则按照 group 的 renderOrder 渲染；如果设置了 renderOrder 则按自身的 renderOrder 渲染
+      // group renderOrder 有一些未知异常，尽量少用
       mesh2.renderOrder = 3;
       group.add(mesh2);
       group.renderOrder = 0;
