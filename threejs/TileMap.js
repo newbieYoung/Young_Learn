@@ -19,8 +19,7 @@ class TileMap {
     this.zIndex =
       params.zIndex ||
       function (r, c) {
-        const index = r * this.mapGrid.column + c;
-        return -1.0 / (index + 2);
+        return -1.0 / (this._gridToIndex(r, c) + 2);
       };
 
     // 偏移函数（世界坐标系）
@@ -55,6 +54,9 @@ class TileMap {
       throw new Error("tileMap texture null");
     }
     this.status = params.status || [];
+    this.matrices = [];
+    this.mixedList = [];
+
     this._buffers = []; // bufferGeometry 缓存
     this.updateAll(this.status);
   }
@@ -131,8 +133,7 @@ class TileMap {
     });
     const shapes = [];
     for (let i = 0; i < uvs.length; i++) {
-      const r = parseInt(i / column);
-      const c = i % column;
+      const { r, c } = this._indexToGrid(i);
       shapes.push({
         index: i,
         zIndex: this.zIndex(r, c), // 序号
@@ -154,8 +155,7 @@ class TileMap {
       for (let i = 0; i < shapes.length; i++) {
         const shape = shapes[i];
         const index = shape.index;
-        const r = parseInt(index / column);
-        const c = index % column;
+        const { r, c } = this._indexToGrid(index);
         const leftTop = shape.points[0];
         const points = this.area(r, c);
         for (let j = 0; j < points.length; j++) {
@@ -184,6 +184,31 @@ class TileMap {
    */
   _getState(index, status) {
     return status && status[index] != null ? status[index] : 0;
+  }
+
+  _getMatrix(index, matrices) {
+    return matrices && matrices[index] != null
+      ? matrices[index]
+      : new THREE.Matrix4();
+  }
+
+  _getMixed(index, mixedList) {
+    return mixedList && mixedList[index] != null
+      ? mixedList[index]
+      : { state: -1, percent: 0 };
+  }
+
+  _indexToGrid(index) {
+    const column = this.mapGrid.column;
+    return {
+      c: index % column,
+      r: parseInt(index / column),
+    };
+  }
+
+  _gridToIndex(r, c) {
+    const column = this.mapGrid.column;
+    return r * column + c;
   }
 
   /**
@@ -226,8 +251,10 @@ class TileMap {
    * 按序号更新瓦片状态
    * @param {*} index
    * @param {*} state
+   * @param {*} curMatrix
+   * @param {*} curMixed
    */
-  _updateIndex(index, state) {
+  _updateIndex(index, state, curMatrix, curMixed) {
     const row = this.mapGrid.row;
     const column = this.mapGrid.column;
     const viewWidth = this.viewport.width;
@@ -237,35 +264,120 @@ class TileMap {
     const scaleX = itemWidth / viewWidth;
     const scaleY = itemHeight / viewHeight;
 
-    const c = index % column;
-    const r = parseInt(index / column);
+    const { r, c } = this._indexToGrid(index);
     const currentState = state != null ? state : 0;
+    const currentMatrix =
+      curMatrix != null ? curMatrix.clone() : new THREE.Matrix4();
+    const currentMixed =
+      curMixed != null
+        ? {
+            state: curMixed.state,
+            percent: curMixed.percent,
+          }
+        : { state: -1, percent: 0 };
     const originState = this._getState(index, this.status);
+    const originMatrix = this._getMatrix(index, this.matrices);
+    const originMixed = this._getMixed(index, this.mixedList);
     // 每次状态更新都重新生成 geometry，后续可以优化更新变化的值
     // 此外每个 geometry 有不少相同的数据，后续可以优化共用
-    if (originState != currentState || !this._buffers[index]) {
+    if (
+      originState != currentState ||
+      !currentMatrix.equals(originMatrix) ||
+      currentMixed.state != originMixed.state ||
+      currentMixed.percent != originMixed.percent ||
+      !this._buffers[index]
+    ) {
+      const lastColumn = column - 1;
+      const lastRow = row - 1;
+      const lastOffset = this.offset(
+        lastRow,
+        lastColumn,
+        itemWidth,
+        itemHeight
+      );
+
+      const meshMat = new THREE.Matrix4();
+      if (this.mesh) {
+        this.mesh.updateMatrixWorld();
+        meshMat.copy(this.mesh.matrixWorld);
+      }
+      const meshTrans = this._splitMatrix(meshMat);
+
       const geometry = new THREE.BufferGeometry();
+      // 状态混合
+      // mixed uv
+      const mixedUv = this.uvs[currentMixed.state]
+        ? this.uvs[currentMixed.state]
+        : [-1, -1, -1, -1, -1, -1, -1, -1];
+      geometry.setAttribute(
+        "mixedCoord",
+        new THREE.Float32BufferAttribute(mixedUv, 2)
+      );
+      // mixed opacity
+      const ops = [1 - currentMixed.percent, currentMixed.percent];
+      const mixedOpacity = [
+        ops[0],
+        ops[1],
+        ops[0],
+        ops[1],
+        ops[0],
+        ops[1],
+        ops[0],
+        ops[1],
+      ];
+      geometry.setAttribute(
+        "mixedOpacity",
+        new THREE.Float32BufferAttribute(mixedOpacity, 2)
+      );
       // uv
       const uv = this.uvs[currentState]
         ? this.uvs[currentState]
-        : [0, 0, 0, 0, 0, 0, 0, 0];
+        : [-1, -1, -1, -1, -1, -1, -1, -1];
       geometry.setAttribute(
         "texCoord",
         new THREE.Float32BufferAttribute(uv, 2)
       );
       // matrix
-      const mat4 = new THREE.Matrix4();
+      const transform = this._splitMatrix(currentMatrix);
       const offset = this.offset(r, c, itemWidth, itemHeight);
       const translation = new THREE.Vector3(
         -((column - 1) / 2 - c) * itemWidth + offset.x,
         ((row - 1) / 2 - r) * itemHeight + offset.y,
         0
       );
-      mat4.makeTranslation(
-        (translation.x / viewWidth) * 2,
-        (translation.y / viewHeight) * 2,
-        translation.z
-      );
+      const mat4 = new THREE.Matrix4()
+        .makeTranslation(-lastOffset.x / 2, -lastOffset.y / 2, 0) // 考虑下居中偏移
+        .multiply(
+          new THREE.Matrix4().makeScale(
+            1 / meshTrans.scale.x,
+            1 / meshTrans.scale.y,
+            1
+          )
+        )
+        .multiply(currentMatrix) // 暂时不更新顶点坐标以及 KdTree ！！！
+        .multiply(
+          new THREE.Matrix4().makeTranslation(
+            (translation.x / transform.scale.x) * meshTrans.scale.x,
+            (translation.y / transform.scale.y) * meshTrans.scale.y,
+            translation.z
+          )
+        )
+        .multiply(
+          new THREE.Matrix4().makeScale(meshTrans.scale.x, meshTrans.scale.y, 1)
+        )
+        .multiply(
+          new THREE.Matrix4().makeTranslation(
+            lastOffset.x / 2,
+            lastOffset.y / 2,
+            0
+          )
+        );
+      mat4.elements[12] +=
+        (-meshTrans.position.x * (transform.scale.x - 1)) / meshTrans.scale.x;
+      mat4.elements[13] +=
+        (-meshTrans.position.y * (transform.scale.y - 1)) / meshTrans.scale.y;
+      mat4.elements[12] /= viewWidth / 2;
+      mat4.elements[13] /= viewHeight / 2;
       let matrix = [[], [], [], []];
       for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
@@ -307,6 +419,8 @@ class TileMap {
       geometry.index = new THREE.Uint16BufferAttribute([0, 1, 2, 3, 2, 1], 1);
       this._buffers[index] = geometry;
       this.status[index] = currentState;
+      this.matrices[index] = currentMatrix;
+      this.mixedList[index] = currentMixed;
     }
   }
 
@@ -323,11 +437,10 @@ class TileMap {
   }
 
   /**
-   * 拆解世界坐标系变换矩阵
+   * 拆解矩阵
    */
-  _splitWorldMatrix() {
-    this.mesh.updateMatrixWorld();
-    const mProps = this.mesh.matrixWorld.elements;
+  _splitMatrix(matrix) {
+    const mProps = matrix.elements;
     let scaleX = Math.sqrt(Math.pow(mProps[0], 2) + Math.pow(mProps[1], 2));
     let scaleY = Math.sqrt(Math.pow(mProps[4], 2) + Math.pow(mProps[5], 2));
     let rotate = Math.asin(mProps[1] / scaleX);
@@ -356,6 +469,7 @@ class TileMap {
     return {
       scale: new THREE.Vector3(scaleX, scaleY, 1),
       position: new THREE.Vector3(posX, posY, 0),
+      rotate: rotate,
     };
   }
 
@@ -384,7 +498,8 @@ class TileMap {
    * @returns
    */
   _viewportToMap(point) {
-    const { scale, position } = this._splitWorldMatrix();
+    this.mesh.updateMatrixWorld();
+    const { scale, position } = this._splitMatrix(this.mesh.matrixWorld);
     const row = this.mapGrid.row;
     const column = this.mapGrid.column;
     const itemWidth = (this.size.width * scale.x) / column;
@@ -412,7 +527,8 @@ class TileMap {
    * @returns
    */
   _mapToViewport(point) {
-    const { scale, position } = this._splitWorldMatrix();
+    this.mesh.updateMatrixWorld();
+    const { scale, position } = this._splitMatrix(this.mesh.matrixWorld);
     const row = this.mapGrid.row;
     const column = this.mapGrid.column;
     const itemWidth = (this.size.width * scale.x) / column;
@@ -459,9 +575,11 @@ class TileMap {
     const column = this.mapGrid.column;
     for (let r = 0; r < row; r += 1) {
       for (let c = 0; c < column; c += 1) {
-        const index = r * column + c;
-        const currentState = this._getState(index, status);
-        this._updateIndex(index, currentState);
+        const index = this._gridToIndex(r, c);
+        const curState = this._getState(index, status);
+        const curMatrix = this._getMatrix(index);
+        const curMixed = this._getMixed(index);
+        this._updateIndex(index, curState, curMatrix, curMixed);
       }
     }
     this.render();
@@ -469,17 +587,19 @@ class TileMap {
 
   /**
    * 局部网格更新
-   * @param {row, column, state} grids
+   * @param {row, column, state, matrix, mixed} grids
    */
   updateGrids(grids) {
-    const column = this.mapGrid.column;
     for (let i = 0; i < grids.length; i++) {
       const grid = grids[i];
       const r = grid.row;
       const c = grid.column;
-      const index = r * column + c;
-      const currentState = grid.state != null ? grid.state : 0;
-      this._updateIndex(index, currentState);
+      const index = this._gridToIndex(r, c);
+      const curState = grid.state != null ? grid.state : 0;
+      const curMatrix = grid.matrix != null ? grid.matrix : new THREE.Matrix4();
+      const curMixed =
+        grid.mixed != null ? grid.mixed : { state: -1, percent: 0 };
+      this._updateIndex(index, curState, curMatrix, curMixed);
     }
     this.render();
   }
@@ -491,6 +611,8 @@ class TileMap {
     this.texture.dispose();
     this.mesh.removeFromParent();
     this.status = [];
+    this.matrices = [];
+    this.mixedList = [];
     this._buffers = [];
     this._shapes = [];
     this._kdTree = null;
@@ -547,15 +669,11 @@ class TileMap {
       if (targets.length <= 0) {
         return null;
       } else {
-        const targetIndex = targets[0].index;
-        const targetRow = parseInt(targetIndex / column);
-        const targetColumn = targetIndex % column;
+        const { r, c } = this._indexToGrid(targets[0].index);
         return {
-          row: targetRow,
-          column: targetColumn,
-          center: this._mapToViewport(
-            this._getMapCenter(targetRow, targetColumn)
-          ),
+          row: r,
+          column: c,
+          center: this._mapToViewport(this._getMapCenter(r, c)),
         };
       }
     }
@@ -608,7 +726,6 @@ class TileMap {
             uniform float uOffsetX; // 居中偏移
             uniform float uOffsetY;
             attribute vec4 position;
-            attribute vec2 texCoord; // 纹理坐标
 
             // attribute mat4 matrix; // 变换矩阵
             attribute vec4 mat_0;
@@ -616,7 +733,13 @@ class TileMap {
             attribute vec4 mat_2;
             attribute vec4 mat_3;
             
+            attribute vec2 texCoord; // 纹理坐标
+            attribute vec2 mixedCoord; // 混合纹理
+            attribute vec2 mixedOpacity;
             varying vec2 vTexCoord;
+            varying vec2 vMixedCoord;
+            varying vec2 vMixedOpacity;
+
             void main() {
               // tilemap scale
               // 模拟缩放 viewport，避免重新生成 geometry
@@ -632,23 +755,41 @@ class TileMap {
                 mat_2.x, mat_2.y, mat_2.z, mat_2.w,
                 mat_3.x * scaleX, mat_3.y * scaleY, mat_3.z, mat_3.w);
               
-                // 格式化模型矩阵
+              // 格式化模型矩阵
               mat4 normalizedMat = mat4(1.0, modelMatrix[0][1], modelMatrix[0][2], modelMatrix[0][3],
                 modelMatrix[1][0], 1.0, modelMatrix[1][2], modelMatrix[1][3],
                 modelMatrix[2][0], modelMatrix[2][1], modelMatrix[2][2], modelMatrix[2][3],
                 (modelMatrix[3][0] / scaleX + uOffsetX) / width, (modelMatrix[3][1] / scaleY + uOffsetY) / height, modelMatrix[3][2], modelMatrix[3][3]);
               
               gl_Position = matrix * normalizedMat * pos;
+
               vTexCoord = texCoord;
+              vMixedCoord = mixedCoord;
+              vMixedOpacity = mixedOpacity;
             }
         `,
         fragmentShader: `
             precision mediump float;
             varying vec2 vTexCoord;
+            varying vec2 vMixedCoord;
+            varying vec2 vMixedOpacity;
             uniform sampler2D uSampler; // 纹理取样器
+
+            vec4 realColor(float flag, vec4 color){
+              vec4 newColor = vec4(1.0, 1.0, 1.0, 1.0);
+              newColor.r = flag * color.r + 1.0 * (1.0 - flag);
+              newColor.g = flag * color.g + 1.0 * (1.0 - flag);
+              newColor.b = flag * color.b + 1.0 * (1.0 - flag);
+              newColor.a = color.a;
+              return newColor;
+            }
+
             void main() {
-              vec4 color = texture2D(uSampler, vTexCoord);
-              gl_FragColor = color;
+              float vStep = step(0.0, vTexCoord.x);
+              vec4 color = realColor(vStep, texture2D(uSampler, vTexCoord));
+              float mStep = step(0.0, vMixedCoord.x);
+              vec4 mixedColor = realColor(mStep, texture2D(uSampler, vMixedCoord));
+              gl_FragColor = color * vMixedOpacity.x + mixedColor * vMixedOpacity.y;
             }
         `,
         transparent: true,

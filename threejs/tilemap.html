@@ -15,6 +15,7 @@
         overflow-y: auto;
       }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenLite.min.js"></script>
   </head>
   <body>
     <div id="retina"></div>
@@ -127,6 +128,59 @@
       scene.scale.set(1, 0.7, 1);
       scene.position.set(0, -33, 0);
 
+      // animation
+      function tweenTo(tilemap, map, params, duration, delay) {
+        return new Promise(function (resolve) {
+          const mapGrid = tilemap.mapGrid;
+          const index = map.row * mapGrid.column + map.column; // 序号
+          const matrix = tilemap._getMatrix(index, tilemap.matrices);
+          const trans = tilemap._splitMatrix(matrix);
+          const state = tilemap._getState(index, tilemap.status);
+
+          const info = {
+            mixedState: params.state != null ? params.state : state,
+            mixedPercent: params.state != null && params.state != state ? 0 : 1, // 暂不考虑中间状态
+            scaleX: trans.scale.x,
+            scaleY: trans.scale.y,
+            x: trans.position.x,
+            y: trans.position.y,
+          };
+
+          TweenLite.to(info, duration, {
+            mixedState: params.state != null ? params.state : state,
+            mixedPercent: 1,
+            scaleX: params.scaleX != null ? params.scaleX : trans.scale.x,
+            scaleY: params.scaleY != null ? params.scaleY : trans.scale.y,
+            x: params.x != null ? params.x : trans.position.x,
+            y: params.y != null ? params.y : trans.position.y,
+            delay: delay != null ? delay : 0,
+            onUpdate: function () {
+              tilemap.updateGrids([
+                {
+                  row: map.row,
+                  column: map.column,
+                  state: info.mixedPercent < 1 ? state : info.mixedState,
+                  // 混合其它状态
+                  mixed: {
+                    state: info.mixedState,
+                    percent: info.mixedPercent,
+                  },
+                  // 自定义变换矩阵
+                  matrix: new THREE.Matrix4()
+                    .makeTranslation(info.x, info.y, 0)
+                    .multiply(
+                      new THREE.Matrix4().makeScale(info.scaleX, info.scaleY, 1)
+                    ),
+                },
+              ]);
+            },
+            onComplete: function () {
+              resolve();
+            },
+          });
+        });
+      }
+
       // 事件监听
       renderer.domElement.addEventListener(
         "click",
@@ -141,13 +195,32 @@
           console.log(window.performance.now());
           console.log(map);
           console.log(tilemap.getRectViewportPoints(map.row, map.column));
-          tilemap.updateGrids([
+
+          tweenTo(
+            tilemap,
+            map,
             {
-              row: map.row,
-              column: map.column,
-              state: 1,
+              state: -1,
+              scaleX: 1.2,
+              scaleY: 1.2,
+              x: -50,
+              y: -50,
             },
-          ]);
+            2
+          ).then(function () {
+            tweenTo(
+              tilemap,
+              map,
+              {
+                state: 0,
+                scaleX: 1,
+                scaleY: 1,
+                x: 0,
+                y: 0,
+              },
+              2
+            );
+          });
         },
         false
       );
