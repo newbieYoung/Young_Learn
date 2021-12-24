@@ -234,7 +234,6 @@
             orCamera.lookAt(lootAt);
           }
           // origin
-          const origin = new THREE.Vector3(0, 0, 0);
           const originCamera = new THREE.OrthographicCamera(
             width / -2,
             width / 2,
@@ -243,9 +242,9 @@
             -500,
             1000
           );
-          originCamera.position.copy(origin);
+          originCamera.position.set(0, 0, 0);
           originCamera.up.copy(camera.up);
-          originCamera.lookAt(origin);
+          originCamera.lookAt(new THREE.Vector3(0, 0, 0));
           matrix.multiply(changeCameraMatrix(orCamera, originCamera));
 
           return matrix;
