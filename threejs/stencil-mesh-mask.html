@@ -81,6 +81,7 @@
           new THREE.PlaneGeometry(1, 1, 1),
           new THREE.MeshPhongMaterial({
             color: 0xff0000,
+            transparent: true,
             colorWrite: false, // watch out
             stencilWrite: true,
             stencilRef: 1,
@@ -94,6 +95,7 @@
             .multiply(new THREE.Matrix4().makeTranslation(-20, -30, 0))
             .multiply(new THREE.Matrix4().makeScale(100, 100, 1))
         );
+        mask.renderOrder = -1; // stencil mask 需要先绘制
         scene.add(mask);
 
         const sprite1 = new THREE.Sprite(
@@ -109,6 +111,7 @@
         sprite1.matrix.copy(
           ignoreMat.clone().multiply(new THREE.Matrix4().makeScale(200, 200, 1))
         );
+        sprite1.renderOrder = 0;
         scene.add(sprite1);
 
       };

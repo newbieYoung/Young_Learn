@@ -104,6 +104,7 @@
             .multiply(new THREE.Matrix4().makeTranslation(-60, -60, 0))
             .multiply(new THREE.Matrix4().makeScale(200, 200, 1))
         );
+        mask.renderOrder = -1; // stencil mask 需要先绘制
         demo1.add(mask);
 
         const sprite1 = new THREE.Sprite(
@@ -123,6 +124,7 @@
         sprite1.matrix.copy(
           ignoreMat.clone().multiply(new THREE.Matrix4().makeScale(200, 200, 1))
         );
+        sprite1.renderOrder = 0;
         demo1.add(sprite1);
 
         scene.add(demo1);
