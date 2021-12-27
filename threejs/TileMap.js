@@ -498,6 +498,7 @@ class TileMap {
    * @returns
    */
   _viewportToMap(point) {
+    // this.mesh.updateWorldMatrix(false, false);
     this.mesh.updateMatrixWorld();
     const { scale, position } = this._splitMatrix(this.mesh.matrixWorld);
     const row = this.mapGrid.row;
@@ -590,6 +591,10 @@ class TileMap {
    * @param {row, column, state, matrix, mixed} grids
    */
   updateGrids(grids) {
+    this.prepareGrids(grids);
+    this.render();
+  }
+  prepareGrids(grids) {
     for (let i = 0; i < grids.length; i++) {
       const grid = grids[i];
       const r = grid.row;
@@ -601,7 +606,6 @@ class TileMap {
         grid.mixed != null ? grid.mixed : { state: -1, percent: 0 };
       this._updateIndex(index, curState, curMatrix, curMixed);
     }
-    this.render();
   }
 
   // 销毁
@@ -793,6 +797,8 @@ class TileMap {
             }
         `,
         transparent: true,
+        depthTest: false,
+        depthWrite: false
       });
       this.mesh = new THREE.Mesh(geometry, material);
     } else {
