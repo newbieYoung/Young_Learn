@@ -70,7 +70,7 @@
       };
       manager.onLoad = function () {
         console.log("Loading complete!");
-        const ignoreMat = ignore3dCameraMatrix(camera, origin, width, height);
+        const ignoreMat = ignore3dCameraMatrix(camera, width, height);
 
         const image = texture.image;
         const sprite = new THREE.Sprite(
@@ -106,6 +106,9 @@
         // camera1 转换为 camera2
         function changeCameraMatrix(camera1, camera2) {
           camera1.updateMatrixWorld();
+          if (camera1.parent) {
+            camera1.parent.add(camera2);
+          }
           camera2.updateMatrixWorld();
           const cProj = new THREE.Matrix4().copy(camera1.projectionMatrix);
           const cWorldInverse = new THREE.Matrix4().copy(
@@ -118,13 +121,14 @@
           );
           orcProj.multiply(orcWorldInverse);
           cProj.multiply(orcProj);
+          camera2.removeFromParent();
           return cProj;
         }
 
-        return function (camera, lootAt, width, height) {
+        return function (camera, width, height) {
           const matrix = new THREE.Matrix4();
           // orthographic
-          const orCamera = new THREE.OrthographicCamera(
+          const orthCamera = new THREE.OrthographicCamera(
             width / -2,
             width / 2,
             height / 2,
@@ -132,27 +136,10 @@
             -500,
             1000
           );
-          orCamera.position.copy(camera.position);
-          orCamera.up.copy(camera.up);
-          if (camera.type == "PerspectiveCamera") {
-            orCamera.lookAt(camera.position);
-            matrix.multiply(changeCameraMatrix(camera, orCamera));
-          } else {
-            orCamera.lookAt(lootAt);
-          }
-          // origin
-          const originCamera = new THREE.OrthographicCamera(
-            width / -2,
-            width / 2,
-            height / 2,
-            height / -2,
-            -500,
-            1000
-          );
-          originCamera.position.set(0, 0, 0);
-          originCamera.up.copy(camera.up);
-          originCamera.lookAt(new THREE.Vector3(0, 0, 0));
-          matrix.multiply(changeCameraMatrix(orCamera, originCamera));
+          orthCamera.position.set(0, 0, 0);
+          orthCamera.up.copy(camera.up);
+          orthCamera.lookAt(new THREE.Vector3(0, 0, 0));
+          matrix.multiply(changeCameraMatrix(camera, orthCamera));
 
           return matrix;
         };
