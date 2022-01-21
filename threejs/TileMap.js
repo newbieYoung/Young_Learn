@@ -21,6 +21,7 @@ class TileMap {
       function (r, c) {
         return -1.0 / (this._gridToIndex(r, c) + 2);
       };
+    this.zIndexNeedsUpdate = true;
 
     // 偏移函数（世界坐标系）
     this.offset =
@@ -58,6 +59,8 @@ class TileMap {
     this.mixedList = [];
 
     this._buffers = []; // bufferGeometry 缓存
+    this._sortedBuffersIndex = []; // _buffers 按 zIndex 排序序号
+    this._batchUpdateIndex = []; // 待更新序号
     this.updateAll(this.status);
   }
 
@@ -303,19 +306,15 @@ class TileMap {
       }
       const meshTrans = this._splitMatrix(meshMat);
 
-      const geometry = new THREE.BufferGeometry();
+      const geometry = {};
       // 状态混合
       // mixed uv
-      const mixedUv = this.uvs[currentMixed.state]
+      geometry.mixedCoord = this.uvs[currentMixed.state]
         ? this.uvs[currentMixed.state]
         : [-1, -1, -1, -1, -1, -1, -1, -1];
-      geometry.setAttribute(
-        "mixedCoord",
-        new THREE.Float32BufferAttribute(mixedUv, 2)
-      );
       // mixed opacity
       const ops = [1 - currentMixed.percent, currentMixed.percent];
-      const mixedOpacity = [
+      geometry.mixedOpacity = [
         ops[0],
         ops[1],
         ops[0],
@@ -325,18 +324,10 @@ class TileMap {
         ops[0],
         ops[1],
       ];
-      geometry.setAttribute(
-        "mixedOpacity",
-        new THREE.Float32BufferAttribute(mixedOpacity, 2)
-      );
       // uv
-      const uv = this.uvs[currentState]
+      geometry.texCoord = this.uvs[currentState]
         ? this.uvs[currentState]
         : [-1, -1, -1, -1, -1, -1, -1, -1];
-      geometry.setAttribute(
-        "texCoord",
-        new THREE.Float32BufferAttribute(uv, 2)
-      );
       // matrix
       const transform = this._splitMatrix(currentMatrix);
       const offset = this.offset(r, c, itemWidth, itemHeight);
@@ -390,14 +381,11 @@ class TileMap {
         }
       }
       for (let i = 0; i < 4; i++) {
-        geometry.setAttribute(
-          `mat_${i}`,
-          new THREE.Float32BufferAttribute(matrix[i], 4)
-        );
+        geometry[`mat_${i}`] = matrix[i];
       }
       // position
       const zIndex = this.zIndex(r, c);
-      let position = [
+      geometry.position = [
         -1.0 * scaleX,
         1.0 * scaleY,
         -zIndex,
@@ -411,16 +399,13 @@ class TileMap {
         -1.0 * scaleY,
         -zIndex,
       ];
-      geometry.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(position, 3)
-      );
       // index
-      geometry.index = new THREE.Uint16BufferAttribute([0, 1, 2, 3, 2, 1], 1);
+      geometry.index = [0, 1, 2, 3, 2, 1];
       this._buffers[index] = geometry;
       this.status[index] = currentState;
       this.matrices[index] = currentMatrix;
       this.mixedList[index] = currentMixed;
+      this._batchUpdateIndex.push(index); // 加入待更新列表
     }
   }
 
@@ -685,19 +670,80 @@ class TileMap {
 
   // 渲染
   render() {
-    let geometry;
-    if (this._shapes.length <= 0) {
-      geometry = BufferGeometryUtils.mergeBufferGeometries(this._buffers);
-    } else {
-      // 存在自定义偏移函数，可能相互覆盖，需要先按层级排序，层级低的先绘制，否则会遮挡区域空白的情况
-      const sorted = [];
+    // 存在自定义偏移函数，可能相互覆盖，需要先按层级排序，层级低的先绘制，否则会遮挡区域空白的情况
+    const self = this;
+    if (this.zIndexNeedsUpdate) {
+      this._sortedBuffersIndex = [];
       for (let i = 0; i < this._buffers.length; i++) {
-        sorted.push(this._buffers[i]);
+        this._sortedBuffersIndex.push(i);
       }
-      sorted.sort(function (a, b) {
-        return b.attributes.position.array[2] - a.attributes.position.array[2];
+      this._sortedBuffersIndex.sort(function (a, b) {
+        return self._buffers[b].position[2] - self._buffers[a].position[2];
       });
-      geometry = BufferGeometryUtils.mergeBufferGeometries(sorted);
+      this.zIndexNeedsUpdate = false;
+    }
+    const sorted = [];
+    for (let i = 0; i < this._sortedBuffersIndex.length; i++) {
+      sorted.push(this._buffers[this._sortedBuffersIndex[i]]);
+    }
+
+    // Buffer
+    let interleavedFloat32Buffer;
+    let uInt16Buffer;
+    let newBuffer = true;
+    let strideLen = 2 + 2 + 2 + 4 * 4 + 3;
+    if (this.mesh) {
+      const attrPos = this.mesh.geometry.attributes.position;
+      if (
+        attrPos &&
+        attrPos.data.array &&
+        attrPos.data.array.length >= sorted.length * 4 * strideLen
+      ) {
+        interleavedFloat32Buffer = attrPos.data.array;
+        uInt16Buffer = this.mesh.geometry.index.array;
+        newBuffer = false;
+      }
+    }
+    if (newBuffer) {
+      interleavedFloat32Buffer = new Float32Array(
+        new ArrayBuffer(sorted.length * 4 * strideLen * 4)
+      );
+      uInt16Buffer = new Uint16Array(new ArrayBuffer(sorted.length * 6 * 2));
+    }
+
+    var float32List = [
+      { key: "mixedCoord", len: 2, offset: 0 },
+      { key: "mixedOpacity", len: 2, offset: 2 },
+      { key: "texCoord", len: 2, offset: 4 },
+      { key: "mat_0", len: 4, offset: 6 },
+      { key: "mat_1", len: 4, offset: 10 },
+      { key: "mat_2", len: 4, offset: 14 },
+      { key: "mat_3", len: 4, offset: 18 },
+      { key: "position", len: 3, offset: 22 },
+    ];
+
+    const indexList = [0, 1, 2, 3, 2, 1];
+    for (let i = 0; i < sorted.length; i++) {
+      // 仅更新需要更新的
+      if (
+        this._batchUpdateIndex.length <= 0 ||
+        this._batchUpdateIndex.includes(this._sortedBuffersIndex[i])
+      ) {
+        const sortedItem = sorted[i];
+        for (let j = 0; j < 4; j += 1) {
+          for (let z = 0; z < float32List.length; z++) {
+            const floatItem = float32List[z];
+            for (let k = 0; k < floatItem.len; k++) {
+              interleavedFloat32Buffer[
+                strideLen * 4 * i + strideLen * j + k + floatItem.offset
+              ] = sortedItem[floatItem.key][floatItem.len * j + k];
+            }
+          }
+        }
+        for (let j = 0; j < indexList.length; j += 1) {
+          uInt16Buffer[6 * i + j] = i * 4 + indexList[j];
+        }
+      }
     }
 
     if (!this.mesh) {
@@ -798,21 +844,42 @@ class TileMap {
         `,
         transparent: true,
         depthTest: false,
-        depthWrite: false
+        depthWrite: false,
       });
-      this.mesh = new THREE.Mesh(geometry, material);
-    } else {
-      // this.mesh.geometry.copy(geometry);
-      this.mesh.geometry.setIndex(geometry.index.clone());
-      const attributeKeys = Object.keys(geometry.attributes);
-      for (let i = 0; i < attributeKeys.length; i += 1) {
-        const attributeName = attributeKeys[i];
+      this.mesh = new THREE.Mesh(new THREE.BufferGeometry(), material);
+    }
+
+    var attributeItem;
+    if (newBuffer) {
+      var interleavedBuffer32 = new THREE.InterleavedBuffer(
+        interleavedFloat32Buffer,
+        strideLen
+      );
+      for (let i = 0; i < float32List.length; i += 1) {
+        attributeItem = float32List[i];
         this.mesh.geometry.setAttribute(
-          attributeName,
-          geometry.attributes[attributeName].clone()
+          attributeItem.key,
+          new THREE.InterleavedBufferAttribute(
+            interleavedBuffer32,
+            attributeItem.len,
+            attributeItem.offset
+          )
         );
+        this.mesh.geometry.attributes[attributeItem.key].needsUpdate = true;
+      }
+      this.mesh.geometry.index = new THREE.Uint16BufferAttribute(
+        uInt16Buffer,
+        1
+      );
+      this.mesh.geometry.index.needsUpdate = true;
+    } else {
+      for (let i = 0; i < float32List.length; i += 1) {
+        attributeItem = float32List[i];
+        this.mesh.geometry.attributes[attributeItem.key].needsUpdate = true;
       }
     }
+
+    this._batchUpdateIndex = []; // 待更新序号清空
   }
 }
 
