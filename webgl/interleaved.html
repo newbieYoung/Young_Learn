@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>interleaved</title>
+    <script src="./webgl.js"></script>
+  </head>
+  <body>
+    <canvas id="webgl" width="400" height="400"></canvas>
+    <script>
+      const canvas = document.querySelector("#webgl");
+      const gl = canvas.getContext("webgl");
+      gl.clearColor(0.9, 0.9, 0.9, 1.0);
+
+      const program = {
+        vertexSrc: `
+          attribute vec4 a_position;
+          attribute vec4 a_color;
+          varying vec4 v_color;
+          void main() {
+            gl_Position = a_position;
+            v_color = a_color;
+          }
+        `,
+        fragmentSrc: `
+          precision mediump float;
+          varying vec4 v_color;
+          void main() {
+            gl_FragColor = v_color;
+          }
+        `,
+      };
+      const webglProgram = generateProgram(gl, program);
+
+      const datas = new Float32Array([
+        // 顶点、颜色
+        0.0, 0.5, 1.0, 0.0, 0.0, -0.5, -0.5, 0.0, 1.0, 0.0, 0.5, -0.5, 0.0, 0.0,
+        1.0,
+      ]);
+      const vertexBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, datas, gl.STATIC_DRAW);
+
+      // 交替数据
+      const size = datas.BYTES_PER_ELEMENT; // 数组中的每个元素的大小（以字节为单位）
+      const stride = size * 5; // 步幅
+      const a_position = gl.getAttribLocation(webglProgram, "a_position");
+      gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, stride, 0);
+      gl.enableVertexAttribArray(a_position);
+
+      const a_color = gl.getAttribLocation(webglProgram, "a_color");
+      gl.vertexAttribPointer(a_color, 3, gl.FLOAT, false, stride, size * 2); // 偏移
+      gl.enableVertexAttribArray(a_color);
+
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    </script>
+  </body>
+</html>

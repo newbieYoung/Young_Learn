@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>triangle</title>
+    <title>uniforms</title>
     <script src="./webgl.js"></script>
   </head>
   <body>
@@ -13,39 +13,37 @@
       gl.clearColor(0.9, 0.9, 0.9, 1.0);
 
       const program = {
-        // 顶点着色器
         vertexSrc: `
           attribute vec4 a_position;
           void main() {
             gl_Position = a_position;
           }
         `,
-        // 片元着色器
         fragmentSrc: `
-          precision mediump float; // 不写会报错 No precision specified for (float)，缺少精度描述
+          precision mediump float;
+          uniform vec4 u_color;
           void main() {
-            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+            gl_FragColor = u_color;
           }
         `,
       };
       const webglProgram = generateProgram(gl, program);
 
-      // 缓冲区
       const vertices = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]);
-      // 创建缓冲区
       const vertexBuffer = gl.createBuffer();
-      // 绑定缓存区
       gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-      // 向缓冲区写入数据
       gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
       const a_position = gl.getAttribLocation(webglProgram, "a_position");
-      // 将缓冲区数据分配给 a_position 变量
       gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0);
-      // 启用缓存区
       gl.enableVertexAttribArray(a_position);
 
+      // uniform
+      const u_color = gl.getUniformLocation(webglProgram, "u_color");
+      gl.uniform4f(u_color, 1.0, 0.0, 1.0, 1.0);
+
       gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.drawArrays(gl.TRIANGLES, 0, 3); // 绘制三角形
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
     </script>
   </body>
 </html>
