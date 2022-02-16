@@ -37,18 +37,17 @@
       document.getElementById("retina").appendChild(renderer.domElement);
 
       // 相机
-      const position = new THREE.Vector3(200, 300, 400); // 位置
+      const position = new THREE.Vector3(0, 0, 400); // 位置
       const up = new THREE.Vector3(0, 1, 0); // 正方向
-      const origin = new THREE.Vector3(100, 200, 300); // 焦点
-      const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000); // 透视
-      //   const camera = new THREE.OrthographicCamera(
-      //     width / -2,
-      //     width / 2,
-      //     height / 2,
-      //     height / -2,
-      //     -500,
-      //     1000
-      //   ); // 正交
+      const origin = new THREE.Vector3(0, 0, 0); // 焦点
+      const camera = new THREE.OrthographicCamera(
+        width / -2,
+        width / 2,
+        height / 2,
+        height / -2,
+        -500,
+        1000
+      ); // 正交
       camera.position.copy(position);
       camera.up.copy(up);
       camera.lookAt(origin);
@@ -75,7 +74,6 @@
       };
       manager.onLoad = function () {
         console.log("Loading complete!");
-        const ignoreMat = ignore3dCameraMatrix(camera, width, height);
 
         const demo1 = new THREE.Object3D();
         const mask = new THREE.Sprite(
@@ -99,9 +97,8 @@
         );
         mask.matrixAutoUpdate = false;
         mask.matrix.copy(
-          ignoreMat
-            .clone()
-            .multiply(new THREE.Matrix4().makeTranslation(-60, -60, 0))
+          new THREE.Matrix4()
+            .makeTranslation(-60, -60, 0)
             .multiply(new THREE.Matrix4().makeScale(200, 200, 1))
         );
         mask.renderOrder = -1; // stencil mask 需要先绘制
@@ -121,9 +118,7 @@
           })
         );
         sprite1.matrixAutoUpdate = false;
-        sprite1.matrix.copy(
-          ignoreMat.clone().multiply(new THREE.Matrix4().makeScale(200, 200, 1))
-        );
+        sprite1.matrix.copy(new THREE.Matrix4().makeScale(200, 200, 1));
         sprite1.renderOrder = 0;
         demo1.add(sprite1);
 
@@ -137,49 +132,6 @@
       const maskTexture = new THREE.TextureLoader(manager).load(
         "../img/img_0.png"
       );
-
-      var ignore3dCameraMatrix = (function () {
-        // camera1 转换为 camera2
-        function changeCameraMatrix(camera1, camera2) {
-          camera1.updateMatrixWorld();
-          if (camera1.parent) {
-            camera1.parent.add(camera2);
-          }
-          camera2.updateMatrixWorld();
-          const cProj = new THREE.Matrix4().copy(camera1.projectionMatrix);
-          const cWorldInverse = new THREE.Matrix4().copy(
-            camera1.matrixWorldInverse
-          );
-          cProj.multiply(cWorldInverse).invert();
-          const orcProj = new THREE.Matrix4().copy(camera2.projectionMatrix);
-          const orcWorldInverse = new THREE.Matrix4().copy(
-            camera2.matrixWorldInverse
-          );
-          orcProj.multiply(orcWorldInverse);
-          cProj.multiply(orcProj);
-          camera2.removeFromParent();
-          return cProj;
-        }
-
-        return function (camera, width, height) {
-          const matrix = new THREE.Matrix4();
-          // orthographic
-          const orthCamera = new THREE.OrthographicCamera(
-            width / -2,
-            width / 2,
-            height / 2,
-            height / -2,
-            -500,
-            1000
-          );
-          orthCamera.position.set(0, 0, 0);
-          orthCamera.up.copy(camera.up);
-          orthCamera.lookAt(new THREE.Vector3(0, 0, 0));
-          matrix.multiply(changeCameraMatrix(camera, orthCamera));
-
-          return matrix;
-        };
-      })();
 
       // 渲染
       function render() {

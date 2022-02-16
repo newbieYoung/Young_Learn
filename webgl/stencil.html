@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>stencil</title>
+    <script src="./webgl.js"></script>
+  </head>
+  <body>
+    <canvas id="webgl" width="600" height="600"></canvas>
+    <script>
+      const canvas = document.querySelector("#webgl");
+      const gl = canvas.getContext("webgl", { stencil: true });
+      gl.enable(gl.STENCIL_TEST);
+      gl.clearColor(0.9, 0.9, 0.9, 1.0);
+
+      const program = {
+        vertexSrc: `
+          attribute vec4 a_position;
+          uniform vec4 u_translation;
+          void main() {
+            gl_Position = a_position + u_translation;
+          }
+        `,
+        fragmentSrc: `
+          precision mediump float;
+          uniform vec4 u_color;
+          void main() {
+            gl_FragColor = u_color;
+          }
+        `,
+      };
+      const webglProgram = generateProgram(gl, program);
+      const u_translation = gl.getUniformLocation(
+        webglProgram,
+        "u_translation"
+      );
+      const u_color = gl.getUniformLocation(webglProgram, "u_color");
+
+      function objBuffer(width) {
+        const vertices = new Float32Array([
+          -width,
+          width,
+          -width,
+          -width,
+          width,
+          width,
+          width,
+          -width,
+        ]);
+        const vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+        const a_position = gl.getAttribLocation(webglProgram, "a_position");
+        gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_position);
+
+        const index = new Uint16Array([0, 1, 2, 1, 2, 3]);
+        const indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, index, gl.STATIC_DRAW);
+      }
+
+      // 透明反转遮罩
+      function alphaReverseMask() {
+        gl.clear(
+          gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT
+        );
+
+        objBuffer(0.5, true);
+
+        gl.stencilFunc(gl.ALWAYS, 1, 0xff);
+        gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
+        gl.uniform4f(u_translation, 0.5, 0.4, 0.0, 0.0);
+        gl.uniform4f(u_color, 1.0, 1.0, 1.0, 1.0); // white
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        gl.stencilFunc(gl.EQUAL, 0, 0xff); // EQUAL 0
+        gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
+        gl.uniform4f(u_translation, 0.0, 0.0, 0.0, 0.0);
+        gl.uniform4f(u_color, 1.0, 0.0, 0.0, 1.0);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+      }
+      // alphaReverseMask();
+
+      // 透明遮罩
+      function alphaMask() {
+        gl.clear(
+          gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT
+        );
+
+        objBuffer(0.5);
+
+        gl.stencilFunc(gl.ALWAYS, 1, 0xff);
+        gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
+        gl.uniform4f(u_translation, 0.5, 0.4, 0.0, 0.0);
+        gl.uniform4f(u_color, 1.0, 1.0, 1.0, 1.0); // white
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        gl.stencilFunc(gl.EQUAL, 1, 0xff); // EQUAL 0
+        gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
+        gl.uniform4f(u_translation, 0.0, 0.0, 0.0, 0.0);
+        gl.uniform4f(u_color, 1.0, 0.0, 0.0, 1.0);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+      }
+      // alphaMask();
+
+      // 组合遮罩
+      function mode(mask) {
+        if (
+          (mask.mode === "+" && mask.inv === false) ||
+          (mask.mode === "-" && mask.inv === true)
+        ) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
+      function compositeMask(masks) {
+        gl.clear(
+          gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT
+        );
+
+        objBuffer(0.5);
+
+        const refs = [];
+        for (let i = 0; i < masks.length; i++) {
+          refs.push(mode(masks[i]));
+        }
+        const targetRef = refs[0];
+        for (let i = 0; i < refs.length; i++) {
+          refs[i] = refs[i] == targetRef ? 1 : 0;
+        }
+        console.log(targetRef);
+        console.log(refs);
+
+        // rightTop
+        gl.stencilFunc(gl.ALWAYS, refs[0], 0xff);
+        gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
+        gl.uniform4f(u_translation, 0.5, 0.4, 0.0, 0.0);
+        gl.uniform4f(u_color, 1.0, 1.0, 1.0, 1.0);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        // leftTop
+        gl.stencilFunc(gl.ALWAYS, refs[1], 0xff);
+        gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
+        gl.uniform4f(u_translation, -0.6, 0.4, 0.0, 0.0);
+        gl.uniform4f(u_color, 1.0, 1.0, 1.0, 1.0);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        // bottom
+        gl.stencilFunc(gl.ALWAYS, refs[2], 0xff);
+        gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
+        gl.uniform4f(u_translation, -0.2, -0.2, 0.0, 0.0);
+        gl.uniform4f(u_color, 1.0, 1.0, 1.0, 1.0);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        gl.stencilFunc(gl.EQUAL, targetRef, 0xff);
+        gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
+        gl.uniform4f(u_translation, 0.0, 0.0, 0.0, 0.0);
+        gl.uniform4f(u_color, 1.0, 0.0, 0.0, 1.0);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+      }
+      // + 相加、- 相减、inv 反转
+      compositeMask([
+        {
+          mode: "+",
+          inv: false,
+        },
+        {
+          mode: "-",
+          inv: false,
+        },
+        {
+          mode: "+",
+          inv: false,
+        },
+      ]);
+    </script>
+  </body>
+</html>
