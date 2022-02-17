@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>vao</title>
+    <script src="./webgl.js"></script>
+  </head>
+  <body>
+    <canvas id="webgl" width="600" height="600"></canvas>
+    <script>
+      const canvas = document.querySelector("#webgl");
+      const gl = canvas.getContext("webgl");
+      const vaoExt = gl.getExtension("OES_vertex_array_object");
+      gl.clearColor(0.9, 0.9, 0.9, 1.0);
+
+      const program = {
+        vertexSrc: `
+          attribute vec4 a_position;
+          uniform vec4 u_translation;
+          void main() {
+            gl_Position = a_position + u_translation;
+          }
+        `,
+        fragmentSrc: `
+          precision mediump float;
+          uniform vec4 u_color;
+          void main() {
+            gl_FragColor = u_color;
+          }
+        `,
+      };
+      const webglProgram = generateProgram(gl, program);
+      const u_translation = gl.getUniformLocation(
+        webglProgram,
+        "u_translation"
+      );
+      const u_color = gl.getUniformLocation(webglProgram, "u_color");
+
+      function rectBuffer(width, useVao) {
+        let vao = null;
+        if (useVao) {
+          vao = vaoExt.createVertexArrayOES();
+          vaoExt.bindVertexArrayOES(vao);
+        }
+
+        // buffer
+        const vertices = new Float32Array([
+          -width,
+          width,
+          -width,
+          -width,
+          width,
+          width,
+          width,
+          -width,
+        ]);
+        const vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+        const a_position = gl.getAttribLocation(webglProgram, "a_position");
+        gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_position);
+
+        const index = new Uint16Array([0, 1, 2, 1, 2, 3]);
+        const indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, index, gl.STATIC_DRAW);
+
+        vaoExt.bindVertexArrayOES(null);
+        return vao;
+      }
+
+      function triangleBuffer(width, useVao) {
+        let vao = null;
+        if (useVao) {
+          vao = vaoExt.createVertexArrayOES(); // create vao
+          vaoExt.bindVertexArrayOES(vao); // bind vao
+        }
+
+        //buffer
+        const vertices = new Float32Array([
+          0.0,
+          width,
+          -width,
+          -width,
+          width,
+          -width,
+        ]);
+        const vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+        const a_position = gl.getAttribLocation(webglProgram, "a_position");
+        gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_position);
+
+        vaoExt.bindVertexArrayOES(null); // bind null
+        return vao;
+      }
+
+      function render() {
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        // 不使用 vao
+        // 绘制某个矩形之后再绘制三角形，需要重新执行 vertexAttribPointer 指定 buffer 布局
+        // triangleBuffer(0.5, false);
+        // gl.uniform4f(u_translation, 0.2, 0.2, 0.0, 0.0);
+        // gl.uniform4f(u_color, 0.0, 0.0, 1.0, 1.0);
+        // gl.drawArrays(gl.TRIANGLES, 0, 3); // 绘制三角形
+
+        // rectBuffer(0.5, false);
+        // gl.uniform4f(u_translation, 0.0, 0.0, 0.0, 0.0);
+        // gl.uniform4f(u_color, 1.0, 0.0, 0.0, 1.0);
+        // gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0); // 绘制矩形
+
+        // triangleBuffer(0.5, false);
+        // gl.uniform4f(u_translation, -0.2, -0.2, 0.0, 0.0);
+        // gl.uniform4f(u_color, 0.0, 1.0, 0.0, 1.0);
+        // gl.drawArrays(gl.TRIANGLES, 0, 3); // 绘制三角形
+
+        // 使用 vao
+        // 首先分别创建 三角形 vao 和 矩形 vao，绘制不同图形时只需要先绑定相应 vao 即可
+        const triVao = triangleBuffer(0.5, true);
+        const rectVao = rectBuffer(0.5, true);
+
+        vaoExt.bindVertexArrayOES(triVao);
+        gl.uniform4f(u_translation, 0.2, 0.2, 0.0, 0.0);
+        gl.uniform4f(u_color, 0.0, 0.0, 1.0, 1.0);
+        gl.drawArrays(gl.TRIANGLES, 0, 3); // 绘制三角形
+
+        vaoExt.bindVertexArrayOES(rectVao);
+        gl.uniform4f(u_translation, 0.0, 0.0, 0.0, 0.0);
+        gl.uniform4f(u_color, 1.0, 0.0, 0.0, 1.0);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0); // 绘制矩形
+
+        vaoExt.bindVertexArrayOES(triVao);
+        gl.uniform4f(u_translation, -0.2, -0.2, 0.0, 0.0);
+        gl.uniform4f(u_color, 0.0, 1.0, 0.0, 1.0);
+        gl.drawArrays(gl.TRIANGLES, 0, 3); // 绘制三角形
+
+        // vao 不再使用后需要释放
+        vaoExt.deleteVertexArrayOES(triVao);
+        vaoExt.deleteVertexArrayOES(rectVao);
+      }
+      render();
+    </script>
+  </body>
+</html>

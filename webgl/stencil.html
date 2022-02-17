@@ -99,7 +99,7 @@
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
-        gl.stencilFunc(gl.EQUAL, 1, 0xff); // EQUAL 0
+        gl.stencilFunc(gl.EQUAL, 1, 0xff); // EQUAL 1
         gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
         gl.uniform4f(u_translation, 0.0, 0.0, 0.0, 0.0);
         gl.uniform4f(u_color, 1.0, 0.0, 0.0, 1.0);
