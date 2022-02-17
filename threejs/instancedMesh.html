@@ -47,17 +47,12 @@
       camera.up.set(0, 1, 0); //正方向
       camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-      // 场景、灯光、正方体
+      // 场景
       const scene = new THREE.Scene();
-      const ambientLight = new THREE.AmbientLight(0x333333);
-      scene.add(ambientLight);
-      const pointLight = new THREE.PointLight(0xffffff, 1, 2000);
-      pointLight.position.set(70, 112, 98);
-      scene.add(pointLight);
 
       const instancedMax = 10;
       const geometry = new THREE.PlaneGeometry(100, 100);
-      const material = new THREE.MeshLambertMaterial({
+      const material = new THREE.MeshBasicMaterial({
         color: new THREE.Color(0xff0000),
       });
       // InstancedMesh 不支持 SpriteMaterial
