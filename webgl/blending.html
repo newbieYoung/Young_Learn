@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>blending</title>
+    <script src="./webgl.js"></script>
+  </head>
+  <body>
+    <canvas id="webgl" width="600" height="600"></canvas>
+    <script>
+      const canvas = document.querySelector("#webgl");
+      const gl = canvas.getContext("webgl");
+      gl.enable(gl.BLEND);
+
+      const program = {
+        vertexSrc: `
+          attribute vec4 a_position;
+          uniform vec4 u_translation;
+          void main() {
+            gl_Position = a_position + u_translation;
+          }
+        `,
+        fragmentSrc: `
+          precision mediump float;
+          uniform vec4 u_color;
+          void main() {
+            gl_FragColor = u_color;
+          }
+        `,
+      };
+      const webglProgram = generateProgram(gl, program);
+      const u_translation = gl.getUniformLocation(
+        webglProgram,
+        "u_translation"
+      );
+      const u_color = gl.getUniformLocation(webglProgram, "u_color");
+
+      function objBuffer(width) {
+        const vertices = new Float32Array([
+          -width,
+          width,
+          -width,
+          -width,
+          width,
+          width,
+          width,
+          -width,
+        ]);
+        const vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+        const a_position = gl.getAttribLocation(webglProgram, "a_position");
+        gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_position);
+
+        const index = new Uint16Array([0, 1, 2, 1, 2, 3]);
+        const indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, index, gl.STATIC_DRAW);
+      }
+
+      function blending() {
+        gl.clearColor(1.0, 1.0, 1.0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        // sourceColor * sourceFactor (op) dstColor * dstFactor
+        // gl.blendFuncSeparate
+        // gl.blendFunc
+        // 实际计算时需要考虑 clearColor 的影响
+        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
+        objBuffer(0.5);
+        gl.uniform4f(u_translation, 0.2, 0.2, 0.0, 0.0);
+        gl.uniform4f(u_color, 1.0, 0.0, 0.0, 0.3);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+
+        gl.uniform4f(u_translation, 0.0, 0.0, 0.0, 0.0);
+        gl.uniform4f(u_color, 0.0, 0.0, 1.0, 0.3);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+      }
+      blending();
+    </script>
+  </body>
+</html>

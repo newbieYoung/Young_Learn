@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>blending</title>
+    <script src="../../node_modules/pixi.js/dist/browser/pixi.js"></script>
+    <style>
+      canvas {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      window.onload = function () {
+        const renderer = PIXI.autoDetectRenderer({
+          width: 1067,
+          height: 600,
+          antialias: true,
+          transparent: true,
+          resolution: window.devicePixelRatio,
+        });
+        document.body.appendChild(renderer.view);
+
+        const stage = new PIXI.Container();
+
+        const sprite1 = new PIXI.Sprite(PIXI.Texture.from("../img/img_0.png"));
+        stage.addChild(sprite1);
+
+        const sprite2 = new PIXI.Sprite(PIXI.Texture.from("../img/img_1.png"));
+        // blendMode
+        // IMPORTANT - The WebGL renderer only supports the NORMAL, ADD, MULTIPLY and SCREEN blend modes. Anything else will silently act like NORMAL.
+        // sprite2.blendMode = PIXI.BLEND_MODES.NORMAL_NPM; // 正常
+        // sprite2.blendMode = PIXI.BLEND_MODES.ADD; // 相加
+        // sprite2.blendMode = PIXI.BLEND_MODES.MULTIPLY; // 相乘
+        sprite2.blendMode = PIXI.BLEND_MODES.SUBTRACT; // 相减
+        sprite2.position.set(0, -100, 0);
+        stage.addChild(sprite2);
+
+        // ------------------
+
+        const rect1 = new PIXI.Graphics();
+        rect1.beginFill(0xff0000, 1.0);
+        rect1.drawRect(50, 50, 400, 400);
+        rect1.endFill();
+        // stage.addChild(rect1);
+
+        const rect2 = new PIXI.Graphics();
+        // blendMode
+        // IMPORTANT - The WebGL renderer only supports the NORMAL, ADD, MULTIPLY and SCREEN blend modes. Anything else will silently act like NORMAL.
+        // rect2.blendMode = PIXI.BLEND_MODES.NORMAL_NPM;
+        // rect2.blendMode = PIXI.BLEND_MODES.ADD;
+        // rect2.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+        rect2.blendMode = PIXI.BLEND_MODES.SUBTRACT;
+        rect2.beginFill(0x00ffff, 1.0);
+        rect2.drawRect(200, 200, 400, 400);
+        rect2.endFill();
+        // stage.addChild(rect2);
+
+        let ticker = PIXI.Ticker.shared;
+        ticker.start();
+        ticker.add(function () {
+          renderer.render(stage);
+        });
+      };
+    </script>
+  </body>
+</html>

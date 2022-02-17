@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>blending</title>
+    <style>
+      body,
+      html {
+        margin: 0px;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+    </style>
+    <!-- three.js -->
+    <script src="../node_modules/three/build/three.js"></script>
+  </head>
+  <body>
+    <div id="retina"></div>
+    <script>
+      // 渲染器
+      //const width = 1067;
+      //const height = 600;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      console.log(width + " " + height);
+      console.log(window.innerWidth + " " + window.innerHeight);
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true, // 透明
+      });
+      renderer.setSize(width, height);
+      /**
+       * ADD setClearColor("#ffffff", 0.0);
+       * MULTIPLY setClearColor("#ffffff", 1.0);
+       */
+      renderer.setClearColor("#ffffff", 0.0);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      document.getElementById("retina").appendChild(renderer.domElement);
+
+      // 相机
+      const position = new THREE.Vector3(0, 0, 400); // 位置
+      const up = new THREE.Vector3(0, 1, 0); // 正方向
+      const origin = new THREE.Vector3(0, 0, 0); // 焦点
+      const camera = new THREE.OrthographicCamera(
+        width / -2,
+        width / 2,
+        height / 2,
+        height / -2,
+        -500,
+        1000
+      ); // 正交
+      camera.position.copy(position);
+      camera.up.copy(up);
+      camera.lookAt(origin);
+
+      // 场景
+      const scene = new THREE.Scene();
+
+      const manager = new THREE.LoadingManager();
+      manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+        console.log(
+          "Loading file: " +
+            url +
+            ".\nLoaded " +
+            itemsLoaded +
+            " of " +
+            itemsTotal +
+            " files."
+        );
+      };
+
+      const sprite1Texture = new THREE.TextureLoader(manager).load(
+        "../img/img_0.png"
+      );
+      const sprite2Texture = new THREE.TextureLoader(manager).load(
+        "../img/img_1.png"
+      );
+
+      // 图片和图形同一混合模式参数有可能不一样
+      manager.onLoad = function () {
+        const sprite1 = new THREE.Sprite(
+          new THREE.SpriteMaterial({
+            map: sprite1Texture,
+            transparent: true,
+          })
+        );
+        sprite1.matrixAutoUpdate = false;
+        sprite1.matrix.copy(
+          new THREE.Matrix4()
+            .makeTranslation(50, 50, 0)
+            .multiply(new THREE.Matrix4().makeScale(300, 300, 1))
+        );
+        scene.add(sprite1);
+
+        const sprite2 = new THREE.Sprite(
+          new THREE.SpriteMaterial({
+            map: sprite2Texture,
+            transparent: true,
+            // 正常
+            // PIXI.BLEND_MODES.NORMAL_NPM
+
+            // 相加
+            // PIXI.BLEND_MODES.ADD
+            // blending: THREE.CustomBlending,
+            // blendSrc: THREE.OneFactor,
+            // blendDst: THREE.OneFactor,
+
+            // 相乘
+            // PIXI.BLEND_MODES.MULTIPLY
+            // blending: THREE.CustomBlending,
+            // blendSrc: THREE.DstColorFactor,
+            // blendDst: THREE.OneMinusSrcAlphaFactor,
+
+            // 相减
+            // PIXI.BLEND_MODES.SUBTRACT;
+            // blending: THREE.CustomBlending,
+            // blendSrc: THREE.OneFactor,
+            // blendDst: THREE.OneFactor,
+            // blendEquation: THREE.ReverseSubtractEquation,
+            // blendEquationAlpha: THREE.AddEquation,
+
+            // 变亮
+            // PIXI.BLEND_MODES.LIGHTEN;
+            // blending: THREE.CustomBlending,
+            // blendSrc: THREE.OneFactor,
+            // blendDst: THREE.OneFactor,
+            // blendEquation: THREE.MaxEquation,
+
+            // 屏幕
+            // PIXI.BLEND_MODES.SCREEN;
+            blending: THREE.CustomBlending,
+            blendSrc: THREE.OneFactor,
+            blendDst: THREE.OneMinusSrcColorFactor,
+          })
+        );
+        sprite2.matrixAutoUpdate = false;
+        sprite2.matrix.copy(
+          new THREE.Matrix4()
+            .makeTranslation(-50, 50, 0)
+            .multiply(new THREE.Matrix4().makeScale(300, 600, 1))
+        );
+        scene.add(sprite2);
+
+        // ----------------
+
+        const rect1 = new THREE.Mesh(
+          new THREE.PlaneGeometry(1, 1, 1),
+          new THREE.MeshBasicMaterial({
+            color: 0xff0000,
+            transparent: true,
+            opacity: 0.7,
+          })
+        );
+        rect1.matrixAutoUpdate = false;
+        rect1.matrix.copy(
+          new THREE.Matrix4()
+            .makeTranslation(50, 0, 0)
+            .multiply(new THREE.Matrix4().makeScale(200, 200, 1))
+        );
+        // scene.add(rect1);
+
+        const rect2 = new THREE.Mesh(
+          new THREE.PlaneGeometry(1, 1, 1),
+          new THREE.MeshBasicMaterial({
+            color: 0x00ffff,
+            transparent: true,
+            opacity: 0.7,
+            // 正常
+            // PIXI.BLEND_MODES.NORMAL_NPM
+
+            // 相加
+            // PIXI.BLEND_MODES.ADD
+            // blending: THREE.CustomBlending,
+            // blendSrc: THREE.SrcAlphaFactor,
+            // blendDst: THREE.OneMinusSrcColorFactor,
+            // blendSrcAlpha: THREE.OneFactor,
+            // blendDstAlpha: THREE.OneMinusSrcAlphaFactor,
+
+            // 相乘
+            // PIXI.BLEND_MODES.MULTIPLY
+            // blending: THREE.CustomBlending,
+            // blendSrc: THREE.DstColorFactor,
+            // blendDst: THREE.OneMinusSrcAlphaFactor,
+
+            // 相减
+            // PIXI.BLEND_MODES.SUBTRACT;
+            blending: THREE.CustomBlending,
+            blendSrc: THREE.OneFactor,
+            blendDst: THREE.OneFactor,
+            blendEquation: THREE.ReverseSubtractEquation,
+            blendEquationAlpha: THREE.AddEquation,
+          })
+        );
+        rect2.matrixAutoUpdate = false;
+        rect2.matrix.copy(
+          new THREE.Matrix4()
+            .makeTranslation(150, -50, 0)
+            .multiply(new THREE.Matrix4().makeScale(200, 200, 1))
+        );
+        // scene.add(rect2);
+      };
+
+      // 渲染
+      function render() {
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+      }
+      render();
+    </script>
+  </body>
+</html>
