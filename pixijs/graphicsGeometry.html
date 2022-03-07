@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>graphicsGeometry</title>
+    <script src="../../node_modules/pixi.js/dist/browser/pixi.js"></script>
+    <style>
+      canvas {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      function lineTo(polygon, x, y) {
+        // remove duplicates..
+        var points = polygon.points;
+        var fromX = points[points.length - 2];
+        var fromY = points[points.length - 1];
+        if (fromX !== x || fromY !== y) {
+          points.push(x, y);
+        }
+      }
+
+      function bezierCurveTo(polygon, cpX, cpY, cpX2, cpY2, toX, toY) {
+        PIXI.graphicsUtils.BezierUtils.curveTo(
+          cpX,
+          cpY,
+          cpX2,
+          cpY2,
+          toX,
+          toY,
+          polygon.points
+        );
+      }
+
+      function newLineStyle(params) {
+        const lineStyle = new PIXI.LineStyle();
+        const keys = Object.keys(params);
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          lineStyle[key] = params[key];
+        }
+        return lineStyle;
+      }
+
+      window.onload = function () {
+        const renderer = PIXI.autoDetectRenderer({
+          width: 1067,
+          height: 600,
+          antialias: true,
+          transparent: true,
+          resolution: window.devicePixelRatio,
+        });
+        document.body.appendChild(renderer.view);
+
+        const stage = new PIXI.Container();
+
+        const polygon = new PIXI.Polygon([
+          -24.382999420166016, 23.492000579833984,
+        ]); // moveTo
+        lineTo(polygon, -84.1510009765625, -75.82499694824219);
+        bezierCurveTo(
+          polygon,
+          -86.52999877929688,
+          -79.69100189208984,
+          -88.31400299072266,
+          -84.1500015258789,
+          -88.31400299072266,
+          -88.61100006103516
+        );
+        bezierCurveTo(
+          polygon,
+          -88.31400299072266,
+          -105.26300048828125,
+          -73.14900207519531,
+          -110.91300201416016,
+          -63.63399887084961,
+          -110.91300201416016
+        );
+        bezierCurveTo(
+          polygon,
+          -52.0369987487793,
+          -110.91300201416016,
+          -46.685001373291016,
+          -106.15499877929688,
+          -41.630001068115234,
+          -96.63899993896484
+        );
+        lineTo(polygon, 0.8920000195503235, -18.43600082397461);
+        lineTo(polygon, 43.117000579833984, -96.63899993896484);
+        bezierCurveTo(
+          polygon,
+          48.76599884033203,
+          -107.34500122070312,
+          54.11800003051758,
+          -110.91300201416016,
+          64.22899627685547,
+          -110.91300201416016
+        );
+        bezierCurveTo(
+          polygon,
+          73.14900207519531,
+          -110.91300201416016,
+          88.31400299072266,
+          -105.26300048828125,
+          88.31400299072266,
+          -88.61100006103516
+        );
+        bezierCurveTo(
+          polygon,
+          88.31400299072266,
+          -84.1500015258789,
+          86.52999877929688,
+          -79.69100189208984,
+          84.1510009765625,
+          -75.82499694824219
+        );
+        lineTo(polygon, 24.382999420166016, 23.492000579833984);
+        lineTo(polygon, 24.382999420166016, 86.53099822998047);
+        bezierCurveTo(
+          polygon,
+          24.382999420166016,
+          101.10099792480469,
+          14.868000030517578,
+          110.91300201416016,
+          0,
+          110.91300201416016
+        );
+        bezierCurveTo(
+          polygon,
+          -14.868000030517578,
+          110.91300201416016,
+          -24.382999420166016,
+          101.10099792480469,
+          -24.382999420166016,
+          86.53099822998047
+        );
+        lineTo(polygon, -24.382999420166016, 23.492000579833984);
+
+        const graphicsGeometry = new PIXI.GraphicsGeometry();
+        graphicsGeometry.drawShape(
+          polygon,
+          new PIXI.FillStyle(),
+          newLineStyle({
+            cap: "butt",
+            join: "miter",
+            width: 4,
+            color: 0xff0000,
+            miterLimit: 3,
+            alpha: 1,
+            visible: true, // 显示
+          })
+        );
+        graphicsGeometry.updateBatches(true);
+
+        const stroke = new PIXI.Graphics(graphicsGeometry);
+        stroke.transform.setFromMatrix(new PIXI.Matrix(1, 0, 0, 1, 400, 200));
+        stage.addChild(stroke);
+
+        renderer.render(stage);
+      };
+    </script>
+  </body>
+</html>
