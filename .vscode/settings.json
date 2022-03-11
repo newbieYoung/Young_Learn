@@ -2,12 +2,15 @@
   "liveServer.settings.port": 5505,
   "files.associations": {
     "__functional_03": "c",
-    "functional": "c"
+    "functional": "c",
+    "__config": "c",
+    "__nullptr": "c"
   },
   "cSpell.words": [
     "datas",
     "linewidth",
     "mediump",
+    "opengl",
     "Raycaster"
   ]
 }

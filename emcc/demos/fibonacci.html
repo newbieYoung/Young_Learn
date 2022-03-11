@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fibonacci</title>
+  </head>
+  <body>
+    <script src="wasm.js"></script>
+    <script>
+      function fib_js(n) {
+        if (n < 2) {
+          return 1;
+        }
+        return fib_js(n - 2) + fib_js(n - 1);
+      }
+
+      // emcc fibonacci.c -O3 -s WASM=1 -s SIDE_MODULE=1 -o fibonacci.wasm
+      window.onload = function () {
+        loadWebAssembly("./fibonacci.wasm").then((instance) => {
+          console.log(instance.exports);
+
+          // 计算斐波那契数列
+          const fib_wasm = instance.exports.fibonacci;
+          const wasm0 = window.performance.now();
+          fib_wasm(42);
+          const wasm1 = window.performance.now();
+          console.log(`fib_wasm(${42}) ${wasm1 - wasm0}ms`);
+
+          const js0 = window.performance.now();
+          fib_js(42);
+          const js1 = window.performance.now();
+          console.log(`fib_js(${42}) ${js1 - js0}ms`);
+        });
+      };
+    </script>
+  </body>
+</html>
