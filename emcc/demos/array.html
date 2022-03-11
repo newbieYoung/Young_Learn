@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>array</title>
+  </head>
+  <body>
+    <script src="array.js"></script>
+    <script>
+      // emcc array.c -O3 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s -s EXPORTED_FUNCTIONS="['_lenArr']" -o array.js
+      Module["onRuntimeInitialized"] = function () {
+        console.log(Module);
+
+        const arrLen = 20;
+        const arrPtr = Module._lenArr(arrLen);
+        console.log(arrPtr);
+        const arr = HEAPF32.subarray(
+          arrPtr / Float32Array.BYTES_PER_ELEMENT,
+          arrPtr / Float32Array.BYTES_PER_ELEMENT + arrLen
+        );
+        console.log(arr);
+      };
+    </script>
+  </body>
+</html>
