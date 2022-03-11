@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>kociemba</title>
+  </head>
+
+  <body>
+    <script src="string_tool.js"></script>
+    <script type="text/javascript" src="kociemba.js"></script>
+    <script>
+      //emcc -O3 coordcube.c cubiecube.c facecube.c prunetable_helpers.c search.c solve.c -s WASM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS='["UTF8ToString"]' -s ALLOW_MEMORY_GROWTH=1 -s EXPORTED_FUNCTIONS="['_solve']" -o kociemba.js
+      Module["onRuntimeInitialized"] = function () {
+        // 测试魔方还原 kociemba 算法
+        const rubik = "DRLUUBFBRBLURRLRUBLRDDFDLFUFUFFDBRDUBRUFLLFDDBFLUBLRBD";
+        const ptr = allocate(intArrayFromString(rubik), "i8", ALLOC_NONE);
+        const p0 = Module._solve(ptr);
+        console.log(Module.UTF8ToString(p0));
+      };
+    </script>
+  </body>
+</html>
