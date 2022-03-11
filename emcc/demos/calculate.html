@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>multiple files</title>
+  </head>
+  <body>
+    <script src="./wasm.js"></script>
+    <script>
+      // emcc calculate_int.c calculate_float.c -O3 -s WASM=1 -s SIDE_MODULE=1 -o calculate.wasm
+      window.onload = function () {
+        loadWebAssembly("./calculate.wasm").then((instance) => {
+          console.log(instance.exports);
+
+          const add_int = instance.exports.add_int;
+          const minus_int = instance.exports.minus_int;
+          console.log("2 + 4 =", add_int(2, 4));
+          console.log("3 - 2 =", minus_int(3, 2));
+
+          const add_float = instance.exports.add_float;
+          const minus_float = instance.exports.minus_float;
+          console.log("2.2 + 4.4 =", add_float(2.2, 4.4));
+          console.log("3.3 - 2.2 =", minus_float(3.3, 2.2));
+        });
+      };
+    </script>
+  </body>
+</html>
