@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>texture</title>
+    <script src="./webgl.js"></script>
+  </head>
+  <body>
+    <canvas id="webgl" width="600" height="600"></canvas>
+    <script>
+      const canvas = document.querySelector("#webgl");
+      const gl = canvas.getContext("webgl");
+      gl.clearColor(0.9, 0.9, 0.9, 1.0);
+
+      const program = {
+        vertexSrc: `
+          attribute vec4 a_position;
+          attribute vec2 a_TexCoord; // 纹理坐标
+          varying vec2 v_TexCoord;
+          void main() {
+            v_TexCoord = a_TexCoord;
+            gl_Position = a_position;
+          }
+        `,
+        fragmentSrc: `
+          precision mediump float;
+          uniform sampler2D u_Sampler; // 纹理取样器
+          varying vec2 v_TexCoord;
+          void main() {
+            gl_FragColor = texture2D(u_Sampler, v_TexCoord);
+          }
+        `,
+      };
+      const webglProgram = generateProgram(gl, program);
+
+      const image = new Image();
+      image.src = "../img/sky.JPG";
+      image.onload = function () {
+        const texture = gl.createTexture(); // 创建纹理对象
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // 对纹理图像进行y轴反转
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, texture); // 绑定纹理对象
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); // 配置纹理对象的参数
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.RGBA,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          image
+        ); //将纹理图像分配给纹理对象
+
+        const u_Sampler = gl.getUniformLocation(webglProgram, "u_Sampler");
+        gl.uniform1i(u_Sampler, 0); // 将对应纹理传给着色器中的取样器变量
+
+        // 顶点坐标、纹理坐标
+        const vertices = new Float32Array([
+          -0.5, 0.5, 0.0, 1.0, -0.5, -0.5, 0.0, 0.0, 0.5, 0.5, 1.0, 1.0, 0.5,
+          -0.5, 1.0, 0.0,
+        ]);
+        const size = vertices.BYTES_PER_ELEMENT; // 数组中的每个元素的大小（以字节为单位）
+        const stride = size * 4; // 步幅
+        const vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+        const a_position = gl.getAttribLocation(webglProgram, "a_position");
+        gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, stride, 0);
+        gl.enableVertexAttribArray(a_position);
+
+        var a_TexCoord = gl.getAttribLocation(webglProgram, "a_TexCoord");
+        gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, stride, 4 * 2);
+        gl.enableVertexAttribArray(a_TexCoord);
+
+        // index buffer
+        const index = new Uint16Array([0, 1, 2, 1, 2, 3]);
+        const indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, index, gl.STATIC_DRAW);
+
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0); // 绘制矩形
+      };
+    </script>
+  </body>
+</html>
