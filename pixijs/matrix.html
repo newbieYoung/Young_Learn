@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>matrix</title>
+    <script src="../../node_modules/pixi.js/dist/browser/pixi.js"></script>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+      }
+      canvas {
+        width: 100%;
+      }
+      #dom {
+        width: 100px;
+        height: 120px;
+        background-color: red;
+        transform-origin: 50px 50px;
+        transform: skew(10deg, 10deg);
+        margin-bottom: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="dom"></div>
+    <script>
+      window.onload = function () {
+        const dom = document.querySelector("#dom");
+        const style = window.getComputedStyle(dom);
+        console.log(style.getPropertyValue("transform"));
+
+        const renderer = PIXI.autoDetectRenderer({
+          width: window.innerWidth,
+          height: 400,
+          antialias: true,
+          transparent: true,
+          resolution: window.devicePixelRatio,
+        });
+        document.body.appendChild(renderer.view);
+
+        const stage = new PIXI.Container();
+
+        const rect1 = new PIXI.Graphics();
+        rect1.beginFill(0xff0000, 1.0);
+        rect1.drawRect(0, 0, 100, 120);
+        rect1.endFill();
+        const matrix = new PIXI.Matrix(1, 0, 0, 1, 50, 50);
+        matrix.append(new PIXI.Matrix(1, 0.176327, 0.176327, 1, 0, 0));
+        matrix.append(new PIXI.Matrix(1, 0, 0, 1, -50, -50));
+        rect1.transform.setFromMatrix(matrix);
+        stage.addChild(rect1);
+
+        let ticker = PIXI.Ticker.shared;
+        ticker.start();
+        ticker.add(function () {
+          renderer.render(stage);
+        });
+      };
+    </script>
+  </body>
+</html>
