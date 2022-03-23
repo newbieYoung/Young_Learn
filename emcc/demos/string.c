@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdlib.h>
 
 char *hello()
 {
@@ -7,5 +8,14 @@ char *hello()
 
 char *sayHi(char *name)
 {
-    return strcat("hi ", name);
+    char *hi = "hi ";
+    char *result = malloc(strlen(hi) + strlen(name) + 1); // +1 end
+    if (result == NULL)
+    {
+        exit(1);
+    }
+    strcpy(result, hi);
+    strcat(result, name);
+
+    return result;
 }

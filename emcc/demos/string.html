@@ -7,21 +7,36 @@
     <title>string</title>
   </head>
   <body>
-    <script src="string_tool.js"></script>
     <script src="string.js"></script>
     <script>
-      // emcc string.c -O3 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s EXTRA_EXPORTED_RUNTIME_METHODS='["UTF8ToString"]' -s EXPORTED_FUNCTIONS="['_hello','_sayHi']" -o string.js
+      // emcc string.c -O3 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s EXPORTED_RUNTIME_METHODS='["UTF8ToString"]' -s EXPORTED_FUNCTIONS="['_hello','_sayHi', '_malloc','_free']" -o string.js
       Module["onRuntimeInitialized"] = function () {
         console.log(Module);
 
         const p0 = Module._hello();
         console.log(Module.UTF8ToString(p0));
 
-        // 有些胶水方法在使用编译优化参数之后会被去掉，可以先不使用编译优化获得含有胶水方法的代码，然后复制到 string_tool.js
-        const name = "newyoungli";
-        const ptr = allocate(intArrayFromString(name), "i8", ALLOC_NONE);
-        const p1 = Module._sayHi(ptr);
+        const enc = new TextEncoder(); // always utf-8
+
+        const str1U8 = enc.encode("newyoungli");
+        const ptr1 = Module._malloc(
+          str1U8.length * Uint8Array.BYTES_PER_ELEMENT
+        );
+        HEAPU8.set(str1U8, ptr1 / Uint8Array.BYTES_PER_ELEMENT);
+        const p1 = Module._sayHi(ptr1);
         console.log(Module.UTF8ToString(p1));
+        Module._free(ptr1);
+        Module._free(p1);
+
+        const str2U8 = enc.encode("newbieweb");
+        const ptr2 = Module._malloc(
+          str2U8.length * Uint8Array.BYTES_PER_ELEMENT
+        );
+        HEAPU8.set(str2U8, ptr2 / Uint8Array.BYTES_PER_ELEMENT);
+        const p2 = Module._sayHi(ptr2);
+        console.log(Module.UTF8ToString(p2));
+        Module._free(ptr2);
+        Module._free(p2);
       };
     </script>
   </body>

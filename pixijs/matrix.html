@@ -54,6 +54,48 @@
         rect1.transform.setFromMatrix(matrix);
         stage.addChild(rect1);
 
+        // matrix
+        // const rotate = new PIXI.Matrix().rotate((30.0 / 180) * Math.PI);
+        // console.log(rotate);
+        // const scale = new PIXI.Matrix().scale(1.2, 1.4);
+        // console.log(scale);
+        // const trans = new PIXI.Matrix().translate(30, 40);
+        // console.log(trans);
+        // const mat = new PIXI.Matrix();
+        // mat.append(rotate).append(scale).append(trans);
+        // console.log(mat);
+
+        // transform
+        const pivot = new PIXI.Transform();
+        pivot.pivot.set(20, 30);
+        pivot.updateLocalTransform();
+        console.log(pivot);
+        const trans = new PIXI.Transform();
+        trans.position.set(50, 20);
+        trans.updateLocalTransform();
+        console.log(trans);
+        const scale = new PIXI.Transform();
+        scale.scale.set(1.2, 1.4);
+        scale.updateLocalTransform();
+        console.log(scale);
+        const skew = new PIXI.Transform();
+        skew.skew.set(0.4, 0.2);
+        skew.updateLocalTransform();
+        console.log(skew);
+        const rotate = new PIXI.Transform();
+        rotate.rotation = (30.0 / 180) * Math.PI;
+        rotate.updateLocalTransform();
+        console.log(rotate);
+
+        const transform = new PIXI.Transform();
+        transform.pivot.set(20, 30);
+        transform.skew.set(0.4, 0.2);
+        transform.rotation = (30.0 / 180) * Math.PI;
+        transform.scale.set(1.2, 1.4);
+        transform.position.set(50, 20);
+        transform.updateLocalTransform();
+        console.log(transform);
+
         let ticker = PIXI.Ticker.shared;
         ticker.start();
         ticker.add(function () {
