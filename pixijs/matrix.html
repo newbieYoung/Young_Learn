@@ -87,14 +87,18 @@
         rotate.updateLocalTransform();
         console.log(rotate);
 
-        const transform = new PIXI.Transform();
-        transform.pivot.set(20, 30);
-        transform.skew.set(0.4, 0.2);
-        transform.rotation = (30.0 / 180) * Math.PI;
-        transform.scale.set(1.2, 1.4);
-        transform.position.set(50, 20);
-        transform.updateLocalTransform();
-        console.log(transform);
+        const trans1 = new PIXI.Transform();
+        trans1.pivot.set(20, 30);
+        trans1.skew.set(0.4, 0.2);
+        trans1.rotation = (30.0 / 180) * Math.PI;
+        trans1.scale.set(1.2, 1.4);
+        trans1.position.set(50, 20);
+        trans1.updateLocalTransform();
+        console.log(trans1);
+
+        const trans2 = new PIXI.Transform();
+        trans2.setFromMatrix(trans1.localTransform);
+        console.log(trans2);
 
         let ticker = PIXI.Ticker.shared;
         ticker.start();
