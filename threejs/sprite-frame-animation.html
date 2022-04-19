@@ -73,6 +73,7 @@
         renderer.clear();
         offset++;
         texture.offset.set((offset % 8) / 8, 0);
+        sprite.material.rotation += 1; // sprite rotation
         renderer.render(scene, camera);
         setTimeout(function () {
           requestAnimationFrame(render);
