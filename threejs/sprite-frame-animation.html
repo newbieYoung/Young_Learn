@@ -59,9 +59,28 @@
       const texture = new THREE.TextureLoader(manager).load(
         "./textures/WalkingManSpriteSheet.png"
       );
+      // const texture = new THREE.TextureLoader(manager).load(
+      //   "./textures/tilemap.png"
+      // );
+      const totalWidth = 1024;
+      const totalHeight = 128;
+      const itemWidth = 128;
+      const itemHeight = 128;
+      const wItemLen = totalWidth / itemWidth;
+      const hItemLen = totalHeight / itemHeight;
       let offset = 0;
-      texture.repeat.x = 1 / 8; // uv scale
-      texture.offset.set(offset / 8, 0); // uv translate
+      texture.repeat.x = 1 / wItemLen; // uv scale
+      texture.repeat.y = 1 / hItemLen;
+      texture.offset.set(offset / wItemLen, 0); // uv translate
+
+      // scaleX(-1)
+      // texture.offset.x += texture.repeat.x;
+      // texture.repeat.x = -texture.repeat.x;
+
+      // scaleY(-1)
+      // texture.offset.y += texture.repeat.y;
+      // texture.repeat.y = -texture.repeat.y;
+
       const sprite = new THREE.Sprite(
         new THREE.SpriteMaterial({ map: texture, depthTest: false })
       );
@@ -71,9 +90,13 @@
       // 渲染
       function render() {
         renderer.clear();
+
+        // animation
         offset++;
-        texture.offset.set((offset % 8) / 8, 0);
-        sprite.material.rotation += 1; // sprite rotation
+        texture.offset.set((offset % wItemLen) / wItemLen, 0);
+
+        // sprite.material.rotation += 0.1; // sprite rotation
+
         renderer.render(scene, camera);
         setTimeout(function () {
           requestAnimationFrame(render);
