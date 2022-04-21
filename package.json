@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/newbieYoung/Html_learn#readme",
   "dependencies": {
+    "earcut": "^2.2.3",
     "lottie-web": "^5.8.1",
     "pixi.js": "^6.2.0",
     "point-in-polygon": "^1.1.0",

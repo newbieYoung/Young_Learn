@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>demo</title>
+    <style>
+      body,
+      html {
+        background-color: #fff;
+        margin: 0px;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="retina"></div>
+    <script type="module">
+      import * as THREE from "../../node_modules/three/build/three.module.js";
+      import { SVGLoader } from "../../node_modules/three/examples/jsm/loaders/SVGLoader.js";
+      import * as BufferGeometryUtils from "../../node_modules/three/examples/jsm/utils/BufferGeometryUtils.js";
+      import { buildNonNativeLine } from "../stroke/buildNonNativeLine.js";
+      import { polygon } from "./data/eberly-3.js";
+
+      // buildNonNativeLine fast then SVGLoader.pointsToStroke
+      SVGLoader.pointsToStroke = function (points, style) {
+        const graphicsData = {
+          points: [],
+          lineStyle: {
+            alignment: 0.5,
+            cap: style.strokeLineCap,
+            join: style.strokeLineJoin,
+            miterLimit: style.strokeMiterLimit,
+            width: style.strokeWidth,
+          },
+        };
+        for (let i = 0; i < points.length; i++) {
+          graphicsData.points.push(points[i].x, points[i].y);
+        }
+        const graphicsGeometry = {
+          points: [],
+          indices: [],
+        };
+
+        buildNonNativeLine(graphicsData, graphicsGeometry);
+
+        const points3D = [];
+        for (let i = 0; i < graphicsGeometry.points.length; i += 2) {
+          points3D.push(
+            graphicsGeometry.points[i],
+            graphicsGeometry.points[i + 1],
+            0
+          );
+        }
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(points3D, 3)
+        );
+        geometry.index = new THREE.Uint16BufferAttribute(
+          graphicsGeometry.indices,
+          1
+        );
+
+        return geometry;
+      };
+
+      // 创建序号数字
+      function createDomNumber(num, x, y){
+        const $div = document.createElement("div");
+        $div.style.position = "absolute";
+        $div.style.top = `${window.innerHeight/2 - y}px`;
+        $div.style.left = `${window.innerWidth/2 + x}px`;
+        $div.style.fontSize = '12px';
+        $div.innerHTML = parseInt(num);
+        document.body.appendChild($div);
+      }
+
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true, //抗锯齿开启
+      });
+      renderer.setSize(width, height); //设置渲染器宽度和高度
+      renderer.setClearColor("#ffffff", 1.0); //设置背景颜色
+      renderer.setPixelRatio(window.devicePixelRatio); //设置设备像素比
+      document.getElementById("retina").appendChild(renderer.domElement); //把渲染器放置到页面中
+
+      const camera = new THREE.OrthographicCamera(
+        width / -2,
+        width / 2,
+        height / 2,
+        height / -2,
+        -500,
+        1000
+      );
+      camera.position.set(0, 0, 800);
+      camera.up.set(0, 1, 0); // 正方向
+      camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+      // 场景、灯光
+      const scene = new THREE.Scene();
+
+      // shape
+      const points = polygon[0];
+      const scale = 1;
+      const translate = new THREE.Vector2(100, -100);
+      const shape = new THREE.Shape();
+      const origin = new THREE.Vector2(translate.x, translate.y);
+      shape.moveTo(origin.x, origin.y);
+      console.log(0, [origin.x, origin.y]);
+      createDomNumber(0, origin.x, origin.y);
+      for (let i = 1; i < points.length; i++) {
+        const x = (points[i][0] - points[0][0]) * scale + translate.x;
+        const y = (points[i][1] - points[0][1]) * scale + translate.y;
+        console.log(i, [x, y]);
+        createDomNumber(i, x, y);
+        shape.lineTo(x, y);
+      }
+
+      console.log(window.performance.now());
+      const geometry = new THREE.ShapeGeometry([shape]);
+      console.log(window.performance.now());
+
+      // 辅助显示三角形
+      const triangles = new THREE.LineSegments(
+        geometry,
+        new THREE.LineBasicMaterial({ color: 0x000000 })
+      );
+      // scene.add(triangles);
+
+      // 辅助显示边框
+      const edges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(geometry),
+        new THREE.LineBasicMaterial({ color: 0xff0000 })
+      );
+      scene.add(edges);
+
+      function render() {
+        renderer.clear();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+      }
+      render();
+    </script>
+  </body>
+</html>

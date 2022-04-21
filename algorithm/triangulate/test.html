@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>test triangulate</title>
+  </head>
+  <body>
+    <script src="../../node_modules/earcut/dist/earcut.min.js"></script>
+    <script src="./triangulate.js"></script>
+    <script type="mode"></script>
+    <script type="module">
+      import { polygon } from "./data/eberly-3.js";
+      const points = polygon[0];
+      const pointsLen = points.length;
+      const shape1 = [];
+      const shape2 = [];
+      for (let i = 0; i < pointsLen; i++) {
+        shape1.push({
+          x: points[i][0],
+          y: points[i][1],
+        });
+        shape2.push(points[i][0]);
+        shape2.push(points[i][1]);
+      }
+      console.log('--- self ---');
+      console.log(window.performance.now());
+      triangulate({ points: shape1 });
+      console.log(window.performance.now());
+
+      console.log('--- earcut ---');
+      console.log(window.performance.now());
+      const tri1 = earcut(shape2);
+      console.log(window.performance.now());
+      console.log(tri1);
+    </script>
+  </body>
+</html>
