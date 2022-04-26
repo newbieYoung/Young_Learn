@@ -11,7 +11,7 @@
     <script src="./triangulate.js"></script>
     <script type="mode"></script>
     <script type="module">
-      import { polygon } from "./data/eberly-3.js";
+      import { polygon } from "./data/viz.js";
       const points = polygon[0];
       const pointsLen = points.length;
       const shape1 = [];
@@ -24,16 +24,20 @@
         shape2.push(points[i][0]);
         shape2.push(points[i][1]);
       }
+
       console.log('--- self ---');
-      console.log(window.performance.now());
-      triangulate({ points: shape1 });
-      console.log(window.performance.now());
+      const time1 = window.performance.now();
+      const tri1 = triangulate({ points: shape1 });
+      const time2 = window.performance.now();
+      console.log(time2-time1);
+      console.log(tri1);
 
       console.log('--- earcut ---');
-      console.log(window.performance.now());
-      const tri1 = earcut(shape2);
-      console.log(window.performance.now());
-      console.log(tri1);
+      const time3 = window.performance.now();
+      const tri2 = earcut(shape2);
+      const time4 = window.performance.now();
+      console.log(time4-time3);
+      console.log(tri2);
     </script>
   </body>
 </html>

@@ -45,7 +45,7 @@ function pointInPolygonNested(point: Vector2, vs: Vector2[], start?: number, end
 function decomposition(divides: number[][], polygon: Polygon, sortedIndex: number[], direction: 1 | -1) {
     const deComps: DeCompItem[] = [];
     const points = polygon.points; // 逆时针
-    const maxIndex = points.length - 1;
+    const maxIndex = sortedIndex.length - 1;
     const doneIndex = {};
 
     for (let i = 0; i <= maxIndex; i++) {
@@ -223,8 +223,7 @@ function splitMonotones(lines: number[][], polygon: number[]) {
         }
     }
     if (lastSplits.length >= 2) {
-        polygons.push(lastSplits[0]);
-        polygons.push(lastSplits[1]);
+        polygons.push(lastSplits[0], lastSplits[1]);
     }
     if (polygons.length == 0) {
         polygons.push(polygon);
@@ -251,54 +250,86 @@ function splitPolygon(polygon: number[], line: number[]) {
     return [polygon1, polygon2];
 }
 
-function monotonePolygon(polygon: number[], points: Vector2[]) {
-    const triangles = [];
+function monotonePolygon(polygon: number[], points: Vector2[], triangles: number[]) {
+    const stack = [polygon[0], polygon[1]];
+    const pointsLen = points.length;
     const polygonLen = polygon.length;
-    const stack = [];
-    let start = polygon[0];
-    let end = polygon[polygonLen - 1];
-    let isLeft = true;
-    for (let i = 0; i < polygonLen; i++) {
-        const stackLen = stack.length;
+    // 多边形顶点重置为 0，方便后续判断左右
+    const polygonStart = polygon[0];
+    let polygonSecond = polygon[1] - polygonStart;
+    if (polygonSecond < 0) {
+        polygonSecond += pointsLen;
+    }
+    let polygonEnd = polygon[polygonLen - 1] - polygonStart;
+    if (polygonEnd < 0) {
+        polygonEnd += pointsLen;
+    }
+    let isLeft = polygonSecond < polygonEnd ? true : false; // 初始左右判断
+    for (let i = 2; i < polygonLen; i++) {
+        const stackLastIndex = stack.length - 1;
         const curIndex = polygon[i];
-        if (stackLen <= 1) {
-            stack.push(curIndex)
+        // 左右判断
+        let polygonCur = curIndex - polygonStart;
+        if (polygonCur < 0) {
+            polygonCur += pointsLen;
+        }
+        let curIsLeft = polygonCur < polygonEnd ? true : false;
+        // 异侧
+        if (curIsLeft !== isLeft) {
+            for (let j = 0; j < stackLastIndex; j++) {
+                triangles.push(stack[stackLastIndex - j - 1], stack[stackLastIndex - j], curIndex);
+            }
+            isLeft = !isLeft;
+            const stackEnd = stack[stackLastIndex];
+            stack.length = 0;
+            stack.push(stackEnd, curIndex);
         } else {
-            let curIsLeft = curIndex > start && curIndex < end ? true : false;
-            // 异侧
-            if (curIsLeft !== isLeft) {
-                for (let j = 0; j < stackLen - 1; j++) {
-                    triangles.push(stack[stackLen - j - 2]);
-                    triangles.push(stack[stackLen - j - 1]);
-                    triangles.push(curIndex);
-                }
-                start = stack[stackLen - 1];
-                isLeft = !isLeft;
-                stack.length = 0;
-                stack.push(start);
-                stack.push(curIndex);
-            } else {
-                // 同侧
-                const first = stack[stackLen - 1];
-                const second = stack[stackLen - 2];
+            // 同侧
+            let count = 0;
+            let isConvex = false;
+            do {
+                isConvex = false;
+                const curCount = stackLastIndex - count + 1;
+                const first = stack[curCount - 1];
+                const second = stack[curCount - 2];
                 const pSecond = points[second];
                 const pFirst = points[first];
-                const pCurrent = points[first];
-                const vec1 = {x: pSecond.x - pFirst.x, y: pSecond.y - pFirst.y};
-                const vec2 = {x: pCurrent.x - pFirst.x, y: pCurrent.y - pFirst.y};
-            }
+                const pCurrent = points[curIndex];
+                const vec1 = { x: pFirst.x - pSecond.x, y: pFirst.y - pSecond.y };
+                const vec2 = { x: pCurrent.x - pFirst.x, y: pCurrent.y - pFirst.y };
+                const result1 = vec1.x * vec2.y - vec2.x * vec1.y;
+                const result2 = vec1.x * vec2.x;
+                if ((isLeft && result1 > 0) || (!isLeft && result1 < 0) || (result1 == 0 && result2 < 0)) {
+                    triangles.push(second, first, curIndex);
+                    isConvex = true;
+                    count += 1;
+                }
+            } while ((stack.length - count) > 1 && isConvex)
+            stack.length = stackLastIndex + 1 - count;
+            stack.push(curIndex);
         }
     }
 }
 
 function triangulate(polygon: Polygon) {
     const points = polygon.points; // 逆时针
-    const sortedIndex = [];
-    for (let i = 0; i < points.length; i++) {
-        sortedIndex.push(i);
+    // 去掉尾部和头部重复点（不去掉会导致 bug）
+    const startPoint = points[0];
+    let pointsLen = points.length;
+    for (let i = 0; i < pointsLen; i++) {
+        const end = points[pointsLen - 1];
+        if (end.x == startPoint.x && end.y == startPoint.y) {
+            pointsLen -= 1
+        } else {
+            break;
+        }
     }
 
     // 排序
+    const sortedIndex = [];
+    for (let i = 0; i < pointsLen; i++) {
+        sortedIndex.push(i);
+    }
     sortedIndex.sort(function (a, b) {
         return points[b].y - points[a].y; // 按 y 轴倒序
     })
@@ -313,6 +344,16 @@ function triangulate(polygon: Polygon) {
         return (a[1] - a[0]) - (b[1] - b[0]);
     });
     const monotones = splitMonotones(lines, sortedIndex);
-    console.log(lines);
-    console.log(monotones);
+    // console.log(lines);
+    // console.log(monotones);
+
+    const triangles = [];
+    for (let i = 0; i < monotones.length; i++) {
+        const monotoneItem = monotones[i];
+        if (monotoneItem.length >= 3) {
+            monotonePolygon(monotoneItem, points, triangles);
+        }
+    }
+
+    return triangles;
 }

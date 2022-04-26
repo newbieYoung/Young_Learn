@@ -13,6 +13,7 @@
     "linewidth",
     "mediump",
     "opengl",
-    "Raycaster"
+    "Raycaster",
+    "wireframe"
   ]
 }

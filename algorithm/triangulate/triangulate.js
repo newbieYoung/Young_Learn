@@ -27,7 +27,7 @@ function pointInPolygonNested(point, vs, start, end) {
 function decomposition(divides, polygon, sortedIndex, direction) {
     var deComps = [];
     var points = polygon.points; // 逆时针
-    var maxIndex = points.length - 1;
+    var maxIndex = sortedIndex.length - 1;
     var doneIndex = {};
     for (var i = 0; i <= maxIndex; i++) {
         var curIndex = direction == 1 ? sortedIndex[i] : sortedIndex[maxIndex - i];
@@ -216,8 +216,7 @@ function splitMonotones(lines, polygon) {
         }
     }
     if (lastSplits.length >= 2) {
-        polygons.push(lastSplits[0]);
-        polygons.push(lastSplits[1]);
+        polygons.push(lastSplits[0], lastSplits[1]);
     }
     if (polygons.length == 0) {
         polygons.push(polygon);
@@ -241,13 +240,86 @@ function splitPolygon(polygon, line) {
     }
     return [polygon1, polygon2];
 }
+function monotonePolygon(polygon, points, triangles) {
+    var stack = [polygon[0], polygon[1]];
+    var pointsLen = points.length;
+    var polygonLen = polygon.length;
+    // 多边形顶点重置为 0，方便后续判断左右
+    var polygonStart = polygon[0];
+    var polygonSecond = polygon[1] - polygonStart;
+    if (polygonSecond < 0) {
+        polygonSecond += pointsLen;
+    }
+    var polygonEnd = polygon[polygonLen - 1] - polygonStart;
+    if (polygonEnd < 0) {
+        polygonEnd += pointsLen;
+    }
+    var isLeft = polygonSecond < polygonEnd ? true : false; // 初始左右判断
+    for (var i = 2; i < polygonLen; i++) {
+        var stackLastIndex = stack.length - 1;
+        var curIndex = polygon[i];
+        // 左右判断
+        var polygonCur = curIndex - polygonStart;
+        if (polygonCur < 0) {
+            polygonCur += pointsLen;
+        }
+        var curIsLeft = polygonCur < polygonEnd ? true : false;
+        // 异侧
+        if (curIsLeft !== isLeft) {
+            for (var j = 0; j < stackLastIndex; j++) {
+                triangles.push(stack[stackLastIndex - j - 1], stack[stackLastIndex - j], curIndex);
+            }
+            isLeft = !isLeft;
+            var stackEnd = stack[stackLastIndex];
+            stack.length = 0;
+            stack.push(stackEnd, curIndex);
+        }
+        else {
+            // 同侧
+            var count = 0;
+            var isConvex = false;
+            do {
+                isConvex = false;
+                var curCount = stackLastIndex - count + 1;
+                var first = stack[curCount - 1];
+                var second = stack[curCount - 2];
+                var pSecond = points[second];
+                var pFirst = points[first];
+                var pCurrent = points[curIndex];
+                var vec1 = { x: pFirst.x - pSecond.x, y: pFirst.y - pSecond.y };
+                var vec2 = { x: pCurrent.x - pFirst.x, y: pCurrent.y - pFirst.y };
+                var result1 = vec1.x * vec2.y - vec2.x * vec1.y;
+                var result2 = vec1.x * vec2.x;
+                if ((isLeft && result1 > 0) || (!isLeft && result1 < 0) || (result1 == 0 && result2 < 0)) {
+                    triangles.push(second, first, curIndex);
+                    isConvex = true;
+                    count += 1;
+                }
+            } while ((stack.length - count) > 1 && isConvex);
+            stack.length = stackLastIndex + 1 - count;
+            stack.push(curIndex);
+        }
+    }
+}
 function triangulate(polygon) {
     var points = polygon.points; // 逆时针
-    var sortedIndex = [];
-    for (var i = 0; i < points.length; i++) {
-        sortedIndex.push(i);
+    // 去掉尾部和头部重复点（不去掉会导致 bug）
+    var startPoint = points[0];
+    var pointsLen = points.length;
+    for (var i = 0; i < pointsLen; i++) {
+        var end = points[pointsLen - 1];
+        if (end.x == startPoint.x && end.y == startPoint.y) {
+            pointsLen -= 1;
+        }
+        else {
+            break;
+        }
     }
     // 排序
+    var sortedIndex = [];
+    for (var i = 0; i < pointsLen; i++) {
+        sortedIndex.push(i);
+    }
     sortedIndex.sort(function (a, b) {
         return points[b].y - points[a].y; // 按 y 轴倒序
     });
@@ -261,6 +333,14 @@ function triangulate(polygon) {
         return (a[1] - a[0]) - (b[1] - b[0]);
     });
     var monotones = splitMonotones(lines, sortedIndex);
-    console.log(lines);
-    console.log(monotones);
+    // console.log(lines);
+    // console.log(monotones);
+    var triangles = [];
+    for (var i = 0; i < monotones.length; i++) {
+        var monotoneItem = monotones[i];
+        if (monotoneItem.length >= 3) {
+            monotonePolygon(monotoneItem, points, triangles);
+        }
+    }
+    return triangles;
 }

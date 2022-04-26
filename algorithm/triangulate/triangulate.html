@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>demo</title>
+    <title>triangulate</title>
     <style>
       body,
       html {
@@ -19,21 +19,11 @@
   </head>
   <body>
     <div id="retina"></div>
+    <script src="../../node_modules/earcut/dist/earcut.min.js"></script>
+    <script src="./triangulate.js"></script>
     <script type="module">
       import * as THREE from "../../node_modules/three/build/three.module.js";
-      import { buildNonNativeLine } from "../stroke/buildNonNativeLine.js";
       import { polygon } from "./data/viz.js";
-
-      // 创建序号数字
-      function createDomNumber(num, x, y){
-        const $div = document.createElement("div");
-        $div.style.position = "absolute";
-        $div.style.top = `${window.innerHeight/2 - y}px`;
-        $div.style.left = `${window.innerWidth/2 + x}px`;
-        $div.style.fontSize = '12px';
-        $div.innerHTML = parseInt(num);
-        document.body.appendChild($div);
-      }
 
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -64,37 +54,38 @@
       const points = polygon[0];
       const scale = 0.2;
       const translate = new THREE.Vector2(-200, 200);
-      const shape = new THREE.Shape();
       const origin = new THREE.Vector2(translate.x, translate.y);
-      shape.moveTo(origin.x, origin.y);
-      console.log(0, [origin.x, origin.y]);
-      createDomNumber(0, origin.x, origin.y);
+      const shape = [];
+      const shape3d = [];
+      shape.push(new THREE.Vector2(origin.x, origin.y));
+      shape3d.push(origin.x, origin.y, 0);
       for (let i = 1; i < points.length; i++) {
         const x = (points[i][0] - points[0][0]) * scale + translate.x;
         const y = (points[i][1] - points[0][1]) * scale + translate.y;
-        console.log(i, [x, y]);
-        createDomNumber(i, x, y);
-        shape.lineTo(x, y);
+        shape.push(new THREE.Vector2(x, y));
+        shape3d.push(x, y, 0);
       }
 
-      console.log(window.performance.now());
-      const geometry = new THREE.ShapeGeometry([shape]);
-      console.log(window.performance.now());
+      const time1 = window.performance.now();
+      const geometry = new THREE.BufferGeometry();
+      const index = triangulate({points: shape});
+      geometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(shape3d, 3)
+      );
+      geometry.index = new THREE.Uint16BufferAttribute(index, 1);
+      const time2 = window.performance.now();
+      console.log(time2 - time1);
       console.log(geometry);
 
-      // 辅助显示三角形
-      const triangles = new THREE.LineSegments(
+      const mesh = new THREE.Mesh(
         geometry,
-        new THREE.LineBasicMaterial({ color: 0x000000 })
+        new THREE.MeshBasicMaterial({ 
+            color: 0x000000,
+            wireframe: true,
+        })
       );
-      // scene.add(triangles);
-
-      // 辅助显示边框
-      const edges = new THREE.LineSegments(
-        new THREE.EdgesGeometry(geometry),
-        new THREE.LineBasicMaterial({ color: 0xff0000 })
-      );
-      scene.add(edges);
+      scene.add(mesh);
 
       function render() {
         renderer.clear();
