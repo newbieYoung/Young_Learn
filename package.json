@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/newbieYoung/Html_learn#readme",
   "dependencies": {
+    "@esotericsoftware/spine-threejs": "^4.0.27",
     "earcut": "^2.2.3",
     "lottie-web": "^5.8.1",
     "pixi.js": "^6.2.0",

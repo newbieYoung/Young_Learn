@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>spine</title>
+    <style>
+      body,
+      html {
+        background-color: #fff;
+        margin: 0px;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+    </style>
+    <!-- spine 4.0 -->
+    <!-- <script src="../node_modules/three/build/three.js"></script>
+    <script src="../node_modules/@esotericsoftware/spine-threejs/dist/iife/spine-threejs.js"></script> -->
+    <!-- spine 3.7 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.js"></script>
+    <script src="../lib/spine-threejs-3.7.js"></script>
+  </head>
+  <body>
+    <div id="retina"></div>
+    <script>
+      // 渲染器
+      //const width = 1067;
+      //const height = 600;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      console.log(width + " " + height);
+      console.log(window.innerWidth + " " + window.innerHeight);
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+      });
+      renderer.setSize(width, height);
+      renderer.setClearColor("#ffffff", 1.0);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      document.getElementById("retina").appendChild(renderer.domElement);
+
+      // 相机
+      const position = new THREE.Vector3(0, 0, 400); // 位置
+      const up = new THREE.Vector3(0, 1, 0); // 正方向
+      const origin = new THREE.Vector3(0, 0, 0); // 焦点
+      // const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000); // 透视
+      const camera = new THREE.OrthographicCamera(
+        width / -2,
+        width / 2,
+        height / 2,
+        height / -2,
+        -500,
+        1000
+      ); // 正交
+      camera.position.copy(position);
+      camera.up.copy(up);
+      camera.lookAt(origin);
+
+      // 场景
+      const scene = new THREE.Scene();
+
+      // spine 动画
+      let skeletonMesh;
+      let lastFrameTime;
+
+      // const animation = "walk";
+      // const skeletonFile = "raptor-pro.json";
+      const animation = "pph_correct_3";
+      const skeletonFile = "pph_correct_3.json";
+      const atlasFile = skeletonFile
+        .replace("-pro", "")
+        .replace("-ess", "")
+        .replace(".json", ".atlas");
+
+      // spine 4.x
+      // const baseUrl = "spines4.0/";
+      // const assetManager = new spine.AssetManager(baseUrl);
+      // assetManager.loadText(skeletonFile);
+      // assetManager.loadTextureAtlas(atlasFile);
+      // requestAnimationFrame(load);
+      // function load() {
+      //   if (assetManager.isLoadingComplete()) {
+      //     const atlas = assetManager.require(atlasFile);
+      //     const atlasLoader = new spine.AtlasAttachmentLoader(atlas);
+      //     const skeletonJson = new spine.SkeletonJson(atlasLoader);
+      //     const skeletonData = skeletonJson.readSkeletonData(
+      //       assetManager.require(skeletonFile)
+      //     );
+      //     skeletonMesh = new spine.SkeletonMesh(skeletonData);
+      //     skeletonMesh.state.setAnimation(0, animation, true);
+      //     scene.add(skeletonMesh);
+      //     skeletonMesh.scale.set(0.2, 0.2, 1);
+
+      //     render();
+      //   } else {
+      //     requestAnimationFrame(load);
+      //   }
+      // }
+
+      // spine 3.7
+      const baseUrl = "spines3.7/";
+      const assetManager = new spine.threejs.AssetManager(baseUrl);
+      assetManager.loadText(skeletonFile);
+      assetManager.loadTextureAtlas(atlasFile);
+      requestAnimationFrame(load);
+      function load(){
+        if (assetManager.isLoadingComplete()) {
+          const atlas = assetManager.get(atlasFile);
+          const atlasLoader = new spine.AtlasAttachmentLoader(atlas);
+          const skeletonJson = new spine.SkeletonJson(atlasLoader);
+
+          const skeletonData = skeletonJson.readSkeletonData(
+            assetManager.get(skeletonFile)
+          );
+          skeletonMesh = new spine.threejs.SkeletonMesh(skeletonData);
+          skeletonMesh.state.setAnimation(0, animation, true);
+          scene.add(skeletonMesh);
+          skeletonMesh.scale.set(0.2, 0.2, 1);
+
+          console.log(skeletonMesh);
+          console.log(skeletonData);
+
+          render();
+        } else {
+          requestAnimationFrame(load);
+        }
+      }
+
+      // 渲染
+      function render(timestamp) {
+        if (skeletonMesh && lastFrameTime) {
+          skeletonMesh.update(timestamp / 1000 - lastFrameTime / 1000);
+        }
+
+        lastFrameTime = timestamp;
+        renderer.clear();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+      }
+    </script>
+  </body>
+</html>
