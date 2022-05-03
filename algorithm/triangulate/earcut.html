@@ -19,10 +19,10 @@
   </head>
   <body>
     <div id="retina"></div>
-    <script src="../../node_modules/earcut/dist/earcut.min.js"></script>
+    <script src="../../node_modules/earcut/dist/earcut.dev.js"></script>
     <script type="module">
       import * as THREE from "../../node_modules/three/build/three.module.js";
-      import { polygon } from "./data/viz.js";
+      import { polygon } from "./data/rain.js";
 
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -52,7 +52,7 @@
       // shape
       const points = polygon[0];
       const scale = 0.2;
-      const translate = new THREE.Vector2(-200, 200);
+      const translate = new THREE.Vector2(100, 0);
       const origin = new THREE.Vector2(translate.x, translate.y);
       const shape = [];
       const shape3d = [];

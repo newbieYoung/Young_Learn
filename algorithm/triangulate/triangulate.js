@@ -1,244 +1,248 @@
-function includes(array, num) {
-    var len = array.length;
-    for (var i = 0; i < len; i++) {
-        if (array[i] == num) {
-            return true;
+function linkedNext(mapsLine, current, helper) {
+    var exist = false;
+    var currentPoint = mapsLine[current];
+    var curNext = currentPoint.next;
+    var curNextLen = curNext.length;
+    for (var i = 0; i < curNextLen; i++) {
+        if (curNext[i] === helper) {
+            exist = true;
+            break;
         }
     }
-    return false;
+    if (!exist) {
+        curNext.push(helper);
+        mapsLine[helper].next.push(current);
+    }
 }
-function pointInPolygonNested(point, vs, start, end) {
+function getLineLen(start, index, maxLen) {
+    var newIndex = index - start;
+    if (newIndex < 0) {
+        newIndex += maxLen;
+    }
+    return newIndex === 0 ? 0 : maxLen - newIndex;
+}
+function pointInPolygonNested(point, vs) {
     var x = point.x, y = point.y;
     var inside = false;
-    if (start === undefined)
-        start = 0;
-    if (end === undefined)
-        end = vs.length;
-    var len = end - start;
+    var len = vs.length;
     for (var i = 0, j = len - 1; i < len; j = i++) {
-        var xi = vs[i + start].x, yi = vs[i + start].y;
-        var xj = vs[j + start].x, yj = vs[j + start].y;
+        var xi = vs[i].x, yi = vs[i].y;
+        var xj = vs[j].x, yj = vs[j].y;
         var intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
         if (intersect)
             inside = !inside;
     }
     return inside;
 }
-function decomposition(divides, polygon, sortedIndex, direction) {
-    var deComps = [];
+function pairing(k1, k2) {
+    return 0.5 * (k1 + k2) * (k1 + k2 + 1) + k2;
+}
+function cacheTrapezium(cache, trap) {
+    var leftKey = pairing(trap.left[0], trap.left[1]);
+    var rightKey = pairing(trap.right[0], trap.right[1]);
+    cache.left[leftKey] = trap;
+    cache.right[rightKey] = trap;
+}
+function getTrapeziumByLeft(cache, left0, left1) {
+    return cache.left[pairing(left0, left1)];
+}
+function getTrapeziumByRight(cache, right0, right1) {
+    return cache.right[pairing(right0, right1)];
+}
+function area(p, q, r) {
+    return (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+}
+function appendTrapezium(end, target) {
+    end.next = target;
+    target.prev = end;
+    target.next = undefined;
+    return target;
+}
+function removeTrapezium(end, target) {
+    var next = target.next;
+    var prev = target.prev;
+    prev.next = next;
+    if (next) {
+        next.prev = prev;
+    }
+    // target.next = undefined;
+    // target.prev = undefined;
+    if (end === target) {
+        return prev;
+    }
+    else {
+        return end;
+    }
+}
+function decomposition(polygon, direction, sortedIndex, mapsLine) {
+    var trapHead = {
+        helper: -1,
+        left: [],
+        right: []
+    };
+    var trapEnd = trapHead;
     var points = polygon.points; // 逆时针
-    var maxIndex = sortedIndex.length - 1;
-    var doneIndex = {};
-    for (var i = 0; i <= maxIndex; i++) {
-        var curIndex = direction == 1 ? sortedIndex[i] : sortedIndex[maxIndex - i];
-        var nextIndex = curIndex + 1;
-        if (nextIndex > maxIndex) {
-            nextIndex = 0;
-        }
-        var prevIndex = curIndex - 1;
-        if (prevIndex < 0) {
-            prevIndex = maxIndex;
-        }
+    var pointsLen = sortedIndex.length;
+    var cache = { left: {}, right: {} };
+    var doneIndex = [];
+    for (var i = 0; i < pointsLen; i++) {
+        var curIndex = direction === 1 ? sortedIndex[i] : sortedIndex[pointsLen - 1 - i];
+        var nextIndex = (curIndex + 1) % pointsLen;
+        var prevIndex = (curIndex + pointsLen - 1) % pointsLen;
         var curPointY = points[curIndex].y * direction;
         // 处理相等的情况
         var prevPointY = points[prevIndex].y * direction;
-        if (prevPointY === curPointY) {
-            if (doneIndex[prevIndex]) {
-                prevPointY = points[prevIndex].y * direction + 0.001;
-            }
-            else {
-                prevPointY = points[prevIndex].y * direction - 0.001;
-            }
+        if (prevPointY - curPointY === 0) {
+            prevPointY += (doneIndex[prevIndex] || -1) * 0.001;
         }
         var nextPointY = points[nextIndex].y * direction;
-        if (nextPointY === curPointY) {
-            if (doneIndex[nextIndex]) {
-                nextPointY = points[nextIndex].y * direction + 0.001;
-            }
-            else {
-                nextPointY = points[nextIndex].y * direction - 0.001;
-            }
+        if (nextPointY - curPointY === 0) {
+            nextPointY += (doneIndex[nextIndex] || -1) * 0.001;
         }
         doneIndex[curIndex] = 1;
         // 事件处理
         if (curPointY > prevPointY && curPointY > nextPointY) {
-            var inner = false;
-            for (var j = 0; j < deComps.length; j++) {
-                var deCompItem = deComps[j];
-                var vs = [points[deCompItem.left[0]], points[deCompItem.left[1]], points[deCompItem.right[0]], points[deCompItem.right[1]]];
-                inner = pointInPolygonNested(points[curIndex], vs);
-                if (inner) {
-                    // 分裂
-                    inner = true;
-                    // 划分至少满足一个三角形
-                    if (prevIndex != deCompItem.helper && nextIndex != deCompItem.helper) {
-                        // 小序号排前，方便后续分解多边形
-                        if (curIndex <= deCompItem.helper) {
-                            divides.push([curIndex, deCompItem.helper]);
-                        }
-                        else {
-                            divides.push([deCompItem.helper, curIndex]);
-                        }
-                        deComps.push({
-                            helper: curIndex,
-                            left: [curIndex, nextIndex],
-                            right: deCompItem.right
-                        });
-                        deCompItem.helper = curIndex;
-                        deCompItem.right = [prevIndex, curIndex];
-                    }
-                    else {
-                        deCompItem.helper = curIndex;
-                        deCompItem.left = [curIndex, nextIndex];
-                    }
+            var exist = false;
+            var trap = trapEnd; // 倒序查找效率高
+            // 分裂
+            while (trap.helper !== -1) {
+                var vs = [points[trap.left[0]], points[trap.left[1]], points[trap.right[0]], points[trap.right[1]]];
+                if (pointInPolygonNested(points[curIndex], vs)) {
+                    linkedNext(mapsLine, curIndex, trap.helper);
+                    var newTrap = {
+                        helper: curIndex,
+                        left: [curIndex, nextIndex],
+                        right: [trap.right[0], trap.right[1]]
+                    };
+                    trapEnd = appendTrapezium(trapEnd, newTrap);
+                    trap.helper = curIndex;
+                    trap.right[0] = prevIndex;
+                    trap.right[1] = curIndex;
+                    cacheTrapezium(cache, newTrap);
+                    cacheTrapezium(cache, trap);
+                    exist = true;
                     break;
                 }
+                trap = trap.prev;
             }
-            if (!inner) {
+            if (!exist) {
                 // 开始
-                deComps.push({
+                var newTrap = {
                     helper: curIndex,
                     left: [curIndex, nextIndex],
                     right: [prevIndex, curIndex]
-                });
+                };
+                trapEnd = appendTrapezium(trapEnd, newTrap);
+                cacheTrapezium(cache, newTrap);
             }
         }
         else if (curPointY < prevPointY && curPointY < nextPointY) {
-            var unions = [-1, -1];
-            var dels = [];
-            var deCompsLen = deComps.length;
-            for (var j = 0; j < deCompsLen; j++) {
-                var deCompItem = deComps[j];
-                if (deCompItem.left[1] == deCompItem.right[0] && deCompItem.right[0] === curIndex) {
-                    // 结束
-                    dels.push(j);
-                    break;
+            var union1 = getTrapeziumByRight(cache, curIndex, nextIndex);
+            var union2 = getTrapeziumByLeft(cache, prevIndex, curIndex);
+            if (union2) {
+                if (union1) {
+                    // 合并
+                    union1.helper = curIndex;
+                    union1.right[0] = union2.right[0];
+                    union1.right[1] = union2.right[1];
+                    cacheTrapezium(cache, union1);
                 }
-                else if (unions[0] <= -1 && deCompItem.right[0] == curIndex) {
-                    unions[0] = j;
-                }
-                else if (unions[1] <= -1 && deCompItem.left[1] == curIndex) {
-                    unions[1] = j;
-                }
-                // 避免无效遍历
-                if (unions[0] >= 0 && unions[1] >= 0) {
-                    break;
-                }
-            }
-            if (dels.length > 0) {
-                deComps.splice(dels[0], 1);
-            }
-            else if (unions[0] >= 0 && unions[1] >= 0) {
-                // 合并
-                var comp1 = deComps[unions[0]];
-                var comp2 = deComps[unions[1]];
-                comp1.helper = curIndex;
-                comp1.right = comp2.right;
-                deComps.splice(unions[1], 1);
+                trapEnd = removeTrapezium(trapEnd, union2);
             }
         }
         else if (curPointY < prevPointY && curPointY > nextPointY) {
             // 左边界
-            for (var j = 0; j < deComps.length; j++) {
-                var deCompItem = deComps[j];
-                if (includes(deCompItem.left, curIndex) && includes(deCompItem.left, prevIndex)) {
-                    deCompItem.helper = curIndex;
-                    deCompItem.left = [curIndex, nextIndex];
-                    break;
-                }
-            }
+            var trap = getTrapeziumByLeft(cache, prevIndex, curIndex);
+            trap.helper = curIndex;
+            trap.left[0] = curIndex;
+            trap.left[1] = nextIndex;
+            cacheTrapezium(cache, trap);
         }
         else if (curPointY > prevPointY && curPointY < nextPointY) {
             // 右边界
-            for (var j = 0; j < deComps.length; j++) {
-                var deCompItem = deComps[j];
-                if (includes(deCompItem.right, curIndex) && includes(deCompItem.right, nextIndex)) {
-                    deCompItem.helper = curIndex;
-                    deCompItem.right = [prevIndex, curIndex];
+            var trap = getTrapeziumByRight(cache, curIndex, nextIndex);
+            trap.helper = curIndex;
+            trap.right[0] = prevIndex;
+            trap.right[1] = curIndex;
+            cacheTrapezium(cache, trap);
+        }
+    }
+}
+function sortMonotone(polygon, points) {
+    var start = 1;
+    var end = polygon.length - 1;
+    var newPolygon = [polygon[0]];
+    while (start !== end) {
+        var startIndex = polygon[start];
+        var endIndex = polygon[end];
+        if (points[startIndex].y >= points[endIndex].y) {
+            newPolygon.push(startIndex);
+            start += 1;
+        }
+        else {
+            newPolygon.push(endIndex);
+            end -= 1;
+        }
+    }
+    newPolygon.push(polygon[end]);
+    return newPolygon;
+}
+function triangulateMonotone(polygon, sortedIndex, mapsLine, triangles) {
+    var points = polygon.points;
+    var pointsLen = points.length;
+    var currentLen = pointsLen;
+    var monotoneItem = [];
+    var doneIndex = [];
+    var head = 0;
+    var headIndex = sortedIndex[head];
+    var line = mapsLine[headIndex];
+    while (currentLen >= 0) {
+        monotoneItem.push(line.index);
+        var startIndex = monotoneItem[0];
+        if (line.next.length === 1) {
+            doneIndex[line.index] = 1;
+            if (line.index === headIndex) {
+                head += 1;
+                headIndex = sortedIndex[head];
+            }
+            currentLen -= 1;
+            line = mapsLine[line.next[0]];
+        }
+        else {
+            // 选取离起始点最近的点
+            var prevIndex = monotoneItem[monotoneItem.length - 2];
+            var nextLen = line.next.length;
+            var minLenIndex = 0;
+            var minLen = getLineLen(startIndex, line.next[0], pointsLen);
+            for (var i = 1; i < nextLen; i++) {
+                var itemIndex = line.next[i];
+                var itemLen = getLineLen(startIndex, itemIndex, pointsLen);
+                if (itemLen < minLen && (prevIndex !== itemIndex || (prevIndex === itemIndex && prevIndex === startIndex && monotoneItem.length >= 3))) {
+                    minLenIndex = i;
+                    minLen = itemLen;
+                }
+            }
+            line = mapsLine[line.next.splice(minLenIndex, 1)[0]];
+        }
+        if (monotoneItem.length > 0 && startIndex === line.index) {
+            var monotone = sortMonotone(monotoneItem, points);
+            if (monotone.length > 3) {
+                monotonePolygon(monotone, points, triangles);
+            }
+            else if (monotone.length === 3) {
+                triangles.push(monotone[0], monotone[1], monotone[2]);
+            }
+            for (var i = head; i < pointsLen; i++) {
+                headIndex = sortedIndex[i];
+                if (!doneIndex[headIndex]) {
+                    head = i;
                     break;
                 }
             }
-        }
-        // console.log(deComps);
-    }
-}
-function splitMonotones(lines, polygon) {
-    var target = polygon;
-    var lastLine;
-    var lastSplits = [];
-    var polygons = [];
-    var linesLen = lines.length;
-    for (var i = 0; i < linesLen; i++) {
-        var curLine = lines[i];
-        // 去掉重复划分
-        if (!lastLine || (curLine[0] !== lastLine[0] || curLine[1] !== lastLine[1])) {
-            // 选取拆分目标
-            if (lastSplits.length >= 2) {
-                var polygon1 = lastSplits[0];
-                var polygon2 = lastSplits[1];
-                // 顶点多的那部分为待拆分目标
-                if (polygon1.length != polygon2.length) {
-                    if (polygon1.length > polygon2.length) {
-                        target = polygon1;
-                        polygons.push(polygon2);
-                    }
-                    else {
-                        target = polygon2;
-                        polygons.push(polygon1);
-                    }
-                }
-                else {
-                    if (polygon1.length < polygon2.length) {
-                        // 优先遍历顶点少的那部分
-                        if (includes(polygon1, curLine[0]) && includes(polygon1, curLine[1])) {
-                            target = polygon1;
-                            polygons.push(polygon2);
-                        }
-                        else {
-                            target = polygon2;
-                            polygons.push(polygon1);
-                        }
-                    }
-                    else {
-                        if (includes(polygon2, curLine[0]) && includes(polygon2, curLine[1])) {
-                            target = polygon2;
-                            polygons.push(polygon1);
-                        }
-                        else {
-                            target = polygon1;
-                            polygons.push(polygon2);
-                        }
-                    }
-                }
-            }
-            lastLine = curLine;
-            lastSplits = splitPolygon(target, curLine);
+            line = mapsLine[headIndex];
+            monotoneItem = [];
         }
     }
-    if (lastSplits.length >= 2) {
-        polygons.push(lastSplits[0], lastSplits[1]);
-    }
-    if (polygons.length == 0) {
-        polygons.push(polygon);
-    }
-    return polygons;
-}
-function splitPolygon(polygon, line) {
-    var min = line[0];
-    var max = line[1];
-    var polygon1 = [];
-    var polygon2 = [];
-    var polygonLen = polygon.length;
-    for (var i = 0; i < polygonLen; i++) {
-        var item = polygon[i];
-        if (item <= min || item >= max) {
-            polygon2.push(item);
-        }
-        if (item >= min && item <= max) {
-            polygon1.push(item);
-        }
-    }
-    return [polygon1, polygon2];
 }
 function monotonePolygon(polygon, points, triangles) {
     var stack = [polygon[0], polygon[1]];
@@ -271,7 +275,7 @@ function monotonePolygon(polygon, points, triangles) {
             }
             isLeft = !isLeft;
             var stackEnd = stack[stackLastIndex];
-            stack.length = 0;
+            stack = [];
             stack.push(stackEnd, curIndex);
         }
         else {
@@ -290,7 +294,7 @@ function monotonePolygon(polygon, points, triangles) {
                 var vec2 = { x: pCurrent.x - pFirst.x, y: pCurrent.y - pFirst.y };
                 var result1 = vec1.x * vec2.y - vec2.x * vec1.y;
                 var result2 = vec1.x * vec2.x;
-                if ((isLeft && result1 > 0) || (!isLeft && result1 < 0) || (result1 == 0 && result2 < 0)) {
+                if ((isLeft && result1 > 0) || (!isLeft && result1 < 0) || (result1 === 0 && result2 <= 0)) {
                     triangles.push(second, first, curIndex);
                     isConvex = true;
                     count += 1;
@@ -302,45 +306,26 @@ function monotonePolygon(polygon, points, triangles) {
     }
 }
 function triangulate(polygon) {
+    var triangles = [];
     var points = polygon.points; // 逆时针
-    // 去掉尾部和头部重复点（不去掉会导致 bug）
-    var startPoint = points[0];
     var pointsLen = points.length;
-    for (var i = 0; i < pointsLen; i++) {
-        var end = points[pointsLen - 1];
-        if (end.x == startPoint.x && end.y == startPoint.y) {
-            pointsLen -= 1;
-        }
-        else {
-            break;
-        }
-    }
     // 排序
+    var mapsLine = [];
     var sortedIndex = [];
     for (var i = 0; i < pointsLen; i++) {
+        mapsLine.push({
+            index: i,
+            next: [(i + 1) % pointsLen]
+        });
         sortedIndex.push(i);
     }
     sortedIndex.sort(function (a, b) {
         return points[b].y - points[a].y; // 按 y 轴倒序
     });
-    // console.log(sortedIndex);
-    // 单调多边形分解
-    var lines = [];
-    decomposition(lines, polygon, sortedIndex, 1);
-    decomposition(lines, polygon, sortedIndex, -1);
-    // 划分线排序，后续只需要继续拆分多的那边
-    lines.sort(function (a, b) {
-        return (a[1] - a[0]) - (b[1] - b[0]);
-    });
-    var monotones = splitMonotones(lines, sortedIndex);
-    // console.log(lines);
-    // console.log(monotones);
-    var triangles = [];
-    for (var i = 0; i < monotones.length; i++) {
-        var monotoneItem = monotones[i];
-        if (monotoneItem.length >= 3) {
-            monotonePolygon(monotoneItem, points, triangles);
-        }
-    }
+    // 拆分单调多边形
+    decomposition(polygon, 1, sortedIndex, mapsLine);
+    decomposition(polygon, -1, sortedIndex, mapsLine);
+    // 三角划分
+    triangulateMonotone(polygon, sortedIndex, mapsLine, triangles);
     return triangles;
 }

@@ -7,11 +7,11 @@
     <title>test triangulate</title>
   </head>
   <body>
-    <script src="../../node_modules/earcut/dist/earcut.min.js"></script>
+    <script src="../../node_modules/earcut/dist/earcut.dev.js"></script>
     <script src="./triangulate.js"></script>
     <script type="mode"></script>
     <script type="module">
-      import { polygon } from "./data/viz.js";
+      import { polygon } from "./data/rain.js";
       const points = polygon[0];
       const pointsLen = points.length;
       const shape1 = [];
@@ -25,18 +25,18 @@
         shape2.push(points[i][1]);
       }
 
-      console.log('--- self ---');
+      console.log("--- self ---");
       const time1 = window.performance.now();
       const tri1 = triangulate({ points: shape1 });
       const time2 = window.performance.now();
-      console.log(time2-time1);
+      console.log(time2 - time1);
       console.log(tri1);
 
-      console.log('--- earcut ---');
+      console.log("--- earcut ---");
       const time3 = window.performance.now();
       const tri2 = earcut(shape2);
       const time4 = window.performance.now();
-      console.log(time4-time3);
+      console.log(time4 - time3);
       console.log(tri2);
     </script>
   </body>
