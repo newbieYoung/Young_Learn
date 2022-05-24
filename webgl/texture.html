@@ -12,6 +12,10 @@
       const gl = canvas.getContext("webgl");
       gl.clearColor(0.9, 0.9, 0.9, 1.0);
 
+      // png 图片纹理处理透明通道
+      gl.enable (gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
       const program = {
         vertexSrc: `
           attribute vec4 a_position;
@@ -34,13 +38,20 @@
       const webglProgram = generateProgram(gl, program);
 
       const image = new Image();
-      image.src = "../img/sky.JPG";
+      // image.src = "../img/sky.JPG";
+      image.src = "../img/img_0.png";
       image.onload = function () {
         const texture = gl.createTexture(); // 创建纹理对象
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // 对纹理图像进行y轴反转
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // 对纹理图像进行 y 轴反转
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture); // 绑定纹理对象
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); // 配置纹理对象的参数
+        // 配置纹理对象的参数
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        // png 图片纹理需要设置，否则不显示
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+ 
         gl.texImage2D(
           gl.TEXTURE_2D,
           0,
