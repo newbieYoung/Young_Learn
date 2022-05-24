@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>texture process</title>
+    <script src="./webgl.js"></script>
+  </head>
+
+  <body>
+    <canvas id="webgl" width="600" height="600"></canvas>
+    <script>
+      // 各种卷积核
+      var kernels = {
+        normal: [0, 0, 0, 0, 1, 0, 0, 0, 0],
+        gaussianBlur: [
+          0.045, 0.122, 0.045, 0.122, 0.332, 0.122, 0.045, 0.122, 0.045,
+        ],
+        gaussianBlur2: [1, 2, 1, 2, 4, 2, 1, 2, 1],
+        gaussianBlur3: [0, 1, 0, 1, 1, 1, 0, 1, 0],
+        unsharpen: [-1, -1, -1, -1, 9, -1, -1, -1, -1],
+        sharpness: [0, -1, 0, -1, 5, -1, 0, -1, 0],
+        sharpen: [-1, -1, -1, -1, 16, -1, -1, -1, -1],
+        edgeDetect: [
+          -0.125, -0.125, -0.125, -0.125, 1, -0.125, -0.125, -0.125, -0.125,
+        ],
+        edgeDetect2: [-1, -1, -1, -1, 8, -1, -1, -1, -1],
+        edgeDetect3: [-5, 0, 0, 0, 0, 0, 0, 0, 5],
+        edgeDetect4: [-1, -1, -1, 0, 0, 0, 1, 1, 1],
+        edgeDetect5: [-1, -1, -1, 2, 2, 2, -1, -1, -1],
+        edgeDetect6: [-5, -5, -5, -5, 39, -5, -5, -5, -5],
+        sobelHorizontal: [1, 2, 1, 0, 0, 0, -1, -2, -1],
+        sobelVertical: [1, 0, -1, 2, 0, -2, 1, 0, -1],
+        previtHorizontal: [1, 1, 1, 0, 0, 0, -1, -1, -1],
+        previtVertical: [1, 0, -1, 1, 0, -1, 1, 0, -1],
+        boxBlur: [
+          0.111, 0.111, 0.111, 0.111, 0.111, 0.111, 0.111, 0.111, 0.111,
+        ],
+        triangleBlur: [
+          0.0625, 0.125, 0.0625, 0.125, 0.25, 0.125, 0.0625, 0.125, 0.0625,
+        ],
+        emboss: [-2, -1, 0, -1, 1, 1, 0, 1, 2],
+      };
+
+      // 计算卷积权重
+      function computeKernelWeight(kernel) {
+        var weight = kernel.reduce(function (prev, cur) {
+          return prev + cur;
+        });
+        return weight <= 0 ? 1 : weight;
+      }
+
+      const canvas = document.querySelector("#webgl");
+      const gl = canvas.getContext("webgl");
+      gl.clearColor(0.9, 0.9, 0.9, 1.0);
+
+      // png 图片纹理处理透明通道
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+      const program = {
+        vertexSrc: `
+          attribute vec4 a_position;
+          attribute vec2 a_TexCoord; // 纹理坐标
+          varying vec2 v_TexCoord;
+          void main() {
+            v_TexCoord = a_TexCoord;
+            gl_Position = a_position;
+          }
+        `,
+        fragmentSrc: `
+          precision mediump float;
+          uniform sampler2D u_Sampler; // 纹理取样器
+          uniform vec2 u_textureSize; // 纹理尺寸
+          uniform float u_kernel[9]; // 卷积核
+          uniform float u_kernelWeight; // 卷积权重
+          varying vec2 v_TexCoord;
+          void main() {
+            // 颜色通道交换
+            // gl_FragColor = texture2D(u_Sampler, v_TexCoord).bgra;
+            
+            // 计算1像素对应的纹理坐标
+            vec2 onePixel = vec2(1.0, 1.0) / u_textureSize;
+
+            // 对左中右像素求均值
+            // gl_FragColor = (
+            //     texture2D(u_Sampler, v_TexCoord) +
+            //     texture2D(u_Sampler, v_TexCoord + vec2(onePixel.x, 0.0)) +
+            //     texture2D(u_Sampler, v_TexCoord + vec2(-onePixel.x, 0.0))) / 3.0;
+
+            // 卷积
+            vec4 colorSum =
+                texture2D(u_Sampler, v_TexCoord + onePixel * vec2(-1, -1)) * u_kernel[0] +
+                texture2D(u_Sampler, v_TexCoord + onePixel * vec2( 0, -1)) * u_kernel[1] +
+                texture2D(u_Sampler, v_TexCoord + onePixel * vec2( 1, -1)) * u_kernel[2] +
+                texture2D(u_Sampler, v_TexCoord + onePixel * vec2(-1,  0)) * u_kernel[3] +
+                texture2D(u_Sampler, v_TexCoord + onePixel * vec2( 0,  0)) * u_kernel[4] +
+                texture2D(u_Sampler, v_TexCoord + onePixel * vec2( 1,  0)) * u_kernel[5] +
+                texture2D(u_Sampler, v_TexCoord + onePixel * vec2(-1,  1)) * u_kernel[6] +
+                texture2D(u_Sampler, v_TexCoord + onePixel * vec2( 0,  1)) * u_kernel[7] +
+                texture2D(u_Sampler, v_TexCoord + onePixel * vec2( 1,  1)) * u_kernel[8] ;
+ 
+            // 只把rgb值求和除以权重
+            // 将阿尔法值设为 1.0
+            gl_FragColor = vec4((colorSum / u_kernelWeight).rgb, 1.0);
+          }
+        `,
+      };
+      const webglProgram = generateProgram(gl, program);
+
+      const image = new Image();
+      image.src = "../img/sky.JPG";
+      // image.src = "../img/img_0.png";
+      image.onload = function () {
+        const texture = gl.createTexture(); // 创建纹理对象
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // 对纹理图像进行 y 轴反转
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, texture); // 绑定纹理对象
+        // 配置纹理对象的参数
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        // png 图片纹理需要设置，否则不显示
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.RGBA,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          image
+        ); //将纹理图像分配给纹理对象
+
+        const u_Sampler = gl.getUniformLocation(webglProgram, "u_Sampler");
+        gl.uniform1i(u_Sampler, 0); // 将对应纹理传给着色器中的取样器变量
+
+        const u_textureSize = gl.getUniformLocation(
+          webglProgram,
+          "u_textureSize"
+        );
+        gl.uniform2f(u_textureSize, image.width, image.height); // 纹理尺寸
+
+        // 卷积参数
+        const kernelName = "emboss";
+        const u_kernel = gl.getUniformLocation(webglProgram, "u_kernel[0]");
+        const u_kernelWeight = gl.getUniformLocation(
+          webglProgram,
+          "u_kernelWeight"
+        );
+        gl.uniform1fv(u_kernel, kernels[kernelName]);
+        gl.uniform1f(u_kernelWeight, computeKernelWeight(kernels[kernelName]));
+
+        // 顶点坐标、纹理坐标
+        const vertices = new Float32Array([
+          -0.5, 0.5, 0.0, 1.0, -0.5, -0.5, 0.0, 0.0, 0.5, 0.5, 1.0, 1.0, 0.5,
+          -0.5, 1.0, 0.0,
+        ]);
+        const size = vertices.BYTES_PER_ELEMENT; // 数组中的每个元素的大小（以字节为单位）
+        const stride = size * 4; // 步幅
+        const vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+        const a_position = gl.getAttribLocation(webglProgram, "a_position");
+        gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, stride, 0);
+        gl.enableVertexAttribArray(a_position);
+
+        var a_TexCoord = gl.getAttribLocation(webglProgram, "a_TexCoord");
+        gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, stride, 4 * 2);
+        gl.enableVertexAttribArray(a_TexCoord);
+
+        // index buffer
+        const index = new Uint16Array([0, 1, 2, 1, 2, 3]);
+        const indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, index, gl.STATIC_DRAW);
+
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0); // 绘制矩形
+      };
+    </script>
+  </body>
+</html>
