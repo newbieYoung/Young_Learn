@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>spine</title>
+    <script src="../../node_modules/pixi.js/dist/browser/pixi.js"></script>
+    <script src="../../node_modules/pixi-spine/dist/pixi-spine.umd.js"></script>
+    <style>
+      canvas {
+        width: 100%;
+        border: 1px solid #000;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      window.onload = function () {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const renderer = PIXI.autoDetectRenderer({
+          width: width,
+          height: height,
+          antialias: true,
+          transparent: true,
+          resolution: window.devicePixelRatio,
+        });
+        document.body.appendChild(renderer.view);
+
+        const stage = new PIXI.Container();
+
+        const loader = PIXI.Loader.shared;
+        loader
+          .add("spineCharacter", "./spines4.0/raptor.json")
+          .load(function (loader, resources) {
+            const spineCharacter = new PIXI.spine.Spine(
+              resources.spineCharacter.spineData
+            );
+
+            // set the position
+            spineCharacter.x = width / 4;
+            spineCharacter.y = height / 3;
+            spineCharacter.scale.set(0.3);
+
+            // add the animation to the scene and render...
+
+            stage.addChild(spineCharacter);
+
+            if (spineCharacter.state.hasAnimation("walk")) {
+              // run forever, little boy!
+              spineCharacter.state.setAnimation(0, "walk", true);
+              // dont run too fast
+              spineCharacter.state.timeScale = 0.5;
+            }
+          });
+
+        let ticker = PIXI.Ticker.shared;
+        ticker.start();
+        ticker.add(function () {
+          renderer.render(stage);
+        });
+      };
+    </script>
+  </body>
+</html>

@@ -24,6 +24,7 @@
     "@esotericsoftware/spine-threejs": "^4.0.27",
     "earcut": "^2.2.3",
     "lottie-web": "^5.8.1",
+    "pixi-spine": "^3.0.13",
     "pixi.js": "^6.2.0",
     "point-in-polygon": "^1.1.0",
     "three": "^0.135.0"

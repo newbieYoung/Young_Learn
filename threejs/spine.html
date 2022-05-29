@@ -16,11 +16,11 @@
       }
     </style>
     <!-- spine 4.0 -->
-    <!-- <script src="../node_modules/three/build/three.js"></script>
-    <script src="../node_modules/@esotericsoftware/spine-threejs/dist/iife/spine-threejs.js"></script> -->
+    <script src="../node_modules/three/build/three.js"></script>
+    <script src="../node_modules/@esotericsoftware/spine-threejs/dist/iife/spine-threejs.js"></script>
     <!-- spine 3.7 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.js"></script>
-    <script src="../lib/spine-threejs-3.7.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.js"></script>
+    <script src="../lib/spine-threejs-3.7.js"></script> -->
   </head>
   <body>
     <div id="retina"></div>
@@ -64,68 +64,67 @@
       let skeletonMesh;
       let lastFrameTime;
 
-      // const animation = "walk";
-      // const skeletonFile = "raptor-pro.json";
-      const animation = "pph_correct_3";
-      const skeletonFile = "pph_correct_3.json";
-      const atlasFile = skeletonFile
-        .replace("-pro", "")
-        .replace("-ess", "")
-        .replace(".json", ".atlas");
-
       // spine 4.x
-      // const baseUrl = "spines4.0/";
-      // const assetManager = new spine.AssetManager(baseUrl);
-      // assetManager.loadText(skeletonFile);
-      // assetManager.loadTextureAtlas(atlasFile);
-      // requestAnimationFrame(load);
-      // function load() {
-      //   if (assetManager.isLoadingComplete()) {
-      //     const atlas = assetManager.require(atlasFile);
-      //     const atlasLoader = new spine.AtlasAttachmentLoader(atlas);
-      //     const skeletonJson = new spine.SkeletonJson(atlasLoader);
-      //     const skeletonData = skeletonJson.readSkeletonData(
-      //       assetManager.require(skeletonFile)
-      //     );
-      //     skeletonMesh = new spine.SkeletonMesh(skeletonData);
-      //     skeletonMesh.state.setAnimation(0, animation, true);
-      //     scene.add(skeletonMesh);
-      //     skeletonMesh.scale.set(0.2, 0.2, 1);
+      const animation = "walk";
+      const skeletonFile = "raptor.json";
+      const atlasFile = "raptor.atlas";
 
-      //     render();
-      //   } else {
-      //     requestAnimationFrame(load);
-      //   }
-      // }
-
-      // spine 3.7
-      const baseUrl = "spines3.7/";
-      const assetManager = new spine.threejs.AssetManager(baseUrl);
+      const baseUrl = "spines4.0/";
+      const assetManager = new spine.AssetManager(baseUrl);
       assetManager.loadText(skeletonFile);
       assetManager.loadTextureAtlas(atlasFile);
       requestAnimationFrame(load);
-      function load(){
+      function load() {
         if (assetManager.isLoadingComplete()) {
-          const atlas = assetManager.get(atlasFile);
+          const atlas = assetManager.require(atlasFile);
           const atlasLoader = new spine.AtlasAttachmentLoader(atlas);
           const skeletonJson = new spine.SkeletonJson(atlasLoader);
-
           const skeletonData = skeletonJson.readSkeletonData(
-            assetManager.get(skeletonFile)
+            assetManager.require(skeletonFile)
           );
-          skeletonMesh = new spine.threejs.SkeletonMesh(skeletonData);
+          skeletonMesh = new spine.SkeletonMesh(skeletonData);
           skeletonMesh.state.setAnimation(0, animation, true);
           scene.add(skeletonMesh);
           skeletonMesh.scale.set(0.2, 0.2, 1);
-
-          console.log(skeletonMesh);
-          console.log(skeletonData);
 
           render();
         } else {
           requestAnimationFrame(load);
         }
       }
+
+      // spine 3.7
+      // const animation = "pph_correct_3";
+      // const skeletonFile = "pph_correct_3.json";
+      // const atlasFile = "pph_correct_3.atlas";
+
+      // const baseUrl = "spines3.7/";
+      // const assetManager = new spine.threejs.AssetManager(baseUrl);
+      // assetManager.loadText(skeletonFile);
+      // assetManager.loadTextureAtlas(atlasFile);
+      // requestAnimationFrame(load);
+      // function load(){
+      //   if (assetManager.isLoadingComplete()) {
+      //     const atlas = assetManager.get(atlasFile);
+      //     const atlasLoader = new spine.AtlasAttachmentLoader(atlas);
+      //     const skeletonJson = new spine.SkeletonJson(atlasLoader);
+
+      //     const skeletonData = skeletonJson.readSkeletonData(
+      //       assetManager.get(skeletonFile)
+      //     );
+      //     skeletonMesh = new spine.threejs.SkeletonMesh(skeletonData);
+      //     skeletonMesh.state.setAnimation(0, animation, true);
+      //     scene.add(skeletonMesh);
+      //     skeletonMesh.scale.set(0.2, 0.2, 1);
+
+      //     console.log(skeletonMesh);
+      //     console.log(skeletonData);
+
+      //     render();
+      //   } else {
+      //     requestAnimationFrame(load);
+      //   }
+      // }
 
       // 渲染
       function render(timestamp) {
