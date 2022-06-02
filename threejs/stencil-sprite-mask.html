@@ -15,11 +15,12 @@
         overflow-y: auto;
       }
     </style>
-    <script src="../node_modules/three/build/three.js"></script>
   </head>
   <body>
     <div id="retina"></div>
-    <script>
+    <script type="module">
+      import * as THREE from "../node_modules/three/build/three.module.js";
+
       // 渲染器
       //const width = 1067;
       //const height = 600;

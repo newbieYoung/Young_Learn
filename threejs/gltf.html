@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>gltf</title>
+    <style>
+        body,
+        html {
+            background-color: #fff;
+            margin: 0px;
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="retina"></div>
+    <script type="module">
+        import * as THREE from "../node_modules/three/build/three.module.js";
+        import { RoomEnvironment } from '../node_modules/three/examples/jsm/environments/RoomEnvironment.js';
+        import { GLTFLoader } from "../node_modules/three/examples/jsm/loaders/GLTFLoader.js";
+        import { OrbitControls } from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
+
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true, //抗锯齿开启
+        });
+        renderer.setSize(width, height); //设置渲染器宽度和高度
+        renderer.setClearColor("#ffffff", 1.0); //设置背景颜色
+        renderer.setPixelRatio(window.devicePixelRatio); //设置设备像素比
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        document.getElementById("retina").appendChild(renderer.domElement); //把渲染器放置到页面中
+
+        // 相机
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 20);
+        camera.position.set(- 1.8, 0.6, 2.7);
+        camera.up.set(0, 1, 0); // 正方向
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+        // 控制
+        const control = new OrbitControls(camera, renderer.domElement);
+        control.minDistance = 2;
+        control.maxDistance = 10;
+        control.target.set(0, 0, - 0.2);
+
+        // 场景
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xbbbbbb);
+        const environment = new RoomEnvironment();
+        scene.environment = new THREE.PMREMGenerator(renderer).fromScene(environment).texture;
+
+        // gltf
+        new GLTFLoader().load(
+            "./gltf/DamagedHelmet/DamagedHelmet.gltf",
+            function (gltf) {
+                scene.add(gltf.scene);
+            }
+        );
+
+        function render() {
+            renderer.clear();
+            control.update();
+            renderer.render(scene, camera);
+            requestAnimationFrame(render);
+        }
+        render();
+    </script>
+</body>
+
+</html>
