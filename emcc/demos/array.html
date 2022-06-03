@@ -9,7 +9,7 @@
   <body>
     <script src="array.js"></script>
     <script>
-      // emcc array.c -O3 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s -s EXPORTED_FUNCTIONS="['_lenArr']" -o array.js
+      // emcc array.c -O3 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s EXPORTED_FUNCTIONS="['_lenArr']" -o array.js
       Module["onRuntimeInitialized"] = function () {
         console.log(Module);
 

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>addFunction</title>
+  </head>
+  <body>
+    <script src="addFunction.js"></script>
+    <script>
+      // emcc addFunction.c -O3 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s ALLOW_TABLE_GROWTH=1 -s EXPORTED_RUNTIME_METHODS="['addFunction']" -s EXPORTED_FUNCTIONS="['_cFunc']" -o addFunction.js
+      Module["onRuntimeInitialized"] = function () {
+        console.log(Module);
+
+        var outer = {
+            num: 101,
+        };
+        function jsFunc(num){
+            console.log(num);
+            console.log(outer);
+            console.log(num + outer.num);
+        }
+        const pointer = Module.addFunction(jsFunc, 'vi');
+        console.log(pointer);
+        
+        Module._cFunc(pointer);
+      };
+    </script>
+  </body>
+</html>
