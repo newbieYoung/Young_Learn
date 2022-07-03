@@ -1,5 +1,6 @@
 {
   "liveServer.settings.port": 5505,
+  "eslint.format.enable": true,
   "files.associations": {
     "__functional_03": "c",
     "functional": "c",
