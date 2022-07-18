@@ -14,9 +14,22 @@ const program = {
             attribute vec4 a_color;
             varying vec4 v_color;
             uniform mat4 u_ProjViewModelMatrix; // 投影矩阵 + 视图矩阵 + 模型矩阵
+
+            attribute vec4 a_normal; // 表面法向量
+            uniform vec3 u_lightColor; // 平行光颜色
+            uniform vec3 u_lightDirection; // 归一化的平行光方向
+            uniform mat4 u_normalMatrix; // 法向量变换矩阵
+            uniform vec3 u_ambientLight; // 环境光
+
             void main() {
                 gl_Position = u_ProjViewModelMatrix * a_position;
-                v_color = a_color; // 将数据传给片元着色器
+
+                vec3 normal = normalize(vec3(u_normalMatrix * a_normal));
+                float nDotL = max(dot(u_lightDirection, normal), 0.0);
+                vec3 diffuse = u_lightColor * vec3(a_color) * nDotL;
+                vec3 ambient = u_ambientLight * vec3(a_color);
+
+                v_color = vec4(diffuse + ambient, a_color.a); // 漫反射 + 环境光
             }
         `,
   fragmentSrc: `
@@ -41,16 +54,36 @@ var PerspParams = { // 正交投影参数
 
 var viewMatrix = new Matrix4();
 viewMatrix.setLookAt(EyePoint.x, EyePoint.y, EyePoint.z, 0, 0, 0, 0, 1, 0);
+
 var modelMatrix = new Matrix4();
 modelMatrix.setRotate(45, 45, 45, 1);
+
+// 法向量变换矩阵是模型矩阵的逆转置矩阵
+var normalMatrix = new Matrix4();
+normalMatrix.setInverseOf(modelMatrix);
+normalMatrix.transpose();
+var u_normalMatrix = gl.getUniformLocation(webglProgram, 'u_normalMatrix');
+gl.uniformMatrix4fv(u_normalMatrix, false, normalMatrix.elements);
+
 var projMatrix = new Matrix4();
 projMatrix.setPerspective(30, width / height, PerspParams.g_near, PerspParams.g_far);
 // projMatrix.setOrtho(-4, 4, -4, 4, OrthoParams.g_near, OrthoParams.g_far);
 
 var prjViewModel = projMatrix.multiply(viewMatrix).multiply(modelMatrix);
-
 const u_ProjViewModelMatrix = gl.getUniformLocation(webglProgram, 'u_ProjViewModelMatrix');
 gl.uniformMatrix4fv(u_ProjViewModelMatrix, false, prjViewModel.elements);
+
+// directionalLight
+var u_lightColor = gl.getUniformLocation(webglProgram, 'u_lightColor');
+gl.uniform3f(u_lightColor, 1.0, 1.0, 1.0);
+var u_lightDirection = gl.getUniformLocation(webglProgram, 'u_lightDirection');
+var lightDirection = new Vector3([0.5, 3.0, 4.0]);
+lightDirection.normalize();
+gl.uniform3fv(u_lightDirection, lightDirection.elements);
+
+// ambientLight
+var u_ambientLight = gl.getUniformLocation(webglProgram, 'u_ambientLight');
+gl.uniform3f(u_ambientLight, 0.2, 0.2, 0.2);
 
 // Create a cube
 //    v6----- v5
@@ -92,6 +125,22 @@ gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
 const a_color = gl.getAttribLocation(webglProgram, 'a_color');
 gl.vertexAttribPointer(a_color, 3, gl.FLOAT, false, 4 * 3, 0);
 gl.enableVertexAttribArray(a_color);
+
+// 法向量
+var normals = new Float32Array([
+  0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, // v0-v1-v2-v3 front
+  1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, // v0-v3-v4-v5 right
+  0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, // v0-v5-v6-v1 up
+  -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, // v1-v6-v7-v2 left
+  0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, // v7-v4-v3-v2 down
+  0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, // v4-v7-v6-v5 back
+]);
+const normalBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, normals, gl.STATIC_DRAW);
+const a_normal = gl.getAttribLocation(webglProgram, 'a_normal');
+gl.vertexAttribPointer(a_normal, 3, gl.FLOAT, false, 4 * 3, 0);
+gl.enableVertexAttribArray(a_normal);
 
 // 索引
 var indices = new Uint8Array([

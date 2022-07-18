@@ -60,6 +60,7 @@ gl.uniformMatrix4fv(u_ProjViewModelMatrix, false, prjViewModel.elements);
 //  |/      |/
 //  v2------v3
 
+// 顶点
 var vertices = new Float32Array([
   1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, // v0-v1-v2-v3 front
   1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, // v0-v3-v4-v5 right
@@ -75,6 +76,7 @@ const a_position = gl.getAttribLocation(webglProgram, 'a_position');
 gl.vertexAttribPointer(a_position, 3, gl.FLOAT, false, 4 * 3, 0);
 gl.enableVertexAttribArray(a_position);
 
+// 颜色
 var colors = new Float32Array([
   0.4, 0.4, 1.0, 0.4, 0.4, 1.0, 0.4, 0.4, 1.0, 0.4, 0.4, 1.0, // v0-v1-v2-v3 front(blue)
   0.4, 1.0, 0.4, 0.4, 1.0, 0.4, 0.4, 1.0, 0.4, 0.4, 1.0, 0.4, // v0-v3-v4-v5 right(green)
@@ -90,7 +92,7 @@ const a_color = gl.getAttribLocation(webglProgram, 'a_color');
 gl.vertexAttribPointer(a_color, 3, gl.FLOAT, false, 4 * 3, 0);
 gl.enableVertexAttribArray(a_color);
 
-// 顶点索引
+// 索引
 var indices = new Uint8Array([
   0, 1, 2, 0, 2, 3, // front
   4, 5, 6, 4, 6, 7, // right
