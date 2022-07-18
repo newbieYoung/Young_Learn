@@ -4,20 +4,26 @@ const width = canvas.width;
 const height = canvas.height;
 const gl = canvas.getContext('webgl');
 
-gl.clearColor(0.0, 0.0, 1.0, 1.0); // 设置背景颜色
+gl.clearColor(0.0, 0.0, 0.0, 1.0); // 设置背景颜色
 gl.enable(gl.DEPTH_TEST); // 开启隐藏面消除
 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); // 清空颜色和深度缓冲区
 
 const program = {
+  /**
+   * 逐顶点点光源的原理在于 WebGL 系统会根据顶点颜色，内插出表面上每个片元的颜色；
+   * 但实际上，点光源光照射到一个表面上所产生的效果（即每个片元获得的颜色）与简单使用4个顶点颜色（虽然这4个顶点的颜色也是由点光源产生）内插出的效果并不完全相同；
+   * 在某些极端情况下甚至很不一样。
+   */
   vertexSrc: `
             attribute vec4 a_position;
             attribute vec4 a_color;
             varying vec4 v_color;
+            uniform mat4 u_modelMatrix; // 模型矩阵
             uniform mat4 u_ProjViewModelMatrix; // 投影矩阵 + 视图矩阵 + 模型矩阵
 
             attribute vec4 a_normal; // 表面法向量
-            uniform vec3 u_lightColor; // 平行光颜色
-            uniform vec3 u_lightDirection; // 归一化的平行光方向
+            uniform vec3 u_lightColor; // 点光源颜色
+            uniform vec3 u_lightPosition; // 点光源位置
             uniform mat4 u_normalMatrix; // 法向量变换矩阵
             uniform vec3 u_ambientLight; // 环境光
 
@@ -25,7 +31,9 @@ const program = {
                 gl_Position = u_ProjViewModelMatrix * a_position;
 
                 vec3 normal = normalize(vec3(u_normalMatrix * a_normal));
-                float nDotL = max(dot(u_lightDirection, normal), 0.0); // 如果反射角大于90度，则该光线无法照射到该片元。
+                vec4 vertexPosition = u_modelMatrix * a_position;
+                vec3 lightDirection = normalize(u_lightPosition - vec3(vertexPosition)); // 计算当前位置的入射光方向
+                float nDotL = max(dot(lightDirection, normal), 0.0); // 如果反射角大于90度，则该光线无法照射到该片元。
                 vec3 diffuse = u_lightColor * vec3(a_color) * nDotL;
                 vec3 ambient = u_ambientLight * vec3(a_color);
                 v_color = vec4(diffuse + ambient, a_color.a); // 漫反射 + 环境光
@@ -56,6 +64,8 @@ viewMatrix.setLookAt(EyePoint.x, EyePoint.y, EyePoint.z, 0, 0, 0, 0, 1, 0);
 
 var modelMatrix = new Matrix4();
 modelMatrix.setRotate(45, 45, 45, 1);
+var u_modelMatrix = gl.getUniformLocation(webglProgram, 'u_modelMatrix');
+gl.uniformMatrix4fv(u_modelMatrix, false, modelMatrix.elements);
 
 // 法向量变换矩阵是模型矩阵的逆转置矩阵
 var normalMatrix = new Matrix4();
@@ -72,13 +82,11 @@ var prjViewModel = projMatrix.multiply(viewMatrix).multiply(modelMatrix);
 const u_ProjViewModelMatrix = gl.getUniformLocation(webglProgram, 'u_ProjViewModelMatrix');
 gl.uniformMatrix4fv(u_ProjViewModelMatrix, false, prjViewModel.elements);
 
-// directionalLight
+// pointLight
 var u_lightColor = gl.getUniformLocation(webglProgram, 'u_lightColor');
 gl.uniform3f(u_lightColor, 1.0, 1.0, 1.0);
-var u_lightDirection = gl.getUniformLocation(webglProgram, 'u_lightDirection');
-var lightDirection = new Vector3([0.5, 3.0, 4.0]);
-lightDirection.normalize();
-gl.uniform3fv(u_lightDirection, lightDirection.elements);
+var u_lightPosition = gl.getUniformLocation(webglProgram, 'u_lightPosition');
+gl.uniform3f(u_lightPosition, 0.0, 1.0, 3.5);
 
 // ambientLight
 var u_ambientLight = gl.getUniformLocation(webglProgram, 'u_ambientLight');
@@ -111,12 +119,12 @@ gl.enableVertexAttribArray(a_position);
 
 // 颜色
 var colors = new Float32Array([
-  0.4, 0.4, 1.0, 0.4, 0.4, 1.0, 0.4, 0.4, 1.0, 0.4, 0.4, 1.0, // v0-v1-v2-v3 front
-  0.4, 1.0, 0.4, 0.4, 1.0, 0.4, 0.4, 1.0, 0.4, 0.4, 1.0, 0.4, // v0-v3-v4-v5 right
-  1.0, 0.4, 0.4, 1.0, 0.4, 0.4, 1.0, 0.4, 0.4, 1.0, 0.4, 0.4, // v0-v5-v6-v1 up
-  1.0, 1.0, 0.4, 1.0, 1.0, 0.4, 1.0, 1.0, 0.4, 1.0, 1.0, 0.4, // v1-v6-v7-v2 left
-  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, // v7-v4-v3-v2 down
-  0.4, 1.0, 1.0, 0.4, 1.0, 1.0, 0.4, 1.0, 1.0, 0.4, 1.0, 1.0, // v4-v7-v6-v5 back
+  1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, // v0-v1-v2-v3 front
+  1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, // v0-v3-v4-v5 right
+  1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, // v0-v5-v6-v1 up
+  1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, // v1-v6-v7-v2 left
+  1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, // v7-v4-v3-v2 down
+  1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, // v4-v7-v6-v5 back
 ]);
 const colorBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
