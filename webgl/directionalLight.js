@@ -12,17 +12,19 @@ const program = {
   vertexSrc: `
             attribute vec4 a_position;
             attribute vec4 a_color;
-            varying vec4 v_color;
-            uniform mat4 u_ProjViewModelMatrix; // 投影矩阵 + 视图矩阵 + 模型矩阵
-
-            attribute vec4 a_normal; // 表面法向量
+            attribute vec4 a_normal;
+            
+            uniform mat4 u_projViewModelMatrix; // 投影矩阵 + 视图矩阵 + 模型矩阵
+            
             uniform vec3 u_lightColor; // 平行光颜色
             uniform vec3 u_lightDirection; // 归一化的平行光方向
             uniform mat4 u_normalMatrix; // 法向量变换矩阵
             uniform vec3 u_ambientLight; // 环境光
 
+            varying vec4 v_color;
+
             void main() {
-                gl_Position = u_ProjViewModelMatrix * a_position;
+                gl_Position = u_projViewModelMatrix * a_position;
 
                 vec3 normal = normalize(vec3(u_normalMatrix * a_normal));
                 float nDotL = max(dot(u_lightDirection, normal), 0.0); // 如果反射角大于90度，则该光线无法照射到该片元。
@@ -33,7 +35,9 @@ const program = {
         `,
   fragmentSrc: `
             precision mediump float; // 不写会报错 No precision specified for (float)，缺少精度描述
+            
             varying vec4 v_color;
+
             void main() {
                 gl_FragColor = v_color; // 从顶点着色器接收数据
             }
@@ -69,8 +73,8 @@ projMatrix.setPerspective(30, width / height, PerspParams.g_near, PerspParams.g_
 // projMatrix.setOrtho(-4, 4, -4, 4, OrthoParams.g_near, OrthoParams.g_far);
 
 var prjViewModel = projMatrix.multiply(viewMatrix).multiply(modelMatrix);
-const u_ProjViewModelMatrix = gl.getUniformLocation(webglProgram, 'u_ProjViewModelMatrix');
-gl.uniformMatrix4fv(u_ProjViewModelMatrix, false, prjViewModel.elements);
+const u_projViewModelMatrix = gl.getUniformLocation(webglProgram, 'u_projViewModelMatrix');
+gl.uniformMatrix4fv(u_projViewModelMatrix, false, prjViewModel.elements);
 
 // directionalLight
 var u_lightColor = gl.getUniformLocation(webglProgram, 'u_lightColor');

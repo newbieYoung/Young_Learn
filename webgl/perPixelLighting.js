@@ -9,45 +9,46 @@ gl.enable(gl.DEPTH_TEST); // 开启隐藏面消除
 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); // 清空颜色和深度缓冲区
 
 const program = {
-  /**
-   * 逐顶点点光源的原理在于 WebGL 系统会根据顶点颜色，内插出表面上每个片元的颜色；
-   * 但实际上，点光源光照射到一个表面上所产生的效果（即每个片元获得的颜色）与简单使用4个顶点颜色（虽然这4个顶点的颜色也是由点光源产生）内插出的效果并不完全相同；
-   * 在某些极端情况下甚至很不一样。
-   */
   vertexSrc: `
             attribute vec4 a_position;
             attribute vec4 a_color;
-            attribute vec4 a_normal;
-            
+            attribute vec4 a_normal; // 表面法向量
+
             uniform mat4 u_modelMatrix; // 模型矩阵
             uniform mat4 u_projViewModelMatrix; // 投影矩阵 + 视图矩阵 + 模型矩阵
-
-            uniform vec3 u_lightColor; // 点光源颜色
-            uniform vec3 u_lightPosition; // 点光源位置
             uniform mat4 u_normalMatrix; // 法向量变换矩阵
-            uniform vec3 u_ambientLight; // 环境光
 
             varying vec4 v_color;
-
+            varying vec3 v_position;
+            varying vec3 v_normal;
+            
             void main() {
                 gl_Position = u_projViewModelMatrix * a_position;
 
-                vec3 normal = normalize(vec3(u_normalMatrix * a_normal));
-                vec4 vertexPosition = u_modelMatrix * a_position;
-                vec3 lightDirection = normalize(u_lightPosition - vec3(vertexPosition)); // 计算当前位置的入射光方向
-                float nDotL = max(dot(lightDirection, normal), 0.0); // 如果反射角大于90度，则该光线无法照射到该片元。
-                vec3 diffuse = u_lightColor * vec3(a_color) * nDotL;
-                vec3 ambient = u_ambientLight * vec3(a_color);
-                v_color = vec4(diffuse + ambient, a_color.a); // 漫反射 + 环境光
+                v_position = vec3(u_modelMatrix * a_position);
+                v_color = a_color;
+                v_normal = normalize(vec3(u_normalMatrix * a_normal));
             }
         `,
   fragmentSrc: `
             precision mediump float; // 不写会报错 No precision specified for (float)，缺少精度描述
 
+            uniform vec3 u_lightColor; // 点光源颜色
+            uniform vec3 u_lightPosition; // 点光源位置
+            uniform vec3 u_ambientLight; // 环境光
+
             varying vec4 v_color;
-            
+            varying vec3 v_position;
+            varying vec3 v_normal;
+
             void main() {
-                gl_FragColor = v_color; // 从顶点着色器接收数据
+                vec3 normal = normalize(v_normal);
+                vec3 lightDirection = normalize(u_lightPosition - v_position);
+                float nDotL = max(dot(lightDirection, normal), 0.0);//如果反射角大于90度，则该光线无法照射到该片元。
+                vec3 diffuse = u_lightColor * v_color.rgb * nDotL;
+                vec3 ambient = u_ambientLight * v_color.rgb;
+
+                gl_FragColor = vec4(diffuse + ambient, v_color.a);
             }
         `,
 };

@@ -61,7 +61,9 @@
         vertexSrc: `
           attribute vec4 a_position;
           attribute vec2 a_TexCoord; // 纹理坐标
+          
           varying vec2 v_TexCoord;
+          
           void main() {
             v_TexCoord = a_TexCoord;
             gl_Position = a_position;
@@ -69,11 +71,14 @@
         `,
         fragmentSrc: `
           precision mediump float;
+          
           uniform sampler2D u_Sampler; // 纹理取样器
           uniform vec2 u_textureSize; // 纹理尺寸
           uniform float u_kernel[9]; // 卷积核
           uniform float u_kernelWeight; // 卷积权重
+          
           varying vec2 v_TexCoord;
+          
           void main() {
             // 颜色通道交换
             // gl_FragColor = texture2D(u_Sampler, v_TexCoord).bgra;

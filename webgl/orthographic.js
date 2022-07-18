@@ -12,16 +12,21 @@ const program = {
   vertexSrc: `
             attribute vec4 a_position;
             attribute vec4 a_color;
+
+            uniform mat4 u_projViewModelMatrix; // 投影矩阵 + 视图矩阵 + 模型矩阵
+
             varying vec4 v_color;
-            uniform mat4 u_ProjViewModelMatrix; // 投影矩阵 + 视图矩阵 + 模型矩阵
+   
             void main() {
-                gl_Position = u_ProjViewModelMatrix * a_position;
+                gl_Position = u_projViewModelMatrix * a_position;
                 v_color = a_color; // 将数据传给片元着色器
             }
         `,
   fragmentSrc: `
             precision mediump float; // 不写会报错 No precision specified for (float)，缺少精度描述
+            
             varying vec4 v_color;
+
             void main() {
                 gl_FragColor = v_color; // 从顶点着色器接收数据
             }
@@ -48,8 +53,8 @@ projMatrix.setOrtho(-4, 4, -4, 4, OrthoParams.g_near, OrthoParams.g_far);
 
 var prjViewModel = projMatrix.multiply(viewMatrix).multiply(modelMatrix);
 
-const u_ProjViewModelMatrix = gl.getUniformLocation(webglProgram, 'u_ProjViewModelMatrix');
-gl.uniformMatrix4fv(u_ProjViewModelMatrix, false, prjViewModel.elements);
+const u_projViewModelMatrix = gl.getUniformLocation(webglProgram, 'u_projViewModelMatrix');
+gl.uniformMatrix4fv(u_projViewModelMatrix, false, prjViewModel.elements);
 
 // Create a cube
 //    v6----- v5

@@ -16,6 +16,7 @@
         // 顶点着色器
         vertexSrc: `
           attribute vec4 a_position;
+          
           void main() {
             gl_Position = a_position;
           }
@@ -23,6 +24,7 @@
         // 片元着色器
         fragmentSrc: `
           precision mediump float; // 不写会报错 No precision specified for (float)，缺少精度描述
+          
           void main() {
             gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
           }

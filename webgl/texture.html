@@ -20,7 +20,9 @@
         vertexSrc: `
           attribute vec4 a_position;
           attribute vec2 a_TexCoord; // 纹理坐标
+          
           varying vec2 v_TexCoord;
+          
           void main() {
             v_TexCoord = a_TexCoord;
             gl_Position = a_position;
@@ -28,8 +30,11 @@
         `,
         fragmentSrc: `
           precision mediump float;
+          
           uniform sampler2D u_Sampler; // 纹理取样器
+          
           varying vec2 v_TexCoord;
+          
           void main() {
             gl_FragColor = texture2D(u_Sampler, v_TexCoord);
           }
