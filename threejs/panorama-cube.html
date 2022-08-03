@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>panorama sphere</title>
+    <title>panorama cube</title>
     <style>
       body,
       html {
@@ -44,21 +44,39 @@
       const scene = new THREE.Scene();
 
       const manager = new THREE.LoadingManager();
-      const panoramaTexture = new THREE.TextureLoader(manager).load(
-        "textures/park-panorama-sphere.jpg"
-      );
+      const textures = [
+        new THREE.TextureLoader(manager).load(
+          "textures/park-panorama-cube-nx.jpg"
+        ),
+        new THREE.TextureLoader(manager).load(
+          "textures/park-panorama-cube-x.jpg"
+        ),
+        new THREE.TextureLoader(manager).load(
+          "textures/park-panorama-cube-y.jpg"
+        ),
+        new THREE.TextureLoader(manager).load(
+          "textures/park-panorama-cube-ny.jpg"
+        ),
+        new THREE.TextureLoader(manager).load(
+          "textures/park-panorama-cube-z.jpg"
+        ),
+        new THREE.TextureLoader(manager).load(
+          "textures/park-panorama-cube-nz.jpg"
+        ),
+      ];
+      const materials = [];
+      for (let i = 0; i < textures.length; i += 1) {
+        materials.push(
+          new THREE.MeshBasicMaterial({
+            map: textures[i],
+          })
+        );
+      }
       const mesh = new THREE.Mesh(
-        new THREE.SphereGeometry(500, 60, 40),
-        /**
-         * THREE.BackSide表示内面；
-         * 如果不设置内面也可以先调用 scale(-1, 1, 1) 镜像变换然后就贴外面即可。
-         * geometry.scale( -1, 1, 1 );
-         */
-        new THREE.MeshBasicMaterial({
-          map: panoramaTexture,
-          side: THREE.BackSide,
-        })
+        new THREE.BoxGeometry(200, 200, 200),
+        materials
       );
+      mesh.geometry.scale(1, 1, -1);
       scene.add(mesh);
 
       // 渲染
