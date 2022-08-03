@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>panorama sphere</title>
+    <style>
+      body,
+      html {
+        margin: 0px;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="retina"></div>
+    <script type="module">
+      import * as THREE from "../node_modules/three/build/three.module.js";
+      import { OrbitControls } from "../node_modules/three/examples/jsm/controls/OrbitControls.js";
+
+      // 渲染器
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true, // 透明
+      });
+      renderer.setSize(width, height);
+      renderer.setClearColor("#ffffff", 0.0);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      document.getElementById("retina").appendChild(renderer.domElement);
+
+      // 相机
+      const camera = new THREE.PerspectiveCamera(60, width / height, 1, 2000);
+      camera.position.set(0, 0, 0.001);
+      camera.up.set(0, 1, 0); // 正方向
+      camera.lookAt(new THREE.Vector3(0, 0, 0));
+      new OrbitControls(camera, renderer.domElement);
+
+      // 场景
+      const scene = new THREE.Scene();
+
+      const manager = new THREE.LoadingManager();
+      const panoramaTexture = new THREE.TextureLoader(manager).load(
+        "textures/park-panorama-sphere.jpg"
+      );
+      const mesh = new THREE.Mesh(
+        new THREE.SphereGeometry(500, 60, 40),
+        /**
+         * THREE.BackSide表示内面；
+         * 如果不设置内面也可以先调用scale(-1,1,1)镜像变换然后就贴外面即可。
+         * geometry.scale( -1, 1, 1 );
+         */
+        new THREE.MeshBasicMaterial({
+          map: panoramaTexture,
+          side: THREE.BackSide,
+        })
+      );
+      scene.add(mesh);
+
+      // 渲染
+      function render() {
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+      }
+      render();
+    </script>
+  </body>
+</html>
