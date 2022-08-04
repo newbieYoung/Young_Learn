@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>panorama cube</title>
+    <title>panorama cube width DeviceOrientationControls</title>
     <style>
       body,
       html {
@@ -14,12 +14,142 @@
         overflow-y: auto;
       }
     </style>
+    <script src="https://unpkg.com/vconsole@3.14.6/dist/vconsole.min.js"></script>
   </head>
   <body>
     <div id="retina"></div>
     <script type="module">
+      new VConsole();
       import * as THREE from "../node_modules/three/build/three.module.js";
-      import { OrbitControls } from "../node_modules/three/examples/jsm/controls/OrbitControls.js";
+
+      class DeviceOrientationControls {
+        constructor(object) {
+          this.object = object;
+          this.object.rotation.reorder("YXZ");
+          this.enabled = true;
+          this.deviceOrientation = {}; // 设备陀螺仪
+          this.screenOrientation = 0; // 设备横竖屏
+          this.alphaOffset = 0;
+
+          this.zee = new THREE.Vector3(0, 0, 1);
+          this.euler = new THREE.Euler();
+          this.q0 = new THREE.Quaternion();
+          this.q1 = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)); // - PI/2 around the x-axis
+
+          this.onDeviceOrientationChangeEvent = (event) => {
+            this.deviceOrientation = event;
+          };
+          this.onScreenOrientationChangeEvent = () => {
+            this.screenOrientation = window.orientation || 0;
+          };
+          this.setObjectQuaternion = (
+            quaternion,
+            alpha,
+            beta,
+            gamma,
+            orient
+          ) => {
+            this.euler.set(beta, alpha, -gamma, "YXZ"); // 'ZXY' for the device, but 'YXZ' for us
+            quaternion.setFromEuler(this.euler); // orient the device
+            quaternion.multiply(this.q1); // camera looks out the back of the device, not the top
+            quaternion.multiply(this.q0.setFromAxisAngle(this.zee, -orient)); // adjust for screen orientation
+          };
+
+          this.connect();
+        }
+
+        connect() {
+          this.onScreenOrientationChangeEvent(); // run once on load
+
+          // iOS 13+
+          if (
+            window.DeviceOrientationEvent !== undefined &&
+            typeof window.DeviceOrientationEvent.requestPermission ===
+              "function"
+          ) {
+            window.DeviceOrientationEvent.requestPermission()
+              .then(function (response) {
+                console.log(
+                  `window.DeviceOrientationEvent.requestPermission ${response}`
+                );
+                if (response === "granted") {
+                  window.addEventListener(
+                    "orientationchange",
+                    this.onScreenOrientationChangeEvent,
+                    false
+                  );
+                  window.addEventListener(
+                    "deviceorientation",
+                    this.onDeviceOrientationChangeEvent,
+                    false
+                  );
+                }
+              })
+              .catch(function (error) {
+                console.error(
+                  "DeviceOrientationControls: Unable to use DeviceOrientation API:",
+                  error
+                );
+              });
+          } else {
+            window.addEventListener(
+              "orientationchange",
+              this.onScreenOrientationChangeEvent,
+              false
+            );
+            window.addEventListener(
+              "deviceorientation",
+              this.onDeviceOrientationChangeEvent,
+              false
+            );
+          }
+
+          this.enabled = true;
+        }
+
+        disconnect() {
+          window.removeEventListener(
+            "orientationchange",
+            this.onScreenOrientationChangeEvent,
+            false
+          );
+          window.removeEventListener(
+            "deviceorientation",
+            this.onDeviceOrientationChangeEvent,
+            false
+          );
+
+          this.enabled = false;
+        }
+
+        update() {
+          if (this.enabled === false) return;
+
+          const device = this.deviceOrientation;
+          if (device) {
+            const alpha = device.alpha
+              ? THREE.Math.degToRad(device.alpha) + this.alphaOffset
+              : 0; // Z
+            const beta = device.beta ? THREE.Math.degToRad(device.beta) : 0; // X
+            const gamma = device.gamma ? THREE.Math.degToRad(device.gamma) : 0; // Y
+            const orient = this.screenOrientation
+              ? THREE.Math.degToRad(this.screenOrientation)
+              : 0; // O
+
+            this.setObjectQuaternion(
+              this.object.quaternion,
+              alpha,
+              beta,
+              gamma,
+              orient
+            );
+          }
+        }
+
+        dispose() {
+          this.disconnect();
+        }
+      }
 
       // 渲染器
       const width = window.innerWidth;
@@ -38,7 +168,7 @@
       camera.position.set(0, 0, 0.001);
       camera.up.set(0, 1, 0); // 正方向
       camera.lookAt(new THREE.Vector3(0, 0, 0));
-      new OrbitControls(camera, renderer.domElement);
+      const controls = new DeviceOrientationControls(camera);
 
       // 场景
       const scene = new THREE.Scene();
@@ -81,6 +211,7 @@
 
       // 渲染
       function render() {
+        controls.update();
         renderer.render(scene, camera);
         requestAnimationFrame(render);
       }
