@@ -40,7 +40,7 @@ var EyePoint = { // 视点以及默认位置
   z: 15.0,
 };
 var PerspParams = { // 正交投影参数
-  g_near: 1.0,
+  g_near: 0.1,
   g_far: 100.0,
 };
 
