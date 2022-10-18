@@ -60,49 +60,49 @@
       const program = {
         vertexSrc: `
           attribute vec4 a_position;
-          attribute vec2 a_TexCoord; // 纹理坐标
+          attribute vec2 a_texCoord; // 纹理坐标
           
-          varying vec2 v_TexCoord;
+          varying vec2 v_texCoord;
           
           void main() {
-            v_TexCoord = a_TexCoord;
+            v_texCoord = a_texCoord;
             gl_Position = a_position;
           }
         `,
         fragmentSrc: `
           precision mediump float;
           
-          uniform sampler2D u_Sampler; // 纹理取样器
+          uniform sampler2D u_sampler; // 纹理取样器
           uniform vec2 u_textureSize; // 纹理尺寸
           uniform float u_kernel[9]; // 卷积核
           uniform float u_kernelWeight; // 卷积权重
           
-          varying vec2 v_TexCoord;
+          varying vec2 v_texCoord;
           
           void main() {
             // 颜色通道交换
-            // gl_FragColor = texture2D(u_Sampler, v_TexCoord).bgra;
+            // gl_FragColor = texture2D(u_sampler, v_texCoord).bgra;
             
             // 计算1像素对应的纹理坐标
             vec2 onePixel = vec2(1.0, 1.0) / u_textureSize;
 
             // 对左中右像素求均值
             // gl_FragColor = (
-            //     texture2D(u_Sampler, v_TexCoord) +
-            //     texture2D(u_Sampler, v_TexCoord + vec2(onePixel.x, 0.0)) +
-            //     texture2D(u_Sampler, v_TexCoord + vec2(-onePixel.x, 0.0))) / 3.0;
+            //     texture2D(u_sampler, v_texCoord) +
+            //     texture2D(u_sampler, v_texCoord + vec2(onePixel.x, 0.0)) +
+            //     texture2D(u_sampler, v_texCoord + vec2(-onePixel.x, 0.0))) / 3.0;
 
             // 卷积
             vec4 colorSum =
-                texture2D(u_Sampler, v_TexCoord + onePixel * vec2(-1, -1)) * u_kernel[0] +
-                texture2D(u_Sampler, v_TexCoord + onePixel * vec2( 0, -1)) * u_kernel[1] +
-                texture2D(u_Sampler, v_TexCoord + onePixel * vec2( 1, -1)) * u_kernel[2] +
-                texture2D(u_Sampler, v_TexCoord + onePixel * vec2(-1,  0)) * u_kernel[3] +
-                texture2D(u_Sampler, v_TexCoord + onePixel * vec2( 0,  0)) * u_kernel[4] +
-                texture2D(u_Sampler, v_TexCoord + onePixel * vec2( 1,  0)) * u_kernel[5] +
-                texture2D(u_Sampler, v_TexCoord + onePixel * vec2(-1,  1)) * u_kernel[6] +
-                texture2D(u_Sampler, v_TexCoord + onePixel * vec2( 0,  1)) * u_kernel[7] +
-                texture2D(u_Sampler, v_TexCoord + onePixel * vec2( 1,  1)) * u_kernel[8] ;
+                texture2D(u_sampler, v_texCoord + onePixel * vec2(-1, -1)) * u_kernel[0] +
+                texture2D(u_sampler, v_texCoord + onePixel * vec2( 0, -1)) * u_kernel[1] +
+                texture2D(u_sampler, v_texCoord + onePixel * vec2( 1, -1)) * u_kernel[2] +
+                texture2D(u_sampler, v_texCoord + onePixel * vec2(-1,  0)) * u_kernel[3] +
+                texture2D(u_sampler, v_texCoord + onePixel * vec2( 0,  0)) * u_kernel[4] +
+                texture2D(u_sampler, v_texCoord + onePixel * vec2( 1,  0)) * u_kernel[5] +
+                texture2D(u_sampler, v_texCoord + onePixel * vec2(-1,  1)) * u_kernel[6] +
+                texture2D(u_sampler, v_texCoord + onePixel * vec2( 0,  1)) * u_kernel[7] +
+                texture2D(u_sampler, v_texCoord + onePixel * vec2( 1,  1)) * u_kernel[8] ;
  
             // 只把rgb值求和除以权重
             // 将阿尔法值设为 1.0
@@ -136,8 +136,8 @@
           image
         ); //将纹理图像分配给纹理对象
 
-        const u_Sampler = gl.getUniformLocation(webglProgram, "u_Sampler");
-        gl.uniform1i(u_Sampler, 0); // 将对应纹理传给着色器中的取样器变量
+        const u_sampler = gl.getUniformLocation(webglProgram, "u_sampler");
+        gl.uniform1i(u_sampler, 0); // 将对应纹理传给着色器中的取样器变量
 
         const u_textureSize = gl.getUniformLocation(
           webglProgram,
@@ -170,9 +170,9 @@
         gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, stride, 0);
         gl.enableVertexAttribArray(a_position);
 
-        var a_TexCoord = gl.getAttribLocation(webglProgram, "a_TexCoord");
-        gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, stride, 4 * 2);
-        gl.enableVertexAttribArray(a_TexCoord);
+        var a_texCoord = gl.getAttribLocation(webglProgram, "a_texCoord");
+        gl.vertexAttribPointer(a_texCoord, 2, gl.FLOAT, false, stride, 4 * 2);
+        gl.enableVertexAttribArray(a_texCoord);
 
         // index buffer
         const index = new Uint16Array([0, 1, 2, 1, 2, 3]);

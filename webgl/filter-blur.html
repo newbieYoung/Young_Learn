@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>filter blur</title>
+    <script src="./webgl.js"></script>
+  </head>
+  <body>
+    <canvas id="webgl" width="600" height="600"></canvas>
+    <script>
+      const canvas = document.querySelector("#webgl");
+      const gl = canvas.getContext("webgl");
+      gl.clearColor(0.9, 0.9, 0.9, 1.0);
+
+      const program = {
+        vertexSrc: `
+            attribute vec4 a_position; // 顶点坐标
+            attribute vec2 a_texCoord; // 纹理坐标
+            varying vec2 v_texCoord;
+            void main() {
+                gl_Position= a_position;
+                v_texCoord = a_texCoord;
+            }
+        `,
+        fragmentSrc: `
+            precision highp float;
+            varying vec2 v_texCoord;
+            uniform sampler2D u_sampler; // 纹理取样器
+            uniform vec2 v_blur;
+
+            vec4 iterationColor(vec4 color, int index, vec2 blur, float weight){
+
+                float fi = float(index);
+                vec2 item = v_texCoord + vec2(fi * blur.x, fi * blur.y);
+                vec4 temp = vec4(0.0);
+
+                /**
+                 * 由于暂时不清楚怎么处理点超出边界的情况，因此webgl简单实现的blur高斯模糊滤镜不能处理纯色；
+                 * 另外当blur参数设置过大时会出现明显的方块聚合的情况，实际模糊效果很不理想；
+                 * 因此该算法和CSS blur、Canvas blur等通用的高斯滤镜还是存在一些差异的。
+                 */
+                if(false){
+                // if(item.x < 0.0 || item.x > 1.0 || item.y > 1.0 || item.y < 0.0){
+                    if(item.x < 0.0 || item.x > 1.0){
+                        item.x = 2.0 * v_texCoord.x - item.x;
+                    }
+                    if(item.y < 0.0 || item.y > 1.0){
+                        item.y = 2.0 * v_texCoord.y - item.y;
+                    }
+
+                    temp = texture2D(u_sampler, item);
+                    temp.a = 0.0;
+                    color += temp * weight;
+                }else{
+                    temp = texture2D(u_sampler, v_texCoord + vec2(fi * blur.x, fi * blur.y));
+                    color += temp * weight;
+                }
+
+                return color;
+            }
+
+            // 高斯模糊 线性可分
+            void main(void) {
+
+                gl_FragColor = vec4(0.0);
+
+                gl_FragColor = iterationColor(gl_FragColor, -7, v_blur, 0.0044299121055113265);
+                gl_FragColor = iterationColor(gl_FragColor, -6, v_blur, 0.00895781211794);
+                gl_FragColor = iterationColor(gl_FragColor, -5, v_blur, 0.0215963866053);
+                gl_FragColor = iterationColor(gl_FragColor, -4, v_blur, 0.0443683338718);
+                gl_FragColor = iterationColor(gl_FragColor, -3, v_blur, 0.0776744219933);
+                gl_FragColor = iterationColor(gl_FragColor, -2, v_blur, 0.115876621105);
+                gl_FragColor = iterationColor(gl_FragColor, -1, v_blur, 0.147308056121);
+                gl_FragColor = iterationColor(gl_FragColor, 0, v_blur, 0.159576912161);
+                gl_FragColor = iterationColor(gl_FragColor, 1, v_blur, 0.147308056121);
+                gl_FragColor = iterationColor(gl_FragColor, 2, v_blur, 0.115876621105);
+                gl_FragColor = iterationColor(gl_FragColor, 3, v_blur, 0.0776744219933);
+                gl_FragColor = iterationColor(gl_FragColor, 4, v_blur, 0.0443683338718);
+                gl_FragColor = iterationColor(gl_FragColor, 5, v_blur, 0.0215963866053);
+                gl_FragColor = iterationColor(gl_FragColor, 6, v_blur, 0.00895781211794);
+                gl_FragColor = iterationColor(gl_FragColor, 7, v_blur, 0.0044299121055113265);
+            }
+        `,
+      };
+      const webglProgram = generateProgram(gl, program);
+
+      function createTexture() {
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+
+        // 配置纹理对象的参数
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        // png 图片纹理需要设置，否则不显示
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+
+        return texture;
+      }
+
+      function createFramebufferTexture() {
+        const fbo = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+
+        const texture = createTexture();
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.RGBA,
+          canvas.width,
+          canvas.height,
+          0,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          null
+        );
+
+        gl.framebufferTexture2D(
+          gl.FRAMEBUFFER,
+          gl.COLOR_ATTACHMENT0,
+          gl.TEXTURE_2D,
+          texture,
+          0
+        );
+
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        return {
+          fbo: fbo,
+          texture: texture,
+        };
+      }
+
+      const image = new Image();
+      image.src = "../img/sky.JPG";
+      // image.src = "../img/img_0.png";
+      image.onload = function () {
+        const texture = createTexture(); // 创建纹理对象
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // 对纹理图像进行 y 轴反转
+        gl.activeTexture(gl.TEXTURE0);
+
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.RGBA,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          image
+        ); //将纹理图像分配给纹理对象
+
+        const u_sampler = gl.getUniformLocation(webglProgram, "u_sampler");
+        gl.uniform1i(u_sampler, 0); // 将对应纹理传给着色器中的取样器变量
+
+        
+        // 顶点坐标、纹理坐标
+        const vertices = new Float32Array([
+          -1.0, 1.0, 0.0, 1.0, -1.0, -1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          -1.0, 1.0, 0.0,
+        ]);
+        const size = vertices.BYTES_PER_ELEMENT; // 数组中的每个元素的大小（以字节为单位）
+        const stride = size * 4; // 步幅
+        const vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+        const a_position = gl.getAttribLocation(webglProgram, "a_position");
+        gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, stride, 0);
+        gl.enableVertexAttribArray(a_position);
+
+        var a_texCoord = gl.getAttribLocation(webglProgram, "a_texCoord");
+        gl.vertexAttribPointer(a_texCoord, 2, gl.FLOAT, false, stride, size * 2);
+        gl.enableVertexAttribArray(a_texCoord);
+
+        // index buffer
+        const index = new Uint16Array([0, 1, 2, 1, 2, 3]);
+        const indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, index, gl.STATIC_DRAW);
+
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        // 高斯模糊
+        const blur = {
+          x: 10 / 7 / canvas.width,
+          y: 10 / 7 / canvas.height,
+        };
+        const v_blur = gl.getUniformLocation(webglProgram, 'v_blur');
+
+        const fbt = createFramebufferTexture(gl);
+        // Vertical
+        gl.uniform2f(v_blur, 0, blur.y);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbt.fbo);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+
+        // Horizontal
+        gl.uniform2f(v_blur, blur.x, 0);
+        gl.bindTexture(gl.TEXTURE_2D, fbt.texture);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+      };
+    </script>
+  </body>
+</html>
