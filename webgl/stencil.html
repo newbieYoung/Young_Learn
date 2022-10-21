@@ -16,18 +16,18 @@
       const program = {
         vertexSrc: `
           attribute vec4 a_position;
-          
+
           uniform vec4 u_translation;
-          
+
           void main() {
             gl_Position = a_position + u_translation;
           }
         `,
         fragmentSrc: `
           precision mediump float;
-          
+
           uniform vec4 u_color;
-          
+
           void main() {
             gl_FragColor = u_color;
           }
@@ -65,69 +65,126 @@
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, index, gl.STATIC_DRAW);
       }
 
-      // 相加遮罩
-      function addMask() {
+      const state = {
+        initRef: 100,
+        masks: [],
+        refs: [],
+        targetRef: 100,
+      };
+
+      function gl_init_stencil(state) {
+        gl.colorMask(false, false, false, false); // 关闭颜色缓冲所有通道
+        gl.stencilFunc(gl.ALWAYS, state.initRef, 0xff);
+        gl.stencilOp(gl.REPLACE, gl.KEEP, gl.REPLACE);
+      }
+
+      function gl_push_stencil(state, mask) {
+        gl.stencilFunc(gl.EQUAL, state.targetRef, 0xff);
+        if (mask > 0) {
+          state.targetRef += 1;
+          gl.stencilOp(gl.INCR, gl.KEEP, gl.INCR);
+          state.refs.push(state.targetRef);
+        } else {
+          gl.stencilOp(gl.DECR, gl.KEEP, gl.DECR);
+          state.refs.push(state.targetRef - 1);
+        }
+        state.masks.push(mask);
+      }
+
+      function gl_pop_stencil(state) {
+        const mask = -state.masks.pop();
+        const ref = state.refs.pop();
+        gl.stencilFunc(gl.EQUAL, ref, 0xff);
+        if (mask < 0) {
+          state.targetRef -= 1;
+          gl.stencilOp(gl.DECR, gl.KEEP, gl.DECR);
+        } else {
+          gl.stencilOp(gl.INCR, gl.KEEP, gl.INCR);
+        }
+      }
+
+      function mask(masks) {
         gl.clear(
           gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT
         );
 
         objBuffer(0.5);
 
-        // 黄
-        gl.uniform4f(u_translation, -0.2, -0.2, 0.0, 0.0);
-        gl.uniform4f(u_color, 1.0, 1.0, 0.0, 1.0);
-        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-
         // 遮罩
-        gl.colorMask(false, false, false, false); // 关闭颜色缓冲所有通道
-        gl.stencilFunc(gl.ALWAYS, 1, 0xff);
-        gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
-        // gl.stencilFunc(gl.EQUAL, 0, 0xff);
-        // gl.stencilOp(gl.KEEP, gl.KEEP, gl.INCR);
-        gl.uniform4f(u_translation, 0.5, 0.5, 0.0, 0.0);
-        gl.uniform4f(u_color, 1.0, 1.0, 1.0, 1.0); // 白
-        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        const masksLen = masks.length;
 
-        // 红
-        gl.colorMask(true, true, true, true); // 开启颜色缓冲
-        gl.stencilFunc(gl.EQUAL, 1, 0xff); // EQUAL 1
-        gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
+        if (masksLen > 0) {
+          gl_init_stencil(state);
+          gl.uniform4f(u_translation, 0.0, 0.0, -0.5, -0.5);
+          gl.uniform4f(u_color, 0.0, 0.0, 0.0, 1.0);
+          gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        }
+
+        if (masksLen >= 1) {
+          gl_push_stencil(state, masks[0]);
+          gl.uniform4f(u_translation, -0.4, 0.4, 0.0, 0.0);
+          gl.uniform4f(u_color, 1.0, 1.0, 0.0, 1.0);
+          gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        }
+
+        if (masksLen >= 2) {
+          gl_push_stencil(state, masks[1]);
+          gl.uniform4f(u_translation, 0.4, 0.4, 0.0, 0.0);
+          gl.uniform4f(u_color, 1.0, 0.0, 1.0, 1.0);
+          gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        }
+
+        if (masksLen >= 3) {
+          gl_push_stencil(state, masks[2]);
+          gl.uniform4f(u_translation, 0.0, -0.4, 0.0, 0.0);
+          gl.uniform4f(u_color, 0.0, 1.0, 1.0, 1.0);
+          gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        }
+
+        // ------------------------------------
+
+        // gl_pop_stencil(state);
+        // gl.uniform4f(u_translation, 0.0, -0.4, 0.0, 0.0);
+        // gl.uniform4f(u_color, 0.0, 1.0, 1.0, 1.0);
+        // gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+
+        // gl_pop_stencil(state);
+        // gl.uniform4f(u_translation, 0.4, 0.4, 0.0, 0.0);
+        // gl.uniform4f(u_color, 1.0, 0.0, 1.0, 1.0);
+        // gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+
+        if (masksLen > 0) {
+          gl.colorMask(true, true, true, true); // 开启颜色缓冲
+          gl.stencilFunc(gl.EQUAL, state.targetRef, 0xff);
+          gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
+        }
         gl.uniform4f(u_translation, 0.0, 0.0, 0.0, 0.0);
-        gl.uniform4f(u_color, 1.0, 0.0, 0.0, 1.0);
+        gl.uniform4f(u_color, 1.0, 1.0, 1.0, 1.0);
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
       }
-      // addMask();
+      // zzz
+      mask([1, 1, 1]);
 
-      // 相减遮罩
-      function reduceMask() {
-        gl.clear(
-          gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT
-        );
+      // zzf
+      // mask([1, 1, -1]);
 
-        objBuffer(0.5);
+      // zfz
+      // mask([1, -1, 1]);
 
-        // 黄
-        gl.uniform4f(u_translation, -0.2, -0.2, 0.0, 0.0);
-        gl.uniform4f(u_color, 1.0, 1.0, 0.0, 1.0);
-        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+      // zff
+      // mask([1, -1, -1]);
 
-        // 遮罩
-        gl.colorMask(false, false, false, false); // 关闭颜色缓冲所有通道
-        gl.stencilFunc(gl.ALWAYS, 1, 0xff);
-        gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
-        gl.uniform4f(u_translation, 0.5, 0.5, 0.0, 0.0);
-        gl.uniform4f(u_color, 1.0, 1.0, 1.0, 1.0); // 白
-        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+      // fzz
+      // mask([-1, 1, 1]);
 
-        // 红
-        gl.colorMask(true, true, true, true); // 开启颜色缓冲
-        gl.stencilFunc(gl.EQUAL, 0, 0xff); // EQUAL 1
-        gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
-        gl.uniform4f(u_translation, 0.0, 0.0, 0.0, 0.0);
-        gl.uniform4f(u_color, 1.0, 0.0, 0.0, 1.0);
-        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-      }
-      reduceMask();
+      // fzf
+      // mask([-1, 1, -1]);
+
+      // ffz
+      // mask([-1, -1, 1]);
+
+      // fff
+      // mask([-1, -1, -1]);
     </script>
   </body>
 </html>
