@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>simd</title>
+  </head>
+  <body>
+    <script src="simd.js"></script>
+    <script>
+      // emcc simd.c -O3 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s ALLOW_TABLE_GROWTH=1 -msimd128 -s EXPORTED_FUNCTIONS="['_multiply_arrays', '_simd_multiply_arrays', '_malloc']" -o simd.js
+      Module["onRuntimeInitialized"] = function () {
+        console.log(Module);
+
+        const len = 1000000;
+        const max = 100;
+        const a = [];
+        const b = [];
+        for (let i = 0; i < len; i += 1) {
+          a.push(Math.floor(Math.random() * max));
+          b.push(Math.floor(Math.random() * max));
+        }
+        console.log(a);
+        console.log(b);
+
+        const aPtr = Module._malloc(len * Int32Array.BYTES_PER_ELEMENT);
+        Module.HEAP32.set(
+          a,
+          aPtr / Int32Array.BYTES_PER_ELEMENT
+        );
+
+        const bPtr = Module._malloc(len * Int32Array.BYTES_PER_ELEMENT);
+        Module.HEAP32.set(
+          b,
+          bPtr / Int32Array.BYTES_PER_ELEMENT
+        );
+
+        const resPtr = Module._malloc(len * Int32Array.BYTES_PER_ELEMENT);
+        const t1 = window.performance.now();
+        Module._multiply_arrays(resPtr, aPtr, bPtr, len);
+        const t2 = window.performance.now();
+        const resStart = resPtr / Int32Array.BYTES_PER_ELEMENT;
+        const res = Module.HEAP32.subarray(resStart, resStart + len);
+        console.log(res);
+        console.log(t2 - t1);
+
+        const simdPtr = Module._malloc(len * Int32Array.BYTES_PER_ELEMENT);
+        const t3 = window.performance.now();
+        Module._simd_multiply_arrays(simdPtr, aPtr, bPtr, len);
+        const t4 = window.performance.now();
+        const simdStart = simdPtr / Int32Array.BYTES_PER_ELEMENT;
+        const simd = Module.HEAP32.subarray(simdStart, simdStart + len);
+        console.log(simd);
+        console.log(t4 - t3);
+
+      };
+    </script>
+  </body>
+</html>
