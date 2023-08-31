@@ -9,10 +9,9 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "lil-gui": "^0.18.2",
     "typescript": "^5.0.2",
-    "vite": "^4.4.5"
-  },
-  "dependencies": {
+    "vite": "^4.4.5",
     "@webgpu/types": "^0.1.34"
   }
 }
