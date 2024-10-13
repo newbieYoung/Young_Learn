@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>embind</title>
+</head>
+
+<body>
+  <script src="embind.js"></script>
+  <script>
+    // emcc --bind embind.cpp -O3 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s ALLOW_TABLE_GROWTH=1 -o embind.js
+    Module["onRuntimeInitialized"] = function () {
+      console.log(Module);
+
+      var instance = new Module.AClass(10, "hello");
+
+      const HEAP32 = Module.HEAP32;
+      const ptr = instance.$$.ptr >> 2;
+      class B {
+        ptr;
+        constructor(ptr){
+          this.ptr = ptr;
+        }
+
+        get x(){
+          return HEAP32[ptr];
+        }
+
+        set x(x){
+          HEAP32[ptr] = x;
+        }
+      }
+      const b = new B(ptr);
+
+      const t1 = window.performance.now();
+      for (let i = 0; i < 100000; i += 1) {
+        instance.x += 1
+      }
+      const t2 = window.performance.now();
+      console.log(instance.x + ' ' + (t2 - t1));
+
+      // 直接内存操作会比 emcc 官方提供的 embind 性能高
+      const t3 = window.performance.now();
+      for (let i = 0; i < 100000; i += 1) {
+        b.x += 1;
+      }
+      const t4 = window.performance.now();
+      console.log(instance.x + ' ' + (t4 - t3));
+    };
+  </script>
+</body>
+
+</html>
